@@ -62,7 +62,7 @@ class RoomServer extends RoomBase
             if (!$isRaceOk) {
                 return getInterFaceArray(0, "race_error", "");
             }
-            $isCashOk = $this->UserOP->cash_by_user_id($user_id, $cost_value);
+            $isCashOk = $this->UserOP->mod_cash_by_user_id($user_id, $cost_value, 0);
             if (!$isCashOk) {
                 return getInterFaceArray(0, "cash_error", "");
             }
