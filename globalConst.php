@@ -41,11 +41,18 @@ define('RACE_PLAY_STATE', '{ "NOT_BEGIN": 1, "CHOICE_LANDLORD": 2, "ROLL_DICE": 
 "DEAL": 4, "BET": 5, "SHOW_DOWN": 6,"SHOW_RESULT": 7,"FINISHED": 8}');
 
 
-//棋牌值类型
+//值类型
 define('MAJ_VALUE_TYPE', '{ "DUI_ZI": 1, "BI_SHI": 2, "DIAN": 3}');
 
 //对比结果
 define('COMPARE_DX_RE', '{ "BIG": "w", "SMALL": "s", "EQ": "e"}');
 
-//当地主方式
+//当方式
 define('BE_LANDLORD_WAY', '{ "TURN": 1}');
+
+
+//当方式
+define('ROOM_PLAY_MEMBER_STATE', '{ "ON_LINE": 1,"OFF_LINE": 2,"KICK_OUT":3}');
+
+//当方式
+define('ROOM_PLAY_MEMBER_TYPE', '{ "ROOM_OWNER": 1,"PLAYER": 2,"WATCHER":3}');

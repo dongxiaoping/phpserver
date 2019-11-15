@@ -12,11 +12,22 @@
 namespace app\race\controller;
 
 
-use app\race\service\RoomPlayerServer;
+use app\race\service\PlayerServer;
 
-class RoomPlayer
+class Player
 {
     public function __construct() {
-        $this->RoomPlayerServer = new RoomPlayerServer();
+        $this->PlayerServer = new PlayerServer();
+    }
+
+    public function get_members_by_room_id(){
+        header("Access-Control-Allow-Origin: *");
+        if(isset($_GET["id"])){
+            $id = $_GET["id"];
+            $result_array = $this->PlayerServer->get_members_by_room_id($id);
+            echo arrayToJson($result_array);
+        }else{
+            echo getJsonStringByParam(0,"param_error","");
+        }
     }
 }

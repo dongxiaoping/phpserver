@@ -4,19 +4,15 @@
 // +----------------------------------------------------------------------
 // | Author: karl.dong
 // +----------------------------------------------------------------------
-// | Date：2019/11/14
+// | Date：2019/11/13
 // +----------------------------------------------------------------------
 // | Description: 
 // +----------------------------------------------------------------------
 
-namespace app\race\service;
+namespace app\race\model\table;
 
-use app\race\model\RoomPlayerOP;
+use think\Model;
 
-class RoomPlayerServer
-{
-    public function __construct()
-    {
-        $this->RoomPlayerOP = new  RoomPlayerOP();
-    }
+class Player extends Model{
+    protected $table = "room_player";
 }
