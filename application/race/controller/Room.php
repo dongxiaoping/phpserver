@@ -29,6 +29,7 @@ class Room
         }
     }
 
+    // http://localhost/phpserver/public/index.php/race/room/create_room
     public function  create_room(){
 //        header('Access-Control-Allow-Origin: *');
 //        $content = file_get_contents("php://input");
@@ -44,7 +45,6 @@ class Room
             "creatUserId" => 1,
             "memberLimit"=>10,
             "playCount"=>4,
-            "playMode"=>1,
             "costLimit"=>100
         ];
         $result_array = $this->RoomServer->create_room($content);
