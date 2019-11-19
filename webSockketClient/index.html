@@ -9,14 +9,52 @@
 
 </body>
 <script>
-    ws = new WebSocket("ws://127.0.0.1:2346");
-    ws.onopen = function() {
-        alert("连接成功");
-        ws.send('tom');
-        alert("给服务端发送一个字符串：tom");
+    var raceStatusDefine = {
+        "NOT_BEGIN": 1, "CHOICE_LANDLORD": 2, "ROLL_DICE": 3,
+        "DEAL": 4, "BET": 5, "SHOW_DOWN": 6, "SHOW_RESULT": 7, "FINISHED": 8
     };
-    ws.onmessage = function(e) {
-        alert("收到服务端的消息：" + e.data);
+    var enterRoom = {type: 'enterRoom', info: {roomId: 2234}};//进入房间事件
+    var startRoomGame = {type: 'startRoomGame', info: {roomId: 2234, raceCount: 4}}; //房间开始game raceCount 场次
+    var landlordSelected = {type: 'landlordSelected', info: {roomId: 2234, raceNum: 0, landlordId: 4}}; //用户抢地主
+    ws = new WebSocket("ws://127.0.0.1:2346");
+    ws.onopen = function () {
+        //  alert("连接成功");
+        ws.send(JSON.stringify(enterRoom));
+        ws.send(JSON.stringify(startRoomGame));
+        setTimeout(function () {
+            ws.send(JSON.stringify(landlordSelected));
+        }, 5000);
+        //alert("给服务端发送一个字符串：tom");
+    };
+    ws.onmessage = function (e) {
+        // alert("收到服务端的消息：" + e.data);
+        var info = JSON.parse(e.data)
+        var type = info.type
+        var message = info.info
+        console.log(JSON.stringify(info));
+        switch (type) {
+            case 'choiceLandlord':
+                console.log('选地主');
+                break;
+            case 'rollDice':
+                console.log('摇色子');
+                break;
+            case 'deal':
+                console.log('发牌');
+                break;
+            case 'bet':
+                console.log('下注');
+                break;
+            case 'showDown':
+                console.log('比大小');
+                break;
+            case 'showResult':
+                console.log('显示结果');
+                break;
+            case 'finished':
+                console.log('本场比赛结束');
+                break;
+        }
     };
 </script>
 </html>
