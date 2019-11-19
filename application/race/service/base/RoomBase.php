@@ -14,16 +14,16 @@ class RoomBase
 
     public function getRoomCostValue($playCount, $costLimit)
     {
-        $cost = 0;
-        if ($playCount <= 8) { //次数
+        $cost = 10;
+        if ($playCount <= 20) { //次数
+            $cost = $cost + 2;
+        } else if ($playCount <= 30) {
+            $cost = $cost + 3;
+        } else { //40
             $cost = $cost + 4;
-        } else if ($playCount <= 16) {
-            $cost = $cost + 8;
-        } else if ($playCount <= 24) {
-            $cost = $cost + 12;
-        } else { //32
-            $cost = $cost + 16;
         }
+
+
 
         if ($costLimit <= 40) { //下注值
             $cost = $cost * 2;
