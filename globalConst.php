@@ -56,3 +56,9 @@ define('ROOM_PLAY_MEMBER_STATE', '{ "ON_LINE": 1,"OFF_LINE": 2,"KICK_OUT":3}');
 
 //当方式
 define('ROOM_PLAY_MEMBER_TYPE', '{ "ROOM_OWNER": 1,"PLAYER": 2,"WATCHER":3}');
+
+//用户类型
+define('USER_TYPE', '{ "VISIT_USER": 1,"NORMAL_USER": 2,"CHEAT_USER":3}');
+
+//位置
+define('BET_LOCATION', '{ "SKY": "sky","LAND": "land","MIDDLE":"middle","BRIDG": "bridg","SKY_CORNER":"skyCorner","LAND_CORNER":"landCorner"}');

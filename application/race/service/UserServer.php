@@ -25,7 +25,20 @@ class UserServer{
         return  getInterFaceArray(1,"success",$item);
     }
 
-    public function test(){
-        return  getInterFaceArray(0,"用户不存在",$this->UserOP->get('1'));
+    public function create_visit_account(){
+        $USER_TYPE = json_decode(USER_TYPE, true);
+        $item = [
+            'score' => 0,
+            'diamond' => 0,
+            'type' => $USER_TYPE['VISIT_USER'],
+            'creatTime' => date("Y-m-d H:i:s"),
+            'modTime' =>date("Y-m-d H:i:s")
+        ];
+        $id = $this->UserOP->insert($item);
+        if ($id) {
+            $info = $this->get_user_info_by_id($id);
+            return $info;
+        }
+        return getInterFaceArray(0, "fail", '');
     }
 }
