@@ -11,6 +11,7 @@
 
 namespace app\race\service;
 
+use app\race\model\BetRecordOP;
 use app\race\model\PlayerOP;
 use app\race\model\RoomOP;
 use app\race\model\UserOP;
@@ -23,7 +24,8 @@ class RoomServer extends RoomBase
         $this->RoomOp = new  RoomOP();
         $this->UserOP = new  UserOP();
         $this->RaceServer = new RaceServer();
-        $this->RoomPlayerOP = new PlayerOP();
+        $this->PlayerOP = new PlayerOP();
+        $this->BetRecordOP = new BetRecordOP();
     }
 
     public function get_room_info_by_id($id)
@@ -53,6 +55,7 @@ class RoomServer extends RoomBase
         $cost_limit = $info["costLimit"];
         $cost_value = $this->getRoomCostValue($play_count, $cost_limit);
         $diamond = $item["diamond"] - $cost_value;
+        $info["roomFee"] = $cost_value;
         if ($diamond < 0) {
             return getInterFaceArray(0, "diamond_not_enough", "");
         }
@@ -75,6 +78,8 @@ class RoomServer extends RoomBase
     {
         $ROOM_STATE = json_decode(ROOM_STATE, true);
         $ROOM_PLAY_MEMBER_STATE = json_decode(ROOM_PLAY_MEMBER_STATE, true);
+
+        ////// 1、判断用户以及房间是否存在 2、判断房间是否已关闭
         $item = $this->UserOP->get($user_id);
         if ($item === null) {
             return getInterFaceArray(0, "user_not_exist", "");
@@ -83,25 +88,30 @@ class RoomServer extends RoomBase
         if ($room_info === null) {
             return getInterFaceArray(0, "room_not_exist", "");
         }
-        $room_state = $room_info["roomState"];
-        if ($room_state === $ROOM_STATE["ALL_RACE_FINISHED"] || $room_state === $ROOM_STATE["CLOSE"]) {
+        if ($room_info["roomState"] === $ROOM_STATE["ALL_RACE_FINISHED"] || $room_info["roomState"] === $ROOM_STATE["CLOSE"]) {
             return getInterFaceArray(0, "room_has_close", "");
         }
-        $memberLimit = $room_info["memberLimit"];
-        $member_info = $this->RoomPlayerOP->get_member_info_in_the_room($user_id, $room_id);
-        $member_state = $member_info["state"];
-        if($member_state === $ROOM_PLAY_MEMBER_STATE["KICK_OUT"]){
-            return getInterFaceArray(0, "has_kickout", "");
-        }
+
+        //////////登录过房间情况的判断
+        $member_info = $this->PlayerOP->get_member_info_in_the_room($user_id, $room_id);
         if ($member_info) {
-            return getInterFaceArray(1, "success", '');
+            if ($member_info["state"] === $ROOM_PLAY_MEMBER_STATE["KICK_OUT"]) {
+                return getInterFaceArray(0, "has_kickout", "");
+            }
+            $room_race_info = $this->get_room_race_info($room_id);
+            return getInterFaceArray(1, "success", $room_race_info);
         }
-        //////////
-        $member_in_count = $this->RoomPlayerOP->get_member_count_in_the_room($room_id);
-        if($member_in_count>=$memberLimit){
+
+
+        /////////房间已满的判断
+        $ROOM_PLAY_MEMBER_TYPE = json_decode(ROOM_PLAY_MEMBER_TYPE, true);
+        $member_in_count = $this->PlayerOP->get_member_count_in_the_room($room_id);
+        if ($member_in_count >= $room_info["memberLimit"]) {
             return getInterFaceArray(0, "member_count_limit", "");
         }
-        $ROOM_PLAY_MEMBER_TYPE = json_decode(ROOM_PLAY_MEMBER_TYPE, true);
+
+
+        //创建进入房间
         $item = [
             'userId' => $user_id,
             'roomId' => $room_id,
@@ -111,11 +121,22 @@ class RoomServer extends RoomBase
             'creatTime' => date("Y-m-d H:i:s"),
             'modTime' => date("Y-m-d H:i:s")
         ];
-        $isOk = $this->RoomPlayerOP->insert($item);
+        $isOk = $this->PlayerOP->insert($item);
         if ($isOk) {
-            return getInterFaceArray(1, "success", '');
+            $room_race_info = $this->get_room_race_info($room_id);
+            return getInterFaceArray(1, "success", $room_race_info);
         }
         return getInterFaceArray(0, "fail", '');
+    }
+
+    //获取房间比赛相关的所有信息
+    public function get_room_race_info($room_id)
+    {
+        $room_info = $this->get_room_info_by_id($room_id)['data'];
+        $race_info = $this->RaceServer->getRacesByRoomId($room_id)["data"];
+        $member_info = $this->PlayerOP->get_members_by_room_id($room_id);
+        $bet_record_info = $this->BetRecordOP->getListByOneColumn('roomId', $room_id);
+        return array('room' => $room_info, 'races' => $race_info, 'members' => $member_info, 'betRecords' => $bet_record_info);
     }
 
 }

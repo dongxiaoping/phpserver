@@ -19,4 +19,10 @@ class BetRecordServer
     {
         $this->BetRecordOP = new  BetRecordOP();
     }
+
+    public function get_bet_record_by_room_id($id)
+    {
+        $list = $this->BetRecordOP->getListByOneColumn('roomId',$id);
+        return getInterFaceArray(1, "success", $list);
+    }
 }

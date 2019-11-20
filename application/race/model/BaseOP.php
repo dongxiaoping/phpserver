@@ -52,6 +52,11 @@ class BaseOP
         return $this->table->where("id",$id)->find(); //查询一个数据
     }
 
+    public function getListByOneColumn($tag, $val){
+        $list = $this->table->where($tag, $val)->select();
+        return $list;
+    }
+
     public function getAll(){
         $list = $this->table->select();
         return $list;

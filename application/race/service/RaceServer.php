@@ -68,4 +68,10 @@ class RaceServer extends RaceBase
         $isOk = $this->RaceOP->insertAll($list);
         return $isOk;
     }
+
+    public function getRacesByRoomId($id)
+    {
+        $list = $this->RaceOP->getListByOneColumn('roomId',$id);
+        return getInterFaceArray(1, "success", $list);
+    }
 }

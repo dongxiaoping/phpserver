@@ -32,6 +32,7 @@ class Room
         }
     }
 
+    // http://127.0.0.1/phpserver/public/index.php/race/room/login_in_room
     public function login_in_room()
     {
         header("Access-Control-Allow-Origin: *");
