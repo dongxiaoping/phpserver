@@ -48,7 +48,7 @@ define('MAJ_VALUE_TYPE', '{ "DUI_ZI": 1, "BI_SHI": 2, "DIAN": 3}');
 define('COMPARE_DX_RE', '{ "BIG": "w", "SMALL": "s", "EQ": "e"}');
 
 //当方式
-define('BE_LANDLORD_WAY', '{ "TURN": 1}');
+define('BE_LANDLORD_WAY', '{ "TURN": 1,"RAP":2}');
 
 
 //当方式

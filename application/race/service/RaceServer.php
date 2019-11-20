@@ -52,7 +52,7 @@ class RaceServer extends RaceBase
                 'skyScore' => json_encode($skyScore),
                 'middleScore' => json_encode($middleScore),
                 'landScore' => json_encode($groundScore),
-                'landlordId' => '',
+                'landlordId' => null,
                 'points' => json_encode($points),
                 'skyResult' => $locationResultDetail['sky'],
                 'middleResult' => $locationResultDetail['middle'],

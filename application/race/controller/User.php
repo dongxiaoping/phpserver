@@ -36,6 +36,7 @@ class User
     }
 
     //http://localhost/phpserver/public/index.php/race/user/test
+    //http://127.0.0.1/phpserver/public/index.php/race/user/test
     public function test(){
         echo 'dxp';
     }

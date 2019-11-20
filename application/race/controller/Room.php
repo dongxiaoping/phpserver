@@ -45,27 +45,21 @@ class Room
         }
     }
 
-    // http://localhost/phpserver/public/index.php/race/room/create_room
+    // http://127.0.0.1/phpserver/public/index.php/race/room/create_room
     public function create_room()
     {
-//        header('Access-Control-Allow-Origin: *');
-//        $content = file_get_contents("php://input");
-//        $content = (string)$content;
-//        $content = json_decode($content,true);
-//        if($content["creatUserId"] && $content["playCount"]&& $content["memberLimit"]&& $content["playMode"]&& $content["costLimit"]){
-//            $result_array = $this->AddressServer->add_address($content);
-//            echo arrayToJson($result_array);
-//        }else{
-//            echo getJsonStringByParam(0,"error","");
-//        }
-        $content = [
-            "creatUserId" => 1,
-            "memberLimit" => 10,
-            "playCount" => 4,
-            "costLimit" => 100
-        ];
-        $result_array = $this->RoomServer->create_room($content);
-        echo arrayToJson($result_array);
+       header('Access-Control-Allow-Origin: *');
+        $content = file_get_contents("php://input");
+        $content = (string)$content;
+        $content = json_decode($content,true);
+        if($content["creatUserId"] && $content["playCount"]&& $content["memberLimit"]&& $content["roomPay"]
+            && $content["costLimit"]){
+            $result_array = $this->RoomServer->create_room($content);
+            echo arrayToJson($result_array);
+        }else{
+            echo getJsonStringByParam(0,"param_error","");
+        }
+
     }
 
 }

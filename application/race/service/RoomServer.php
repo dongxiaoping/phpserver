@@ -11,10 +11,10 @@
 
 namespace app\race\service;
 
+use app\race\model\PlayerOP;
 use app\race\model\RoomOP;
 use app\race\model\UserOP;
 use app\race\service\base\RoomBase;
-use app\race\model\RoomPlayerOP;
 
 class RoomServer extends RoomBase
 {
@@ -23,7 +23,7 @@ class RoomServer extends RoomBase
         $this->RoomOp = new  RoomOP();
         $this->UserOP = new  UserOP();
         $this->RaceServer = new RaceServer();
-        $this->RoomPlayerOP = new RoomPlayerOP();
+        $this->RoomPlayerOP = new PlayerOP();
     }
 
     public function get_room_info_by_id($id)
@@ -44,7 +44,7 @@ class RoomServer extends RoomBase
         $info["modTime"] = date("Y-m-d H:i:s");
         $info["roomState"] = $ROOM_STATE['OPEN'];
         $info["oningRaceNum"] = 0;
-        $info["playMode"] = $BE_LANDLORD_WAY['TURN'];
+        $info["playMode"] = $BE_LANDLORD_WAY['RAP'];
         $item = $this->UserOP->get($user_id);
         if ($item === null) {
             return getInterFaceArray(0, "user_not_exist", "");
