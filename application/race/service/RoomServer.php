@@ -69,7 +69,8 @@ class RoomServer extends RoomBase
             if (!$isCashOk) {
                 return getInterFaceArray(0, "cash_error", "");
             }
-            return getInterFaceArray(1, "success", $room_id);
+            $room_info = $this->RoomOp->get($room_id);
+            return getInterFaceArray(1, "success", $room_info);
         }
         return getInterFaceArray(0, "faill", "");
     }
