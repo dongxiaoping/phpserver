@@ -27,7 +27,7 @@ class BetRecord
         $content = file_get_contents("php://input");
         $content = (string)$content;
         $content = json_decode($content, true);
-        if ($content["userId"] && $content["raceId"] && $content["betVal"] && $content["betLocation"]) {
+        if ($content["userId"] && $content["roomId"] && $content["raceNum"] && $content["betLocation"] && $content["betVal"]) {
             $result_array = $this->BetRecordServer->to_bet($content);
             echo arrayToJson($result_array);
         } else {

@@ -60,6 +60,10 @@ class Worker extends Server
                 $landlordId = $data['info']['landlordId'];
                 $this->landlordSelected($roomId, $raceNum, $landlordId);
                 break;
+            case 'raceBet':
+                $this->raceBet($data['info']['userId'], $data['info']['roomId'], $data['info']['raceNum'],
+                    $data['info']['betLocation'], $data['info']['betVal']);
+                break;
             default:
 
         }
@@ -105,13 +109,22 @@ class Worker extends Server
 
     }
 
+    public function raceBet($userId, $roomId, $raceNum, $betLocation, $betVal)
+    {
+        if (!isset($this->roomList[$roomId])) {
+            var_dump('房间不存在，无法下注');
+            return false;
+        }
+        $this->roomList[$roomId]->raceBet($userId, $roomId, $raceNum, $betLocation, $betVal);
+    }
+
     public function createAndEnterRoom($connection, $roomId, $raceCount)
     {
         if (isset($this->roomList[$roomId])) {
             var_dump('房间已存在');
             return false;
         }
-        $newRoom = new Room($roomId, $raceCount,$this->connectManage,$this->socketServer);
+        $newRoom = new Room($roomId, $raceCount, $this->connectManage, $this->socketServer);
         $this->roomList[$roomId] = $newRoom;
         $this->enterRoom($roomId, $connection);
     }
@@ -135,13 +148,11 @@ class Worker extends Server
 
         $ROOM_STATE = json_decode(ROOM_STATE, true);
         $room_state = $this->roomList[$roomId]->get_room_state();
-        $is_user_in_room =  $this->roomList[$roomId]->is_user_in_room($connection->id);
+        $is_user_in_room = $this->roomList[$roomId]->is_user_in_room($connection->id);
         if ($room_state !== $ROOM_STATE['OPEN'] || (!$is_user_in_room)) {
-          //  var_dump($room_state);
-          //  var_dump($is_user_in_room);
             var_dump('房间游戏不能重复开始,或者用户不在该房间');
             return;
-        }else{
+        } else {
             var_dump('游戏开始');
         }
 
@@ -151,7 +162,7 @@ class Worker extends Server
     public function landlordSelected($roomId, $raceNum, $landlordId)
     {
         $RACE_PLAY_STATE = json_decode(RACE_PLAY_STATE, true);
-        if(!isset($this->roomList[$roomId])){
+        if (!isset($this->roomList[$roomId])) {
             var_dump('房间不存在,无法抢地主');
             return;
         }

@@ -193,16 +193,16 @@ class Room
     public function broadcast_to_select_landlord($raceNum)
     {
         $RACE_PLAY_STATE = json_decode(RACE_PLAY_STATE, true);
-        if($raceNum%5 ===0){
+        if ($raceNum % 5 === 0) {
             $this->race_list[$raceNum]['state'] = $RACE_PLAY_STATE['CHOICE_LANDLORD'];
             $message = array('type' => 'choiceLandlord', 'info' => array('raceNum' => $raceNum, 'roomId' => $this->room_id));
             $this->broadcast_to_all_member($message); //广播选地主
-        }else{
+        } else {
             $this->race_list[$raceNum]['state'] = $RACE_PLAY_STATE['ROLL_DICE'];
         }
-        $this->landlord_select_timer = Timer::add(2, function (){
+        $this->landlord_select_timer = Timer::add(2, function () {
             $this->race_run_after_landlord();
-        },array(),true);
+        }, array(), true);
     }
 
     public function race_run_after_landlord()
@@ -258,6 +258,13 @@ class Room
             return;
         }
         $this->broadcast_to_select_landlord($raceNum);
+    }
+
+    public function raceBet($userId, $roomId, $raceNum, $betLocation, $betVal)
+    {
+        $message = array('type' => 'raceBet', 'info' => array('userId' => $userId, 'roomId' => $roomId,
+            'raceNum' => $raceNum, 'betLocation' => $betLocation, 'betVal' => $betVal));
+        $this->broadcast_to_all_member($message);
     }
 
 }
