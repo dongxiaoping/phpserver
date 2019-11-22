@@ -11,21 +11,22 @@
 
 namespace app\race\controller;
 
+use app\race\service\socket\SocketServer;
 use think\worker\Server;
-use Workerman\Lib\Timer;
 use app\race\service\socket\ConnectManage;
-use app\race\service\socket\Race;
 use app\race\service\socket\Room;
 
 class Worker extends Server
 {
     protected $socket = 'websocket://127.0.0.1:2346';
     public $connectManage;
+    public $socketServer;
     public $roomList = array(); //房间对象集合
 
     public function __construct()
     {
         $this->connectManage = new ConnectManage();
+        $this->socketServer = new SocketServer();
         parent::__construct();
     }
 
@@ -80,12 +81,6 @@ class Worker extends Server
      */
     public function onClose($connection)
     {
-        if (isset($connection->id)) {
-            $room_id = $this->connectManage->get_room_id($connection->id);
-            if ($room_id && isset($this->roomList[$room_id])) {
-                $this->roomList[$room_id]->remove_member($connection);
-            }
-        }
         $this->connectManage->remove_connect($connection);
         var_dump('退出连接');
     }
@@ -116,14 +111,13 @@ class Worker extends Server
             var_dump('房间已存在');
             return false;
         }
-        $newRoom = new Room($roomId, $raceCount);
+        $newRoom = new Room($roomId, $raceCount,$this->connectManage,$this->socketServer);
         $this->roomList[$roomId] = $newRoom;
         $this->enterRoom($roomId, $connection);
     }
 
     public function enterRoom($roomId, $connection)
     {
-        $this->connectManage->enter_room($connection, $roomId);
         if (isset($this->roomList[$roomId])) {
             $this->roomList[$roomId]->add_member($connection);
             var_dump('人员加入房间');
@@ -134,21 +128,23 @@ class Worker extends Server
 
     public function startRoomGame($connection, $roomId)
     {
-        $in_room_id = $this->connectManage->get_room_id($connection->id);
-        if ($in_room_id !== $roomId) {
-            var_dump('用户不在该房间，无法启动房间游戏');
-            return;
-        }
         if (!isset($this->roomList[$roomId])) {
             var_dump('房间不存在');
             return false;
         }
+
         $ROOM_STATE = json_decode(ROOM_STATE, true);
         $room_state = $this->roomList[$roomId]->get_room_state();
-        if ($room_state !== $ROOM_STATE['OPEN']) {
-            var_dump('房间游戏不能重复开始');
+        $is_user_in_room =  $this->roomList[$roomId]->is_user_in_room($connection->id);
+        if ($room_state !== $ROOM_STATE['OPEN'] || (!$is_user_in_room)) {
+          //  var_dump($room_state);
+          //  var_dump($is_user_in_room);
+            var_dump('房间游戏不能重复开始,或者用户不在该房间');
             return;
+        }else{
+            var_dump('游戏开始');
         }
+
         $this->roomList[$roomId]->start_game();
     }
 

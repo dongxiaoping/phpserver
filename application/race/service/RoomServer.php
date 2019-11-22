@@ -81,8 +81,8 @@ class RoomServer extends RoomBase
         $ROOM_PLAY_MEMBER_STATE = json_decode(ROOM_PLAY_MEMBER_STATE, true);
 
         ////// 1、判断用户以及房间是否存在 2、判断房间是否已关闭
-        $item = $this->UserOP->get($user_id);
-        if ($item === null) {
+        $user_info = $this->UserOP->get($user_id);
+        if ($user_info === null) {
             return getInterFaceArray(0, "user_not_exist", "");
         }
         $room_info = $this->RoomOp->get($room_id);
@@ -118,6 +118,8 @@ class RoomServer extends RoomBase
             'roomId' => $room_id,
             'roleType' => $ROOM_PLAY_MEMBER_TYPE["PLAYER"],
             'score' => 0,
+            'nick' => $user_info['nick'],
+            'icon' => $user_info['icon'],
             'state' => $ROOM_PLAY_MEMBER_STATE["ON_LINE"],
             'creatTime' => date("Y-m-d H:i:s"),
             'modTime' => date("Y-m-d H:i:s")

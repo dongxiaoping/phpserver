@@ -24,10 +24,11 @@
           setTimeout(function () {
               ws.send(JSON.stringify(createAndEnterRoom));
           }, 5000);
+
         setTimeout(function () {
             ws.send(JSON.stringify(startRoomGame));
         },8000);
-       ws.send(JSON.stringify(startRoomGame));
+
         setTimeout(function () {
             ws.send(JSON.stringify(landlordSelected));
         }, 12000);

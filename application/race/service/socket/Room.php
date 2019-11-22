@@ -7,6 +7,9 @@ use Workerman\Lib\Timer;
 
 class Room
 {
+    public $connect_manage = null;
+    public $socket_server = null;
+
     public $room_id = null;
     public $member_list = array();
     public $race_list = array();
@@ -21,12 +24,13 @@ class Room
     public $showDownTime = 8; //比大小持续时间 s
     public $showResultTime = 5; //显示结果持续时间 s
 
-    public function __construct($room_id, $race_count)
+    public function __construct($room_id, $race_count, $connect_manage, $socket_server)
     {
+        $this->connect_manage = $connect_manage;
+        $this->socket_server = $socket_server;
         $this->race_count = $race_count;
         $this->room_id = $room_id;
-        $ROOM_STATE = json_decode(ROOM_STATE, true);
-        $this->state = $ROOM_STATE['OPEN'];
+
         $this->init_race($race_count);
     }
 
@@ -42,6 +46,8 @@ class Room
 
     public function init_race($race_count)
     {
+        $ROOM_STATE = json_decode(ROOM_STATE, true);
+        $this->state = $ROOM_STATE['OPEN'];
         $RACE_PLAY_STATE = json_decode(RACE_PLAY_STATE, true);
         for ($i = 0; $i < $race_count; $i++) {
             $item = array('state' => $RACE_PLAY_STATE['NOT_BEGIN']);
@@ -53,7 +59,7 @@ class Room
     public function add_member($connection)
     {
         if (!isset($this->member_list[$connection->id])) {
-            $this->member_list[$connection->id] = $connection;
+            $this->member_list[$connection->id] = array('id' => $connection->id);
             var_dump('房间加入新成员');
         }
     }
@@ -62,8 +68,25 @@ class Room
     {
         if (isset($this->member_list[$connection->id])) {
             unset($this->member_list[$connection->id]);
-            var_dump('成员离线');
         }
+    }
+
+    public function is_user_in_room($connection_id)
+    {
+        if (isset($this->member_list[$connection_id])) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    //失败返回null
+    public function get_member_ob_by_connection_id($connection_id)
+    {
+        if (isset($this->connect_manage->list[$connection_id])) {
+            return $this->connect_manage->list[$connection_id];
+        }
+        return null;
     }
 
     public function get_room_state()
@@ -73,8 +96,13 @@ class Room
 
     public function broadcast_to_all_member($message)
     {
-        foreach ($this->member_list as $item) {
-            $item->send(json_encode($message));
+        foreach ($this->member_list as $member_info) {
+            $member_ob = $this->get_member_ob_by_connection_id($member_info['id']);
+            if ($member_ob !== null) {
+                $member_ob->send(json_encode($message));
+            } else {
+                var_dump('该成员不在线');
+            }
         }
     }
 
@@ -101,6 +129,8 @@ class Room
         $this->race_list[$this->running_race_num]['state'] = $race_play_state['ROLL_DICE'];
         $message = array('type' => 'rollDice', 'info' => array('raceNum' => $this->running_race_num, 'roomId' => $this->room_id));
         $this->broadcast_to_all_member($message);
+        var_dump('启动摇色子流程');
+        var_dump('房间号：'.$this->room_id.',场次号：'.$this->running_race_num);
     }
 
     public function change_deal()
@@ -109,6 +139,8 @@ class Room
         $this->race_list[$this->running_race_num]['state'] = $race_play_state['DEAL'];
         $message = array('type' => 'deal', 'info' => array('raceNum' => $this->running_race_num, 'roomId' => $this->room_id));
         $this->broadcast_to_all_member($message);
+        var_dump('启动发牌流程');
+        var_dump('房间号：'.$this->room_id.',场次号：'.$this->running_race_num);
     }
 
     public function change_roll_bet()
@@ -117,6 +149,8 @@ class Room
         $this->race_list[$this->running_race_num]['state'] = $race_play_state['BET'];
         $message = array('type' => 'bet', 'info' => array('raceNum' => $this->running_race_num, 'roomId' => $this->room_id));
         $this->broadcast_to_all_member($message);
+        var_dump('启动下注流程');
+        var_dump('房间号：'.$this->room_id.',场次号：'.$this->running_race_num);
     }
 
     public function change_show_down()
@@ -125,6 +159,8 @@ class Room
         $this->race_list[$this->running_race_num]['state'] = $race_play_state['SHOW_DOWN'];
         $message = array('type' => 'showDown', 'info' => array('raceNum' => $this->running_race_num, 'roomId' => $this->room_id));
         $this->broadcast_to_all_member($message);
+        var_dump('启动比大小流程');
+        var_dump('房间号：'.$this->room_id.',场次号：'.$this->running_race_num);
     }
 
     public function change_show_result()
@@ -133,6 +169,8 @@ class Room
         $this->race_list[$this->running_race_num]['state'] = $race_play_state['SHOW_RESULT'];
         $message = array('type' => 'showResult', 'info' => array('raceNum' => $this->running_race_num, 'roomId' => $this->room_id));
         $this->broadcast_to_all_member($message);
+        var_dump('启动显示结果流程');
+        var_dump('房间号：'.$this->room_id.',场次号：'.$this->running_race_num);
     }
 
     public function change_finished()
@@ -141,6 +179,8 @@ class Room
         $this->race_list[$this->running_race_num]['state'] = $race_play_state['FINISHED'];
         $message = array('type' => 'finished', 'info' => array('raceNum' => $this->running_race_num, 'roomId' => $this->room_id));
         $this->broadcast_to_all_member($message);
+        var_dump('本场比赛结束');
+        var_dump('房间号：'.$this->room_id.',场次号：'.$this->running_race_num);
     }
 
 
