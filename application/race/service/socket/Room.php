@@ -117,8 +117,9 @@ class Room
             var_dump('正在进行的场次异常');
             return;
         }
-        //$message = array('type' => 'choiceLandlord', 'info' => '游戏开始了');
-        //$this->broadcast_to_all_member($message);
+        $this->socket_server->change_room_state($this->room_id, $ROOM_STATE['PLAYING']);
+        $message = array('type' => 'gameBegin', 'info' => array('roomId' => $this->room_id));
+        $this->broadcast_to_all_member($message);
         $this->state = $ROOM_STATE['PLAYING'];
         $this->startRace(0);
     }
@@ -128,9 +129,10 @@ class Room
         $race_play_state = json_decode(RACE_PLAY_STATE, true);
         $this->race_list[$this->running_race_num]['state'] = $race_play_state['ROLL_DICE'];
         $message = array('type' => 'rollDice', 'info' => array('raceNum' => $this->running_race_num, 'roomId' => $this->room_id));
+        $this->socket_server->change_race_state($this->room_id, $this->running_race_num, $race_play_state['ROLL_DICE']);
         $this->broadcast_to_all_member($message);
         var_dump('启动摇色子流程');
-        var_dump('房间号：'.$this->room_id.',场次号：'.$this->running_race_num);
+        var_dump('房间号：' . $this->room_id . ',场次号：' . $this->running_race_num);
     }
 
     public function change_deal()
@@ -138,9 +140,10 @@ class Room
         $race_play_state = json_decode(RACE_PLAY_STATE, true);
         $this->race_list[$this->running_race_num]['state'] = $race_play_state['DEAL'];
         $message = array('type' => 'deal', 'info' => array('raceNum' => $this->running_race_num, 'roomId' => $this->room_id));
+        $this->socket_server->change_race_state($this->room_id, $this->running_race_num, $race_play_state['DEAL']);
         $this->broadcast_to_all_member($message);
         var_dump('启动发牌流程');
-        var_dump('房间号：'.$this->room_id.',场次号：'.$this->running_race_num);
+        var_dump('房间号：' . $this->room_id . ',场次号：' . $this->running_race_num);
     }
 
     public function change_roll_bet()
@@ -148,9 +151,10 @@ class Room
         $race_play_state = json_decode(RACE_PLAY_STATE, true);
         $this->race_list[$this->running_race_num]['state'] = $race_play_state['BET'];
         $message = array('type' => 'bet', 'info' => array('raceNum' => $this->running_race_num, 'roomId' => $this->room_id));
+        $this->socket_server->change_race_state($this->room_id, $this->running_race_num, $race_play_state['BET']);
         $this->broadcast_to_all_member($message);
         var_dump('启动下注流程');
-        var_dump('房间号：'.$this->room_id.',场次号：'.$this->running_race_num);
+        var_dump('房间号：' . $this->room_id . ',场次号：' . $this->running_race_num);
     }
 
     public function change_show_down()
@@ -158,9 +162,10 @@ class Room
         $race_play_state = json_decode(RACE_PLAY_STATE, true);
         $this->race_list[$this->running_race_num]['state'] = $race_play_state['SHOW_DOWN'];
         $message = array('type' => 'showDown', 'info' => array('raceNum' => $this->running_race_num, 'roomId' => $this->room_id));
+        $this->socket_server->change_race_state($this->room_id, $this->running_race_num, $race_play_state['SHOW_DOWN']);
         $this->broadcast_to_all_member($message);
         var_dump('启动比大小流程');
-        var_dump('房间号：'.$this->room_id.',场次号：'.$this->running_race_num);
+        var_dump('房间号：' . $this->room_id . ',场次号：' . $this->running_race_num);
     }
 
     public function change_show_result()
@@ -168,63 +173,62 @@ class Room
         $race_play_state = json_decode(RACE_PLAY_STATE, true);
         $this->race_list[$this->running_race_num]['state'] = $race_play_state['SHOW_RESULT'];
         $message = array('type' => 'showResult', 'info' => array('raceNum' => $this->running_race_num, 'roomId' => $this->room_id));
+        $this->socket_server->change_race_state($this->room_id, $this->running_race_num, $race_play_state['SHOW_RESULT']);
         $this->broadcast_to_all_member($message);
         var_dump('启动显示结果流程');
-        var_dump('房间号：'.$this->room_id.',场次号：'.$this->running_race_num);
+        var_dump('房间号：' . $this->room_id . ',场次号：' . $this->running_race_num);
     }
 
     public function change_finished()
     { //结束
         $race_play_state = json_decode(RACE_PLAY_STATE, true);
         $this->race_list[$this->running_race_num]['state'] = $race_play_state['FINISHED'];
+        $this->socket_server->change_race_state($this->room_id, $this->running_race_num, $race_play_state['FINISHED']);
         $message = array('type' => 'finished', 'info' => array('raceNum' => $this->running_race_num, 'roomId' => $this->room_id));
         $this->broadcast_to_all_member($message);
         var_dump('本场比赛结束');
-        var_dump('房间号：'.$this->room_id.',场次号：'.$this->running_race_num);
+        var_dump('房间号：' . $this->room_id . ',场次号：' . $this->running_race_num);
     }
 
-
-    public function startRace($raceNum)
+    public function broadcast_to_select_landlord($raceNum)
     {
-        if ($raceNum >= $this->race_count) {
-            $ROOM_STATE = json_decode(ROOM_STATE, true);
-            $this->state = $ROOM_STATE['ALL_RACE_FINISHED'];
-            $message = array('type' => 'allRaceFinished', 'info' => array('roomId' => $this->room_id));
-            $this->broadcast_to_all_member($message);
-            var_dump('所有比赛结束');
-            return;
-        }
-
         $RACE_PLAY_STATE = json_decode(RACE_PLAY_STATE, true);
-        $this->race_list[$raceNum]['state'] = $RACE_PLAY_STATE['CHOICE_LANDLORD'];
-        $message = array('type' => 'choiceLandlord', 'info' => array('raceNum' => $raceNum, 'roomId' => $this->room_id));
-        $this->broadcast_to_all_member($message); //广播选地主
+        if($raceNum%5 ===0){
+            $this->race_list[$raceNum]['state'] = $RACE_PLAY_STATE['CHOICE_LANDLORD'];
+            $message = array('type' => 'choiceLandlord', 'info' => array('raceNum' => $raceNum, 'roomId' => $this->room_id));
+            $this->broadcast_to_all_member($message); //广播选地主
+        }else{
+            $this->race_list[$raceNum]['state'] = $RACE_PLAY_STATE['ROLL_DICE'];
+        }
+        $this->landlord_select_timer = Timer::add(2, function (){
+            $this->race_run_after_landlord();
+        },array(),true);
+    }
 
-        $this->landlord_select_timer = Timer::add(2, function () {
-            $race_play_state = json_decode(RACE_PLAY_STATE, true);
-            if ($this->race_list[$this->running_race_num]['state'] !== $race_play_state['CHOICE_LANDLORD']) {
-                Timer::del($this->landlord_select_timer);
-                ///////////////////////
-                $this->change_roll_dice();
+    public function race_run_after_landlord()
+    {
+        $race_play_state = json_decode(RACE_PLAY_STATE, true);
+        if ($this->race_list[$this->running_race_num]['state'] !== $race_play_state['CHOICE_LANDLORD']) {
+            Timer::del($this->landlord_select_timer);
+            ///////////////////////
+            $this->change_roll_dice();
 
-                Timer::add($this->rollDiceTime, function () {
-                    $this->change_deal();
+            Timer::add($this->rollDiceTime, function () {
+                $this->change_deal();
 
-                    Timer::add($this->dealTime, function () {
-                        $this->change_roll_bet();
+                Timer::add($this->dealTime, function () {
+                    $this->change_roll_bet();
 
-                        Timer::add($this->betTime, function () {
+                    Timer::add($this->betTime, function () {
 
-                            $this->change_show_down();
-                            Timer::add($this->showDownTime, function () {
-                                $this->change_show_result();
-                                Timer::add($this->showResultTime, function () {
-                                    $this->change_finished();
-                                    Timer::add(2, function () {
-                                        $nextRaceNum = $this->running_race_num + 1;
-                                        $this->startRace($nextRaceNum);
-                                    }, array(), false);
-
+                        $this->change_show_down();
+                        Timer::add($this->showDownTime, function () {
+                            $this->change_show_result();
+                            Timer::add($this->showResultTime, function () {
+                                $this->change_finished();
+                                Timer::add(2, function () {
+                                    $this->running_race_num = $this->running_race_num + 1;
+                                    $this->startRace($this->running_race_num);
                                 }, array(), false);
 
                             }, array(), false);
@@ -234,11 +238,26 @@ class Room
                     }, array(), false);
 
                 }, array(), false);
-                /////////////////////////
-            } else {
-                var_dump('等待选地主');
-            }
-        });
+
+            }, array(), false);
+            /////////////////////////
+        } else {
+            var_dump('等待选地主');
+        }
+    }
+
+    public function startRace($raceNum)
+    {
+        if ($raceNum >= $this->race_count) {
+            $ROOM_STATE = json_decode(ROOM_STATE, true);
+            $this->socket_server->change_room_state($this->room_id, $ROOM_STATE['ALL_RACE_FINISHED']);
+            $this->state = $ROOM_STATE['ALL_RACE_FINISHED'];
+            $message = array('type' => 'allRaceFinished', 'info' => array('roomId' => $this->room_id));
+            $this->broadcast_to_all_member($message);
+            var_dump('所有比赛结束');
+            return;
+        }
+        $this->broadcast_to_select_landlord($raceNum);
     }
 
 }

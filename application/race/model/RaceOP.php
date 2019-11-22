@@ -10,12 +10,20 @@
 // +----------------------------------------------------------------------
 
 namespace app\race\model;
+
 use app\race\model\table\Race;
 use think\Db;
 
-class RaceOP extends BaseOP{
-    public function __construct() {
+class RaceOP extends BaseOP
+{
+    public function __construct()
+    {
         $this->race = new Race();
         parent::__construct($this->race);
+    }
+
+    public function change_race_state($room_id, $race_num, $state)
+    {
+        Db::query("update race set playState=" . $state . " where raceNum=" . $race_num . " and roomId=" . $room_id);
     }
 }

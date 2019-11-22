@@ -74,4 +74,9 @@ class RaceServer extends RaceBase
         $list = $this->RaceOP->getListByOneColumn('roomId',$id);
         return getInterFaceArray(1, "success", $list);
     }
+
+    public function change_race_state($room_id, $race_num, $state)
+    {
+        $this->RaceOP->change_race_state($room_id, $race_num, $state);
+    }
 }

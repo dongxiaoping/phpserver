@@ -18,4 +18,9 @@ class RoomOP extends BaseOP{
         $this->room = new Room();
         parent::__construct($this->room);
     }
+
+    public function change_room_state($room_id , $state)
+    {
+        Db::query("update room set roomState=" . $state . " where id=" . $room_id);
+    }
 }
