@@ -29,8 +29,9 @@ class UserServer{
         $USER_TYPE = json_decode(USER_TYPE, true);
         $item = [
             'score' => 0,
-            'diamond' => 0,
-            'type' => $USER_TYPE['VISIT_USER'],
+            'diamond' => 10000,
+            'type' => $USER_TYPE['NORMAL_USER'],
+            'nick' =>'随机测试用户',
             'creatTime' => date("Y-m-d H:i:s"),
             'modTime' =>date("Y-m-d H:i:s")
         ];

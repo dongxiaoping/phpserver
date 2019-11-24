@@ -20,8 +20,13 @@ class SocketServer
         $this->RaceServer->change_race_state($room_id, $race_num, $state);
     }
 
-    public function change_room_state($room_id , $state)
+    public function change_room_state($room_id, $state)
     {
         $this->RoomOp->change_room_state($room_id, $state);
+    }
+
+    public function change_race_landlord($room_id, $running_race_num, $landlordId)
+    {
+        $this->RaceServer->change_race_landlord($room_id, $running_race_num, $landlordId);
     }
 }

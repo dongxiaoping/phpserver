@@ -26,4 +26,9 @@ class RaceOP extends BaseOP
     {
         Db::query("update race set playState=" . $state . " where raceNum=" . $race_num . " and roomId=" . $room_id);
     }
+
+    public function change_race_landlord($room_id, $running_race_num, $landlordId)
+    {
+        Db::query("update race set landlordId=" . $landlordId . " where raceNum=" . $running_race_num . " and roomId=" . $room_id);
+    }
 }

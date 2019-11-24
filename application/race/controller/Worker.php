@@ -54,7 +54,7 @@ class Worker extends Server
                 $roomId = $data['info']['roomId'];
                 $this->startRoomGame($connection, $roomId);
                 break;
-            case 'landlordSelected':
+            case 'landlordSelected': //玩家选择当地主通知
                 $roomId = $data['info']['roomId'];
                 $raceNum = $data['info']['raceNum'];
                 $landlordId = $data['info']['landlordId'];
@@ -159,6 +159,7 @@ class Worker extends Server
         $this->roomList[$roomId]->start_game();
     }
 
+    //抢地主
     public function landlordSelected($roomId, $raceNum, $landlordId)
     {
         $RACE_PLAY_STATE = json_decode(RACE_PLAY_STATE, true);
@@ -167,8 +168,8 @@ class Worker extends Server
             return;
         }
         $the_race_state = $this->roomList[$roomId]->get_race_state($raceNum);
-        if ($the_race_state === $RACE_PLAY_STATE['CHOICE_LANDLORD']) {
-            $this->roomList[$roomId]->set_race_state($raceNum, $RACE_PLAY_STATE['ROLL_DICE']);
+        if ($the_race_state === $RACE_PLAY_STATE['CHOICE_LANDLORD']) {//该用户抢到地主了
+            $this->roomList[$roomId]->landlord_selected($raceNum, $landlordId);
         } else {
             var_dump('地主已经被抢');
         }

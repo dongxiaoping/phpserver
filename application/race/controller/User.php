@@ -35,6 +35,7 @@ class User
 
     public function create_visit_account()
     {
+        header("Access-Control-Allow-Origin: *");
         $result_array = $this->UserServer->create_visit_account();
         echo arrayToJson($result_array);
     }

@@ -32,7 +32,7 @@ class RaceServer extends RaceBase
         $majong_list = $this->get_mahjonList_by_race_count($race_count);
         for ($i = 0; $i < $race_count; $i++) {
             $majongs = array_slice($majong_list, $i * 8, 8);
-            $points = ['x' => rand(1, 6), 'y' => rand(1, 6)];
+            $points = ['one' => rand(1, 6), 'two' => rand(1, 6)];
             $majongResult = [
                 'landlord' => ['one' => $majongs[0], 'two' => $majongs[1]],
                 'sky' => ['one' => $majongs[2], 'two' => $majongs[3]],
@@ -78,5 +78,10 @@ class RaceServer extends RaceBase
     public function change_race_state($room_id, $race_num, $state)
     {
         $this->RaceOP->change_race_state($room_id, $race_num, $state);
+    }
+
+    public function change_race_landlord($room_id, $running_race_num, $landlordId)
+    {
+        $this->RaceOP->change_race_state($room_id, $running_race_num, $landlordId);
     }
 }

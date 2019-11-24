@@ -18,11 +18,11 @@ class Room
     private $race_count;
     private $landlord_select_timer;
 
-    public $rollDiceTime = 5; //摇色子持续时间 s
-    public $dealTime = 8; //发牌持续时间 s
-    public $betTime = 12; //下注持续时间 s
-    public $showDownTime = 8; //比大小持续时间 s
-    public $showResultTime = 5; //显示结果持续时间 s
+    public $rollDiceTime = 12; //摇色子持续时间 s
+    public $dealTime = 18; //发牌持续时间 s
+    public $betTime = 20; //下注持续时间 s
+    public $showDownTime = 18; //比大小持续时间 s
+    public $showResultTime = 15; //显示结果持续时间 s
 
     public function __construct($room_id, $race_count, $connect_manage, $socket_server)
     {
@@ -38,6 +38,22 @@ class Room
     {
         return $this->race_list[$race_num]['state'];
     }
+
+    //1、把数据库里面的比赛地主Id设置完毕 2、向玩家发出地主被选中通知 3、将游戏环节改为开始摇色子
+    public function landlord_selected($raceNum, $landlordId)
+    {
+        $this->socket_server->change_race_landlord($this->room_id, $this->running_race_num, $landlordId);
+
+        $message = array('type' => 'landlordSelected', 'info' => array('roomId' => $this->room_id,
+            'raceNum' => $raceNum, 'landlordId' => $landlordId));
+        $this->broadcast_to_all_member($message);
+
+        Timer::add(2, function ($raceNum) {
+            $RACE_PLAY_STATE = json_decode(RACE_PLAY_STATE, true);
+            $this->set_race_state($raceNum, $RACE_PLAY_STATE['ROLL_DICE']);
+        },array($raceNum),false);
+    }
+
 
     public function set_race_state($race_num, $state)
     {
