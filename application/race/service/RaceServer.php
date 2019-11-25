@@ -71,7 +71,7 @@ class RaceServer extends RaceBase
 
     public function getRacesByRoomId($id)
     {
-        $list = $this->RaceOP->getListByOneColumn('roomId',$id);
+        $list = $this->RaceOP->getListByOneColumn('roomId', $id);
         return getInterFaceArray(1, "success", $list);
     }
 

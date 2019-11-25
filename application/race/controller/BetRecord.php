@@ -28,7 +28,7 @@ class BetRecord
         $content = (string)$content;
         $content = json_decode($content, true);
         if ($content["userId"] && $content["roomId"] && $content["raceNum"] && $content["betLocation"] && $content["betVal"]) {
-            $result_array = $this->BetRecordServer->to_bet($content);
+            $result_array = $this->BetRecordServer->to_bet($content["userId"], $content["roomId"], $content["raceNum"], $content["betLocation"], $content["betVal"]);
             echo arrayToJson($result_array);
         } else {
             echo getJsonStringByParam(0, "param_error", "");

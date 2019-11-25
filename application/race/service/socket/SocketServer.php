@@ -4,7 +4,9 @@
 namespace app\race\service\socket;
 
 
+use app\race\model\PlayerOP;
 use app\race\model\RoomOP;
+use app\race\service\BetRecordServer;
 use app\race\service\RaceServer;
 
 class SocketServer
@@ -13,6 +15,8 @@ class SocketServer
     {
         $this->RaceServer = new RaceServer();
         $this->RoomOp = new  RoomOP();
+        $this->PlayerOP = new PlayerOP();
+        $this->BetRecordServer = new BetRecordServer();
     }
 
     public function change_race_state($room_id, $race_num, $state)
@@ -29,4 +33,15 @@ class SocketServer
     {
         $this->RaceServer->change_race_landlord($room_id, $running_race_num, $landlordId);
     }
+
+    public function get_member_info_in_the_room($user_id, $room_id)
+    {
+        return $this->PlayerOP->get_member_info_in_the_room($user_id, $room_id);
+    }
+
+    public function to_bet($userId, $roomId, $raceNum, $betLocation, $betVal)
+    {
+        return $this->BetRecordServer->to_bet($userId, $roomId, $raceNum, $betLocation, $betVal);
+    }
+
 }

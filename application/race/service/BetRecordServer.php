@@ -28,43 +28,22 @@ class BetRecordServer
         return getInterFaceArray(1, "success", $list);
     }
 
-    public function to_bet($content)
+    public function to_bet($userId, $roomId, $raceNum, $betLocation, $betVal)
     {
-        $userId = $content['userId'];
-        $raceId = $content['raceId'];
-        $betLocation = $content['betLocation'];
-        $betVal = $content['betVal'];
-
-        $race_item = $this->RaceOP->get($raceId);
-        if (!$race_item) {
-            return getInterFaceArray(0, "race_not_exist", '');
-        }
-        $race_state = $race_item['playState'];
-        $RACE_PLAY_STATE = json_decode(RACE_PLAY_STATE, true);
-        if ($race_state !== $RACE_PLAY_STATE['BET']) {
-            return getInterFaceArray(0, "race_not_bet_state", '');
-        }
-
-        $the_record = $this->BetRecordOP->get_the_record($userId, $raceId, $betLocation);
+        $the_record = $this->BetRecordOP->get_the_record($userId, $roomId, $raceNum);
         if ($the_record) { //存在记录
-            $new_bet_val = $the_record['costValue'] + $betVal;
+            $new_bet_val = $the_record[$betLocation] + $betVal;
             $id = $the_record['id'];
-            $this->BetRecordOP->update_bet_val($id, $new_bet_val);
+            $this->BetRecordOP->update_bet_val($id, $betLocation, $new_bet_val);
             return getInterFaceArray(1, "success", '');
         }
 
         //记录不存在
-        $roomId = $race_item['roomId'];
-        $raceNum = $race_item['raceNum'];
-        $isWin = $this->getWinResult($race_item, $betLocation);
         $item = [
             'roomId' => $roomId,
-            'raceId' => $raceId,
             'raceNum' => $raceNum,
             'userId' => $userId,
-            'costValue' => $betVal,
-            'betLocation' => $betLocation,
-            'isWin' => $isWin,
+            $betLocation=>$betVal,
             'creatTime' => date("Y-m-d H:i:s"),
             'modTime' => date("Y-m-d H:i:s")
         ];

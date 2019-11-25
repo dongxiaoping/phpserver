@@ -22,15 +22,18 @@ class BetRecordOP extends BaseOP
         parent::__construct($this->bet_record);
     }
 
-    public function get_the_record($user_id, $race_id, $location)
+    public function get_the_record($userId, $roomId, $raceNum)
     {
-        $info = $this->table->where("userId", $user_id)->where("raceId", $race_id)->where("betLocation", $location)->find();
+        $map['userId'] = $userId;
+        $map['roomId'] = $roomId;
+        $map['raceNum'] = $raceNum;
+        $info = $this->table->where($map)->find();
         return $info;
     }
 
-    public function update_bet_val($id, $new_val)
+    public function update_bet_val($id, $betLocation, $new_val)
     {
-        Db::query("update bet_record set costValue=" . $new_val . " where id=" . $id);
+        Db::query("update bet_record set ".$betLocation."=" . $new_val . " where id=" . $id);
         return true;
     }
 }
