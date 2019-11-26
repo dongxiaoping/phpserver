@@ -14,7 +14,7 @@ namespace app\race\controller;
 
 use app\race\service\BetRecordServer;
 
-class BetRecord
+class Betrecord
 {
     public function __construct()
     {

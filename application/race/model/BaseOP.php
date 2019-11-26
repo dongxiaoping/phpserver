@@ -12,53 +12,70 @@ namespace app\race\model;
 
 class BaseOP
 {
-    public function __construct($table) {
-        $this->table = $table;
+    private $tableOb;
+
+    public function __construct($table) //有问题 暂时不能继承使用，传参传不过来
+    {
+        $this->tableOb = $table;
     }
 
     /* $info ["category_name"=>$name,......] 除主键之外的表字段信息集合
      * */
-    public function insert($info){
-        $this->table->data($info);
-        $isOk = $this->table->save();
-        if($isOk){
-            return $this->table->id;
-        }else{
+    public function insert($info)
+    {
+        $table = new $this->tableOb();
+        $table->data($info);
+        $isOk = $table->save();
+        if ($isOk) {
+            return $table->id;
+        } else {
             return false;
         }
     }
 
-    public function insertAll($list){
-        $isOk = $this->table->insertAll($list);
-        if($isOk){
+    public function insertAll($list)
+    {
+        $table = new $this->tableOb();
+        $isOk = $table->insertAll($list);
+        if ($isOk) {
             return true;
-        }else{
+        } else {
             return false;
         }
     }
 
 
-    public function del($id){
-       return $this->table->where("id",$id)->delete();
+    public function del($id)
+    {
+        $table = new $this->tableOb();
+        return $table->where("id", $id)->delete();
     }
 
-   /* $info ["category_name"=>$name,......] 除主键之外的表字段信息集合
-    * */
-    public function mod($id,$info){
-        $this->table->save($info,["id"=>$id]);
+    /* $info ["category_name"=>$name,......] 除主键之外的表字段信息集合
+     * */
+    public function mod($id, $info)
+    {
+        $table = new $this->tableOb();
+        $table->save($info, ["id" => $id]);
     }
 
-    public function get($id){
-        return $this->table->where("id",$id)->find(); //查询一个数据
+    public function get($id)
+    {
+        $table = new $this->tableOb();
+        return $table->where("id", $id)->find(); //查询一个数据
     }
 
-    public function getListByOneColumn($tag, $val){
-        $list = $this->table->where($tag, $val)->select();
+    public function getListByOneColumn($tag, $val)
+    {
+        $table = new $this->tableOb();
+        $list = $table->where($tag, $val)->select();
         return $list;
     }
 
-    public function getAll(){
-        $list = $this->table->select();
+    public function getAll()
+    {
+        $table = new $this->tableOb();
+        $list = $table->select();
         return $list;
     }
 

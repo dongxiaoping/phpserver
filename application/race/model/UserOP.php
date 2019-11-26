@@ -14,12 +14,11 @@ namespace app\race\model;
 use app\race\model\table\User;
 use think\Db;
 
-class UserOP extends BaseOP
+class UserOP
 {
     public function __construct()
     {
-        $this->user = new User();
-        parent::__construct($this->user);
+
     }
 
     //0表示减 1表示加
@@ -33,5 +32,66 @@ class UserOP extends BaseOP
         } else {
             return false;
         }
+    }
+
+    /////////////////
+    /* $info ["category_name"=>$name,......] 除主键之外的表字段信息集合
+ * */
+    public function insert($info)
+    {
+        $table = new User();
+        $table->data($info);
+        $isOk = $table->save();
+        if ($isOk) {
+            return $table->id;
+        } else {
+            return false;
+        }
+    }
+
+    public function insertAll($list)
+    {
+        $table = new User();
+        $isOk = $table->insertAll($list);
+        if ($isOk) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+
+    public function del($id)
+    {
+        $table = new User();
+        return $table->where("id", $id)->delete();
+    }
+
+    /* $info ["category_name"=>$name,......] 除主键之外的表字段信息集合
+     * */
+    public function mod($id, $info)
+    {
+        $table = new User();
+        $table->save($info, ["id" => $id]);
+    }
+
+    public function get($id)
+    {
+        $table = new User();
+        return $table->where("id", $id)->find(); //查询一个数据
+    }
+
+    public function getListByOneColumn($tag, $val)
+    {
+        $table = new User();
+        $list = $table->where($tag, $val)->select();
+        return $list;
+    }
+
+    public function getAll()
+    {
+        $table = new User();
+        $list = $table->select();
+        return $list;
     }
 }
