@@ -11,18 +11,12 @@ class Room
     public $socket_server = null;
 
     public $room_id = null;
-    public $member_list = array();
+    public $member_list = array(); //connect 对象id集合
     public $race_list = array();
     private $state = null; //房间状态
     private $running_race_num = 0;
     private $race_count;
     private $landlord_select_timer;
-
-    public $rollDiceTime = 12; //摇色子持续时间 s
-    public $dealTime = 18; //发牌持续时间 s
-    public $betTime = 20; //下注持续时间 s
-    public $showDownTime = 18; //比大小持续时间 s
-    public $showResultTime = 15; //显示结果持续时间 s
 
     public function __construct($room_id, $race_count, $connect_manage, $socket_server)
     {
@@ -79,6 +73,9 @@ class Room
             $member_info = $this->socket_server->get_member_info_in_the_room($userId, $this->room_id);
             $message = array('type' => 'newMemberInRoom', 'info' => $member_info);
             $this->broadcast_to_all_member($message);
+
+            $message = array('type' => 'roomGameConfigSet', 'info' => config('roomGameConfig'));
+            $this->broadcast_to_member($message , $connection->id);
             var_dump('房间加入新成员');
         }
     }
@@ -116,12 +113,17 @@ class Room
     public function broadcast_to_all_member($message)
     {
         foreach ($this->member_list as $member_info) {
-            $member_ob = $this->get_member_ob_by_connection_id($member_info['id']);
-            if ($member_ob !== null) {
-                $member_ob->send(json_encode($message));
-            } else {
-                var_dump('该成员不在线');
-            }
+            $this->broadcast_to_member($message, $member_info['id']);
+        }
+    }
+
+    public function broadcast_to_member($message, $connect_id)
+    {
+        $member_ob = $this->get_member_ob_by_connection_id($connect_id);
+        if ($member_ob !== null) {
+            $member_ob->send(json_encode($message));
+        } else {
+            var_dump('该成员不在线');
         }
     }
 
@@ -232,18 +234,18 @@ class Room
             ///////////////////////
             $this->change_roll_dice();
 
-            Timer::add($this->rollDiceTime, function () {
+            Timer::add(config('roomGameConfig.rollDiceTime'), function () {
                 $this->change_deal();
 
-                Timer::add($this->dealTime, function () {
+                Timer::add(config('roomGameConfig.dealTime'), function () {
                     $this->change_roll_bet();
 
-                    Timer::add($this->betTime, function () {
+                    Timer::add(config('roomGameConfig.betTime'), function () {
 
                         $this->change_show_down();
-                        Timer::add($this->showDownTime, function () {
+                        Timer::add(config('roomGameConfig.showDownTime'), function () {
                             $this->change_show_result();
-                            Timer::add($this->showResultTime, function () {
+                            Timer::add(config('roomGameConfig.showResultTime'), function () {
                                 $this->change_finished();
                                 Timer::add(2, function () {
                                     $this->running_race_num = $this->running_race_num + 1;
@@ -281,8 +283,8 @@ class Room
 
     public function raceBet($userId, $roomId, $raceNum, $betLocation, $betVal)
     {
-        $back =  $this->socket_server->to_bet($userId, $roomId, $raceNum, $betLocation, $betVal);
-        if(!$back['status']){
+        $back = $this->socket_server->to_bet($userId, $roomId, $raceNum, $betLocation, $betVal);
+        if (!$back['status']) {
             var_dump('下注失败');
             return;
         }

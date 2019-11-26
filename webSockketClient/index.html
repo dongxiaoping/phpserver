@@ -16,7 +16,7 @@
     };
     var enterRoom = {type: 'enterRoom', info: {roomId: 68}};//进入房间事件
     var startRoomGame = {type: 'startRoomGame', info: {roomId: 68}}; //房间开始game raceCount 场次
-    var createAndEnterRoom= {type: 'createAndEnterRoom', info: {roomId: 68, raceCount: 4}};
+    var createAndEnterRoom= {type: 'createAndEnterRoom', info: {roomId: 68, raceCount: 4,userId:1}};
     var landlordSelected = {type: 'landlordSelected', info: {roomId: 68, raceNum: 0, landlordId: 4}}; //用户抢地主
     var raceBet = {type: 'raceBet', info: {userId: 68, roomId: 68, raceNum: 2, betLocation: 0, betVal: 4}}; //下注
     ws = new WebSocket("ws://127.0.0.1:2346");
@@ -30,13 +30,13 @@
             ws.send(JSON.stringify(startRoomGame));
         },8000);
 
-        setTimeout(function () {
-            ws.send(JSON.stringify(landlordSelected));
-        }, 12000);
+        // setTimeout(function () {
+        //     ws.send(JSON.stringify(landlordSelected));
+        // }, 12000);
 
-        setTimeout(function () {
-            ws.send(JSON.stringify(raceBet));
-        }, 14000);
+        // setTimeout(function () {
+        //     ws.send(JSON.stringify(raceBet));
+        // }, 14000);
         //alert("给服务端发送一个字符串：tom");
     };
     ws.onmessage = function (e) {

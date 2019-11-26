@@ -42,33 +42,54 @@ class Worker extends Server
         var_dump($data);
         switch ($data['type']) {
             case 'createAndEnterRoom':
-                $roomId = $data['info']['roomId'];
-                $raceCount = $data['info']['raceCount'];
-                $userId = $data['info']['userId'];
-                $this->createAndEnterRoom($connection, $roomId, $raceCount,$userId);
+                if (isset($data['info']['roomId']) && isset($data['info']['raceCount']) && isset($data['info']['userId'])) {
+                    $roomId = $data['info']['roomId'];
+                    $raceCount = $data['info']['raceCount'];
+                    $userId = $data['info']['userId'];
+                    $this->createAndEnterRoom($connection, $roomId, $raceCount, $userId);
+                } else {
+                    var_dump('参数错误');
+                }
                 break;
             case 'enterRoom': //进入房间
-                $roomId = $data['info']['roomId'];
-                $userId = $data['info']['userId'];
-                $this->enterRoom($roomId, $connection, $userId);
+                if (isset($data['info']['roomId']) && isset($data['info']['userId'])) {
+                    $roomId = $data['info']['roomId'];
+                    $userId = $data['info']['userId'];
+                    $this->enterRoom($roomId, $connection, $userId);
+                } else {
+                    var_dump('参数错误');
+                }
                 break;
             case 'startRoomGame':
-                $roomId = $data['info']['roomId'];
-                $this->startRoomGame($connection, $roomId);
+                if (isset($data['info']['roomId'])) {
+                    $roomId = $data['info']['roomId'];
+                    $this->startRoomGame($connection, $roomId);
+                } else {
+                    var_dump('参数错误');
+                }
                 break;
             case 'landlordSelected': //玩家选择当地主通知
-                $roomId = $data['info']['roomId'];
-                $raceNum = $data['info']['raceNum'];
-                $landlordId = $data['info']['landlordId'];
-                $this->landlordSelected($roomId, $raceNum, $landlordId);
+                if (isset($data['info']['roomId']) && isset($data['info']['raceNum']) && isset($data['info']['landlordId'])) {
+                    $roomId = $data['info']['roomId'];
+                    $raceNum = $data['info']['raceNum'];
+                    $landlordId = $data['info']['landlordId'];
+                    $this->landlordSelected($roomId, $raceNum, $landlordId);
+                } else {
+                    var_dump('参数错误');
+                }
                 break;
             case 'raceBet': //下注
-                $userId = $data['info']['userId'];
-                $roomId = $data['info']['roomId'];
-                $raceNum = $data['info']['raceNum'];
-                $betLocation = $data['info']['betLocation'];
-                $betVal = $data['info']['betVal'];
-                $this->raceBet($userId, $roomId, $raceNum, $betLocation, $betVal);
+                if (isset($data['info']['userId']) && isset($data['info']['roomId']) && isset($data['info']['raceNum'])
+                    && isset($data['info']['betLocation']) && isset($data['info']['betVal'])) {
+                    $userId = $data['info']['userId'];
+                    $roomId = $data['info']['roomId'];
+                    $raceNum = $data['info']['raceNum'];
+                    $betLocation = $data['info']['betLocation'];
+                    $betVal = $data['info']['betVal'];
+                    $this->raceBet($userId, $roomId, $raceNum, $betLocation, $betVal);
+                } else {
+                    var_dump('参数错误');
+                }
                 break;
             default:
 
@@ -124,7 +145,7 @@ class Worker extends Server
         $this->roomList[$roomId]->raceBet($userId, $roomId, $raceNum, $betLocation, $betVal);
     }
 
-    public function createAndEnterRoom($connection, $roomId, $raceCount,$userId)
+    public function createAndEnterRoom($connection, $roomId, $raceCount, $userId)
     {
         if (isset($this->roomList[$roomId])) {
             var_dump('房间已存在');
@@ -132,7 +153,7 @@ class Worker extends Server
         }
         $newRoom = new Room($roomId, $raceCount, $this->connectManage, $this->socketServer);
         $this->roomList[$roomId] = $newRoom;
-        $this->enterRoom($roomId, $connection,$userId);
+        $this->enterRoom($roomId, $connection, $userId);
     }
 
     public function enterRoom($roomId, $connection, $userId)
