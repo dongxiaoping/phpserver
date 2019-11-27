@@ -62,3 +62,6 @@ define('USER_TYPE', '{ "VISIT_USER": 1,"NORMAL_USER": 2,"CHEAT_USER":3}');
 
 //位置
 define('BET_LOCATION', '{ "SKY": "sky","LAND": "land","MIDDLE":"middle","BRIDG": "bridg","SKY_CORNER":"skyCorner","LAND_CORNER":"landCorner"}');
+
+//成员在房间中的状态
+define('MEMBER_STATE_IN_ROOM', '{ "ON_LINE": 1,"OFF_LINE":2, "NOT_EXIST":3}');

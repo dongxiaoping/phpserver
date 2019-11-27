@@ -11,7 +11,7 @@ class Room
     public $socket_server = null;
 
     public $room_id = null;
-    public $member_list = array(); //connect 对象id集合
+    public $member_list = array(); //connect 对象id集合   $this->member_list[$userId] = array('user_id' => $userId, 'connection_id' => $connection->id);
     public $race_list = array();
     private $state = null; //房间状态
     private $running_race_num = 0;
@@ -68,32 +68,41 @@ class Room
 
     public function add_member($connection, $userId)
     {
-        if (!isset($this->member_list[$connection->id])) {
-            $this->member_list[$connection->id] = array('id' => $connection->id);
-            $member_info = $this->socket_server->get_member_info_in_the_room($userId, $this->room_id);
-            $message = array('type' => 'newMemberInRoom', 'info' => $member_info);
-            $this->broadcast_to_all_member($message);
-
-            $message = array('type' => 'roomGameConfigSet', 'info' => config('roomGameConfig'));
-            $this->broadcast_to_member($message , $connection->id);
-            var_dump('房间加入新成员');
-        }
-    }
-
-    public function remove_member($connection)
-    {
-        if (isset($this->member_list[$connection->id])) {
-            unset($this->member_list[$connection->id]);
-        }
-    }
-
-    public function is_user_in_room($connection_id)
-    {
-        if (isset($this->member_list[$connection_id])) {
-            return true;
-        } else {
+        if($this->is_user_in_room($userId)){
+            var_dump('成员在房间中，不能重复加入');
             return false;
         }
+        $this->member_list[$userId] = array('user_id' => $userId, 'connection_id' => $connection->id);
+        $member_info = $this->socket_server->get_member_info_in_the_room($userId, $this->room_id);
+        $message = array('type' => 'newMemberInRoom', 'info' => $member_info);
+        $this->broadcast_to_all_member($message);
+
+        $message = array('type' => 'roomGameConfigSet', 'info' => config('roomGameConfig'));
+        $this->broadcast_to_member($message, $connection->id, $userId);
+        var_dump('房间加入新成员');
+        return true;
+    }
+
+    public function remove_member($userId)
+    {
+        if (isset($this->member_list[$userId])) {
+            unset($this->member_list[$userId]);
+            $message = array('type' => 'memberOffLine', 'info' => array('user_id'=>$userId));//用户离线
+            $this->broadcast_to_all_member($message);
+        }
+    }
+
+    //判断在socket的房间中是否存在
+    public function is_user_in_room($userId)
+    {
+        if (isset($this->member_list[$userId])) {
+            if ($this->get_member_ob_by_connection_id($this->member_list[$userId]['connection_id']) === null) {
+                $this->remove_member($userId);
+                return false;
+            }
+            return true;
+        }
+        return false;
     }
 
     //失败返回null
@@ -113,17 +122,18 @@ class Room
     public function broadcast_to_all_member($message)
     {
         foreach ($this->member_list as $member_info) {
-            $this->broadcast_to_member($message, $member_info['id']);
+            $this->broadcast_to_member($message, $member_info['connection_id'], $member_info['user_id']);
         }
     }
 
-    public function broadcast_to_member($message, $connect_id)
+    public function broadcast_to_member($message, $connection_id, $userId)
     {
-        $member_ob = $this->get_member_ob_by_connection_id($connect_id);
+        $member_ob = $this->get_member_ob_by_connection_id($connection_id);
         if ($member_ob !== null) {
             $member_ob->send(json_encode($message));
         } else {
             var_dump('该成员不在线');
+            $this->remove_member($userId);
         }
     }
 

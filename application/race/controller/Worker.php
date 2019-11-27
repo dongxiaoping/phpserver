@@ -61,9 +61,10 @@ class Worker extends Server
                 }
                 break;
             case 'startRoomGame':
-                if (isset($data['info']['roomId'])) {
+                if (isset($data['info']['roomId']) && isset($data['info']['userId'])) {
                     $roomId = $data['info']['roomId'];
-                    $this->startRoomGame($connection, $roomId);
+                    $userId = $data['info']['userId'];
+                    $this->startRoomGame($connection, $roomId, $userId);
                 } else {
                     var_dump('参数错误');
                 }
@@ -166,7 +167,7 @@ class Worker extends Server
         }
     }
 
-    public function startRoomGame($connection, $roomId)
+    public function startRoomGame($connection, $roomId, $userId)
     {
         if (!isset($this->roomList[$roomId])) {
             var_dump('房间不存在');
@@ -175,14 +176,13 @@ class Worker extends Server
 
         $ROOM_STATE = json_decode(ROOM_STATE, true);
         $room_state = $this->roomList[$roomId]->get_room_state();
-        $is_user_in_room = $this->roomList[$roomId]->is_user_in_room($connection->id);
+        $is_user_in_room = $this->roomList[$roomId]->is_user_in_room($userId);
         if ($room_state !== $ROOM_STATE['OPEN'] || (!$is_user_in_room)) {
             var_dump('房间游戏不能重复开始,或者用户不在该房间');
             return;
         } else {
             var_dump('游戏开始');
         }
-
         $this->roomList[$roomId]->start_game();
     }
 
