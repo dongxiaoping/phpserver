@@ -15,6 +15,7 @@ use app\race\service\socket\SocketServer;
 use think\worker\Server;
 use app\race\service\socket\ConnectManage;
 use app\race\service\socket\Room;
+use Workerman\Lib\Timer;
 
 class Worker extends Server
 {
@@ -22,6 +23,9 @@ class Worker extends Server
     public $connectManage;
     public $socketServer;
     public $roomList = array(); //房间对象集合
+    private $circle_room_check_timer = null;
+    private $invalid_room_check_time = 30;//无效房间检查周期 s
+    private $room_time_out_time = 60*2;//房间存在超时时间 s
 
     public function __construct()
     {
@@ -42,6 +46,9 @@ class Worker extends Server
         var_dump($data);
         switch ($data['type']) {
             case 'createAndEnterRoom':
+                if ($this->circle_room_check_timer === null) {
+                    $this->roomCheck();
+                }
                 if (isset($data['info']['roomId']) && isset($data['info']['raceCount']) && isset($data['info']['userId'])) {
                     $roomId = $data['info']['roomId'];
                     $raceCount = $data['info']['raceCount'];
@@ -200,6 +207,30 @@ class Worker extends Server
         } else {
             var_dump('地主已经被抢');
         }
+    }
+
+    public function roomCheck()
+    {
+        var_dump('房间检查');
+        $this->circle_room_check_timer = Timer::add($this->invalid_room_check_time, function () {
+            var_dump('定时房间检查,房间数量：'. count($this->roomList));
+            foreach ($this->roomList as $roomItem) {
+                $now_time = time();
+                $ROOM_STATE = json_decode(ROOM_STATE, true);
+                $state = $roomItem->get_room_state();
+                if ($state === $ROOM_STATE['ALL_RACE_FINISHED'] || $state === $ROOM_STATE['CLOSE'] || count($roomItem->member_list) <= 0) {
+                    var_dump('销毁房间，房间比赛结束或者米有人');
+                    $this->roomList[$roomItem->room_id]->destroy();
+                    unset($this->roomList[$roomItem->room_id]);
+                }
+                var_dump('当前时间：' . $now_time . '__房间创建时间：' . $roomItem->creatTime);
+                if ($now_time - $roomItem->creatTime >= $this->room_time_out_time) {
+                    var_dump('销毁房间，房间超时');
+                    $this->roomList[$roomItem->room_id]->destroy();
+                    unset($this->roomList[$roomItem->room_id]);
+                }
+            }
+        }, array(), true);
     }
 
 }

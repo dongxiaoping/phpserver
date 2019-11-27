@@ -17,6 +17,7 @@ class Room
     private $running_race_num = 0;
     private $race_count;
     private $landlord_select_timer;
+    public $creatTime; //房间创建的时间戳
 
     public function __construct($room_id, $race_count, $connect_manage, $socket_server)
     {
@@ -24,7 +25,7 @@ class Room
         $this->socket_server = $socket_server;
         $this->race_count = $race_count;
         $this->room_id = $room_id;
-
+        $this->creatTime = time();
         $this->init_race($race_count);
     }
 
@@ -68,7 +69,7 @@ class Room
 
     public function add_member($connection, $userId)
     {
-        if($this->is_user_in_room($userId)){
+        if ($this->is_user_in_room($userId)) {
             var_dump('成员在房间中，不能重复加入');
             return false;
         }
@@ -87,7 +88,7 @@ class Room
     {
         if (isset($this->member_list[$userId])) {
             unset($this->member_list[$userId]);
-            $message = array('type' => 'memberOffLine', 'info' => array('user_id'=>$userId));//用户离线
+            $message = array('type' => 'memberOffLine', 'info' => array('user_id' => $userId));//用户离线
             $this->broadcast_to_all_member($message);
         }
     }
@@ -234,6 +235,11 @@ class Room
         $this->landlord_select_timer = Timer::add(2, function () {
             $this->race_run_after_landlord();
         }, array(), true);
+    }
+
+    public function destroy()
+    {
+        Timer::del($this->landlord_select_timer);
     }
 
     public function race_run_after_landlord()

@@ -18,7 +18,8 @@ class BetRecordOP
 {
     public function __construct()
     {
-
+/*        $this->tableOb =BetRecord；
+        parent::__construct($this->bet_record);*/
     }
 
     public function get_the_record($userId, $roomId, $raceNum)
