@@ -84,4 +84,9 @@ class RaceServer extends RaceBase
     {
         $this->RaceOP->change_race_state($room_id, $running_race_num, $landlordId);
     }
+
+    public function get_race_result($room_id, $race_num){
+       return $this->RaceOP->get_race_result($room_id, $race_num);
+    }
+
 }

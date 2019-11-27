@@ -31,6 +31,60 @@ class RaceOP
         Db::query("update race set landlordId=" . $landlordId . " where raceNum=" . $running_race_num . " and roomId=" . $room_id);
     }
 
+    public function get_race_result($room_id, $race_num)
+    {
+        $COMPARE_DX_RE = json_decode(COMPARE_DX_RE, true);
+        $list = Db::query("select a.roomId as roomId,a.userId,a.sky,a.land,a.middle,a.skyCorner,a.landCorner,
+        a.bridg,a.raceNum,b.nick,b.icon from bet_record a INNER JOIN user b on a.userId = b.id where a.raceNum=" . $race_num . " and a.roomId = " . $room_id);
+        $table = new Race();
+        $race_item = $table->where("roomId", $room_id)->where("raceNum", $race_num)->find();
+        $skyResult = $race_item['skyResult'];
+        $middleResult = $race_item['middleResult'];
+        $landResult = $race_item['landResult'];
+        $skyCornerResult = $race_item['skyCornerResult'];
+        $landCornerResult = $race_item['landCornerResult'];
+        $bridgResult = $race_item['bridgResult'];
+        for ($i = 0; $i < count($list); $i++) {
+            $list[$i]['score'] = 0;
+            if($skyResult ===  $COMPARE_DX_RE['BIG']){
+                $list[$i]['score'] += $list[$i]['sky'];
+            }else if($skyResult ===  $COMPARE_DX_RE['SMALL']){
+                $list[$i]['score'] -= $list[$i]['sky'];
+            }
+
+            if($middleResult ===  $COMPARE_DX_RE['BIG']){
+                $list[$i]['score'] += $list[$i]['middle'];
+            }else if($middleResult ===  $COMPARE_DX_RE['SMALL']){
+                $list[$i]['score'] -= $list[$i]['middle'];
+            }
+
+            if($landResult ===  $COMPARE_DX_RE['BIG']){
+                $list[$i]['score'] += $list[$i]['land'];
+            }else if($landResult ===  $COMPARE_DX_RE['SMALL']){
+                $list[$i]['score'] -= $list[$i]['land'];
+            }
+
+            if($skyCornerResult ===  $COMPARE_DX_RE['BIG']){
+                $list[$i]['score'] += $list[$i]['skyCorner'];
+            }else if($skyCornerResult ===  $COMPARE_DX_RE['SMALL']){
+                $list[$i]['score'] -= $list[$i]['skyCorner'];
+            }
+
+            if($landCornerResult ===  $COMPARE_DX_RE['BIG']){
+                $list[$i]['score'] += $list[$i]['landCorner'];
+            }else if($landCornerResult ===  $COMPARE_DX_RE['SMALL']){
+                $list[$i]['score'] -= $list[$i]['landCorner'];
+            }
+
+            if($bridgResult ===  $COMPARE_DX_RE['BIG']){
+                $list[$i]['score'] += $list[$i]['bridg'];
+            }else if($bridgResult ===  $COMPARE_DX_RE['SMALL']){
+                $list[$i]['score'] -= $list[$i]['bridg'];
+            }
+        }
+        return $list;
+    }
+
     /////////////////
     /* $info ["category_name"=>$name,......] 除主键之外的表字段信息集合
  * */

@@ -44,4 +44,8 @@ class SocketServer
         return $this->BetRecordServer->to_bet($userId, $roomId, $raceNum, $betLocation, $betVal);
     }
 
+    public function get_race_result($room_id, $race_num){
+        return $this->RaceServer->get_race_result($room_id, $race_num);
+    }
+
 }

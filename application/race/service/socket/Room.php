@@ -204,7 +204,8 @@ class Room
     { //显示结果
         $race_play_state = json_decode(RACE_PLAY_STATE, true);
         $this->race_list[$this->running_race_num]['state'] = $race_play_state['SHOW_RESULT'];
-        $message = array('type' => 'raceStateShowResult', 'info' => array('raceNum' => $this->running_race_num, 'roomId' => $this->room_id));
+        $result_list = $this->socket_server->get_race_result($this->room_id, $this->running_race_num);
+        $message = array('type' => 'raceStateShowResult', 'info' => array('raceNum' => $this->running_race_num, 'roomId' => $this->room_id, 'resultList' => $result_list));
         $this->socket_server->change_race_state($this->room_id, $this->running_race_num, $race_play_state['SHOW_RESULT']);
         $this->broadcast_to_all_member($message);
         var_dump('启动显示结果流程');

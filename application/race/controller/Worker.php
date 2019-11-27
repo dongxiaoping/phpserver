@@ -25,7 +25,7 @@ class Worker extends Server
     public $roomList = array(); //房间对象集合
     private $circle_room_check_timer = null;
     private $invalid_room_check_time = 30;//无效房间检查周期 s
-    private $room_time_out_time = 60*2;//房间存在超时时间 s
+    private $room_time_out_time = 60*10;//房间存在超时时间 s
 
     public function __construct()
     {
