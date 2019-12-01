@@ -142,4 +142,34 @@ class RoomServer extends RoomBase
         return array('room' => $room_info, 'races' => $race_info, 'members' => $member_info, 'betRecords' => $bet_record_info);
     }
 
+    public function get_room_result($room_id)
+    {
+        $race_info = $this->RoomOp->get($room_id);
+        $playCount = $race_info['playCount'];
+        $list = $this->RaceServer->get_race_result($room_id, 0);
+        for ($i = 1; $i < $playCount; $i++) {
+            $otherList = $this->RaceServer->get_race_result($room_id, $i);
+            $list = $this->to_race_merge($list, $otherList);
+        }
+        return $list;
+    }
+
+    private function to_race_merge($list, $otherList)
+    {
+        for ($j = 0; $j < count($otherList); $j++) {
+            $is_exist = false;
+            for ($i = 0; $i < count($list); $i++) {
+                if($list[$i]['userId'] === $otherList[$j]['userId']){
+                    $is_exist = true;
+                    $list[$i]['score'] += $otherList[$j]['score'];
+                    break;
+                }
+            }
+            if(!$is_exist){
+                array_push($list, $otherList[$j]);
+            }
+        }
+        return $list;
+    }
+
 }

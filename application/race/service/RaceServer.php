@@ -80,13 +80,16 @@ class RaceServer extends RaceBase
         $this->RaceOP->change_race_state($room_id, $race_num, $state);
     }
 
-    public function change_race_landlord($room_id, $running_race_num, $landlordId)
+    public function change_race_landlord($room_id, $running_race_num, $landlordId, $landlordLastCount)
     {
-        $this->RaceOP->change_race_state($room_id, $running_race_num, $landlordId);
+        for ($i = 0; $i < $landlordLastCount; $i++) {
+            $this->RaceOP->change_race_landlord($room_id, $running_race_num + $i, $landlordId);
+        }
+
     }
 
-    public function get_race_result($room_id, $race_num){
-       return $this->RaceOP->get_race_result($room_id, $race_num);
+    public function get_race_result($room_id, $race_num)
+    {
+        return $this->RaceOP->get_race_result($room_id, $race_num);
     }
-
 }

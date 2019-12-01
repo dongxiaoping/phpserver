@@ -44,44 +44,51 @@ class RaceOP
         $skyCornerResult = $race_item['skyCornerResult'];
         $landCornerResult = $race_item['landCornerResult'];
         $bridgResult = $race_item['bridgResult'];
+        $landlord_score = 0;
+        $landlord_id = $race_item['landlordId'];
         for ($i = 0; $i < count($list); $i++) {
             $list[$i]['score'] = 0;
-            if($skyResult ===  $COMPARE_DX_RE['BIG']){
+            if ($skyResult === $COMPARE_DX_RE['BIG']) {
                 $list[$i]['score'] += $list[$i]['sky'];
-            }else if($skyResult ===  $COMPARE_DX_RE['SMALL']){
+            } else if ($skyResult === $COMPARE_DX_RE['SMALL']) {
                 $list[$i]['score'] -= $list[$i]['sky'];
             }
 
-            if($middleResult ===  $COMPARE_DX_RE['BIG']){
+            if ($middleResult === $COMPARE_DX_RE['BIG']) {
                 $list[$i]['score'] += $list[$i]['middle'];
-            }else if($middleResult ===  $COMPARE_DX_RE['SMALL']){
+            } else if ($middleResult === $COMPARE_DX_RE['SMALL']) {
                 $list[$i]['score'] -= $list[$i]['middle'];
             }
 
-            if($landResult ===  $COMPARE_DX_RE['BIG']){
+            if ($landResult === $COMPARE_DX_RE['BIG']) {
                 $list[$i]['score'] += $list[$i]['land'];
-            }else if($landResult ===  $COMPARE_DX_RE['SMALL']){
+            } else if ($landResult === $COMPARE_DX_RE['SMALL']) {
                 $list[$i]['score'] -= $list[$i]['land'];
             }
 
-            if($skyCornerResult ===  $COMPARE_DX_RE['BIG']){
+            if ($skyCornerResult === $COMPARE_DX_RE['BIG']) {
                 $list[$i]['score'] += $list[$i]['skyCorner'];
-            }else if($skyCornerResult ===  $COMPARE_DX_RE['SMALL']){
+            } else if ($skyCornerResult === $COMPARE_DX_RE['SMALL']) {
                 $list[$i]['score'] -= $list[$i]['skyCorner'];
             }
 
-            if($landCornerResult ===  $COMPARE_DX_RE['BIG']){
+            if ($landCornerResult === $COMPARE_DX_RE['BIG']) {
                 $list[$i]['score'] += $list[$i]['landCorner'];
-            }else if($landCornerResult ===  $COMPARE_DX_RE['SMALL']){
+            } else if ($landCornerResult === $COMPARE_DX_RE['SMALL']) {
                 $list[$i]['score'] -= $list[$i]['landCorner'];
             }
 
-            if($bridgResult ===  $COMPARE_DX_RE['BIG']){
+            if ($bridgResult === $COMPARE_DX_RE['BIG']) {
                 $list[$i]['score'] += $list[$i]['bridg'];
-            }else if($bridgResult ===  $COMPARE_DX_RE['SMALL']){
+            } else if ($bridgResult === $COMPARE_DX_RE['SMALL']) {
                 $list[$i]['score'] -= $list[$i]['bridg'];
             }
+            $landlord_score -= $list[$i]['score'];
         }
+        $landlord_user_info = (new UserOP())->get($landlord_id);
+        $landlordItem = array('userId' => $landlord_id, 'raceNum' => $race_item['raceNum']
+        , 'nick' => $landlord_user_info['nick'], 'icon' => $landlord_user_info['icon'], 'score' => $landlord_score);
+        array_push($list, $landlordItem);
         return $list;
     }
 

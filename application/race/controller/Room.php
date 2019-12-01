@@ -63,4 +63,14 @@ class Room
 
     }
 
+
+    //http://localhost/phpserver/public/index.php/race/room/test
+    public function test()
+    {
+        header("Access-Control-Allow-Origin: *");
+        $room_id = 212;
+        $info = $this->RoomServer->get_room_result($room_id);
+        var_dump($info);
+    }
+
 }
