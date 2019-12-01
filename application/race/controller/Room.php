@@ -68,7 +68,7 @@ class Room
     public function test()
     {
         header("Access-Control-Allow-Origin: *");
-        $room_id = 212;
+        $room_id = 217;
         $info = $this->RoomServer->get_room_result($room_id);
         var_dump($info);
     }

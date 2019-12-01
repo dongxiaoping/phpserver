@@ -292,7 +292,8 @@ class Room
             $ROOM_STATE = json_decode(ROOM_STATE, true);
             $this->socket_server->change_room_state($this->room_id, $ROOM_STATE['ALL_RACE_FINISHED']);
             $this->state = $ROOM_STATE['ALL_RACE_FINISHED'];
-            $message = array('type' => 'allRaceFinished', 'info' => array('roomId' => $this->room_id));
+            $info = $this->socket_server->get_room_result($this->room_id);
+            $message = array('type' => 'allRaceFinished', 'info' => array('roomResult' => $info));
             $this->broadcast_to_all_member($message);
             var_dump('所有比赛结束');
             return;
