@@ -44,4 +44,8 @@ class User
     {
 
     }
+
+    public function test(){
+        var_dump('welcome');
+    }
 }
