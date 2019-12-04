@@ -44,7 +44,7 @@ class User
     {
 
     }
-
+    //http://120.26.52.88/phpserver/index.php/race/user/test
     public function test(){
         var_dump('welcome');
     }
