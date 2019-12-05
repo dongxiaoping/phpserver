@@ -19,7 +19,8 @@ use Workerman\Lib\Timer;
 
 class Worker extends Server
 {
-    protected $socket = 'websocket://127.0.0.1:2346';
+  //  protected $socket = 'websocket://127.0.0.1:2346';
+    protected $socket = 'websocket://120.26.52.88:2346';
     public $connectManage;
     public $socketServer;
     public $roomList = array(); //房间对象集合
