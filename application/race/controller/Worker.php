@@ -19,8 +19,7 @@ use Workerman\Lib\Timer;
 
 class Worker extends Server
 {
-  //  protected $socket = 'websocket://127.0.0.1:2346';
-    protected $socket = 'websocket://120.26.52.88:2346';
+    protected $socket = 'websocket://0.0.0.0:2346';
     public $connectManage;
     public $socketServer;
     public $roomList = array(); //房间对象集合
@@ -178,7 +177,7 @@ class Worker extends Server
     public function startRoomGame($connection, $roomId, $userId)
     {
         if (!isset($this->roomList[$roomId])) {
-            var_dump('房间不存在');
+            var_dump('websocket房间不存在,不能启动游戏');
             return false;
         }
 
