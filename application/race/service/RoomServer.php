@@ -89,8 +89,8 @@ class RoomServer extends RoomBase
         if ($room_info === null) {
             return getInterFaceArray(0, "room_not_exist", "");
         }
-        if ($room_info["roomState"] === $ROOM_STATE["ALL_RACE_FINISHED"] || $room_info["roomState"] === $ROOM_STATE["CLOSE"]) {
-            return getInterFaceArray(0, "room_has_close", "");
+        if ($room_info["roomState"] !== $ROOM_STATE["OPEN"]) {
+            return getInterFaceArray(0, "room_not_open_state", "");
         }
 
         //////////登录过房间情况的判断

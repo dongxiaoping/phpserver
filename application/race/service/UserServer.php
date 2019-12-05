@@ -31,7 +31,7 @@ class UserServer{
             'score' => 0,
             'diamond' => 10000,
             'type' => $USER_TYPE['NORMAL_USER'],
-            'nick' =>'随机测试用户',
+            'nick' =>'用户'.time(),
             'creatTime' => date("Y-m-d H:i:s"),
             'modTime' =>date("Y-m-d H:i:s")
         ];
