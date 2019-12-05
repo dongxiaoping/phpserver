@@ -54,6 +54,7 @@ class Room
     public function set_race_state($race_num, $state)
     {
         $this->race_list[$race_num]['state'] = $state;
+        $this->socket_server->change_race_state($this->room_id, $race_num, $state);
     }
 
     public function init_race($race_count)
@@ -162,7 +163,6 @@ class Room
         $race_play_state = json_decode(RACE_PLAY_STATE, true);
         $this->set_race_state($this->running_race_num, $race_play_state['ROLL_DICE']);
         $message = array('type' => 'raceStateRollDice', 'info' => array('raceNum' => $this->running_race_num, 'roomId' => $this->room_id));
-        $this->socket_server->change_race_state($this->room_id, $this->running_race_num, $race_play_state['ROLL_DICE']);
         $this->broadcast_to_all_member($message);
         var_dump('启动摇色子流程');
         var_dump('房间号：' . $this->room_id . ',场次号：' . $this->running_race_num);
@@ -173,7 +173,6 @@ class Room
         $race_play_state = json_decode(RACE_PLAY_STATE, true);
         $this->set_race_state($this->running_race_num, $race_play_state['DEAL']);
         $message = array('type' => 'raceStateDeal', 'info' => array('raceNum' => $this->running_race_num, 'roomId' => $this->room_id));
-        $this->socket_server->change_race_state($this->room_id, $this->running_race_num, $race_play_state['DEAL']);
         $this->broadcast_to_all_member($message);
         var_dump('启动发牌流程');
         var_dump('房间号：' . $this->room_id . ',场次号：' . $this->running_race_num);
@@ -184,7 +183,6 @@ class Room
         $race_play_state = json_decode(RACE_PLAY_STATE, true);
         $this->set_race_state($this->running_race_num, $race_play_state['BET']);
         $message = array('type' => 'raceStateBet', 'info' => array('raceNum' => $this->running_race_num, 'roomId' => $this->room_id));
-        $this->socket_server->change_race_state($this->room_id, $this->running_race_num, $race_play_state['BET']);
         $this->broadcast_to_all_member($message);
         var_dump('启动下注流程');
         var_dump('房间号：' . $this->room_id . ',场次号：' . $this->running_race_num);
@@ -195,7 +193,6 @@ class Room
         $race_play_state = json_decode(RACE_PLAY_STATE, true);
         $this->set_race_state($this->running_race_num, $race_play_state['SHOW_DOWN']);
         $message = array('type' => 'raceStateShowDown', 'info' => array('raceNum' => $this->running_race_num, 'roomId' => $this->room_id));
-        $this->socket_server->change_race_state($this->room_id, $this->running_race_num, $race_play_state['SHOW_DOWN']);
         $this->broadcast_to_all_member($message);
         var_dump('启动比大小流程');
         var_dump('房间号：' . $this->room_id . ',场次号：' . $this->running_race_num);
@@ -207,7 +204,6 @@ class Room
         $this->set_race_state($this->running_race_num, $race_play_state['SHOW_RESULT']);
         $result_list = $this->socket_server->get_race_result($this->room_id, $this->running_race_num);
         $message = array('type' => 'raceStateShowResult', 'info' => array('raceNum' => $this->running_race_num, 'roomId' => $this->room_id, 'resultList' => $result_list));
-        $this->socket_server->change_race_state($this->room_id, $this->running_race_num, $race_play_state['SHOW_RESULT']);
         $this->broadcast_to_all_member($message);
         var_dump('启动显示结果流程');
         var_dump('房间号：' . $this->room_id . ',场次号：' . $this->running_race_num);
@@ -217,7 +213,6 @@ class Room
     { //结束
         $race_play_state = json_decode(RACE_PLAY_STATE, true);
         $this->set_race_state($this->running_race_num, $race_play_state['FINISHED']);
-        $this->socket_server->change_race_state($this->room_id, $this->running_race_num, $race_play_state['FINISHED']);
         $message = array('type' => 'raceStateFinished', 'info' => array('raceNum' => $this->running_race_num, 'roomId' => $this->room_id));
         $this->broadcast_to_all_member($message);
         var_dump('本场比赛结束');
