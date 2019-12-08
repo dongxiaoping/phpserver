@@ -144,8 +144,8 @@ class RoomServer extends RoomBase
 
     public function get_room_result($room_id)
     {
-        $race_info = $this->RoomOp->get($room_id);
-        $playCount = $race_info['playCount'];
+        $room_info = $this->RoomOp->get($room_id);
+        $playCount = $room_info['playCount'];
         $list = $this->RaceServer->get_race_result($room_id, 0);
         for ($i = 1; $i < $playCount; $i++) {
             $otherList = $this->RaceServer->get_race_result($room_id, $i);

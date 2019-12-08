@@ -7,7 +7,7 @@
 // | Date：2019/11/15
 // +----------------------------------------------------------------------
 // | Description: 调起 websocket 服务  启动命令 php server.php 文档在thinkphp的说明文档中
-// | php server.php start 调试模式  php start.php start -d 正式上线
+// | php server.php start 调试模式  php server.php start -d 正式上线
 // +----------------------------------------------------------------------
 define('APP_PATH', __DIR__ . '/application/');
 define('BIND_MODULE','race/Worker');
