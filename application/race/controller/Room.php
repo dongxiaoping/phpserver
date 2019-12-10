@@ -49,18 +49,20 @@ class Room
     // http://127.0.0.1/phpserver/public/index.php/race/room/create_room
     public function create_room()
     {
-       header('Access-Control-Allow-Origin: *');
-        $content = file_get_contents("php://input");
-        $content = (string)$content;
-        $content = json_decode($content,true);
-        if($content["creatUserId"] && $content["playCount"]&& $content["memberLimit"]&& $content["roomPay"]
-            && $content["costLimit"]){
+        header('Access-Control-Allow-Origin: *');
+        if ($_GET["creatUserId"] && $_GET["playCount"] && $_GET["memberLimit"] && $_GET["roomPay"]
+            && $_GET["costLimit"]) {
+            $content = [];
+            $content['creatUserId'] = $_GET["creatUserId"];
+            $content['playCount'] = $_GET["playCount"];
+            $content['memberLimit'] = $_GET["memberLimit"];
+            $content['roomPay'] = $_GET["roomPay"];
+            $content['costLimit'] = $_GET["costLimit"];
             $result_array = $this->RoomServer->create_room($content);
             echo arrayToJson($result_array);
-        }else{
-            echo getJsonStringByParam(0,"param_error","");
+        } else {
+            echo getJsonStringByParam(0, "param_error", "");
         }
-
     }
 
 
