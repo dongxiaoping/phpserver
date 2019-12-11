@@ -42,7 +42,7 @@ define('RACE_PLAY_STATE', '{ "NOT_BEGIN": 1, "CHOICE_LANDLORD": 2, "ROLL_DICE": 
 
 
 //值类型
-define('MAJ_VALUE_TYPE', '{ "DUI_ZI": 1, "BI_SHI": 2, "DIAN": 3}');
+define('MAJ_VALUE_TYPE', '{ "DUI_ZI": 1, "BI_SHI": 2, "DIAN": 3, "ER_BA_GANG": 4}'); //二八杠
 
 //对比结果
 define('COMPARE_DX_RE', '{ "BIG": "w", "SMALL": "s", "EQ": "e"}');

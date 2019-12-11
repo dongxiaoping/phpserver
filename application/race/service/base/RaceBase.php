@@ -104,6 +104,9 @@ class RaceBase
     public function getMajhongValueType($majongInfo)
     {
         $MAJ_VALUE_TYPE = json_decode(MAJ_VALUE_TYPE, true);
+        if ((($majongInfo['one'] === 2) && ($majongInfo['two'] === 8)) || (($majongInfo['one'] === 8) && ($majongInfo['two'] === 2))) {
+            return $MAJ_VALUE_TYPE['ER_BA_GANG'];
+        }
         if ($majongInfo['one'] === $majongInfo['two']) {
             return $MAJ_VALUE_TYPE['DUI_ZI'];
         } else if ($majongInfo['two'] + $majongInfo['one'] === 10) {
@@ -113,61 +116,68 @@ class RaceBase
         }
     }
 
-    public function isLandlordMahjongWin($landlordCount, $compareToCount)
+    public function isLandlordMahjongWin($landlordCount, $normalMemberCount)
     {
         $MAJ_VALUE_TYPE = json_decode(MAJ_VALUE_TYPE, true);
-        $targerType = $this->getMajhongValueType($landlordCount);
-        $compareToType = $this->getMajhongValueType($compareToCount);
-        switch ($targerType) {
-            case $MAJ_VALUE_TYPE['DUI_ZI']:
-                if($compareToType === $MAJ_VALUE_TYPE['DUI_ZI']){
-                    if ($compareToCount['one'] > $landlordCount['one']) {
-                        return false;
-                    } else {
-                        return true;
-                    }
-                }else{
+        $landlordValType = $this->getMajhongValueType($landlordCount);
+        $normalMemberValType = $this->getMajhongValueType($normalMemberCount);
+        if ($landlordValType === $MAJ_VALUE_TYPE['ER_BA_GANG']) {
+            return true;
+        }
+        if ($normalMemberValType === $MAJ_VALUE_TYPE['ER_BA_GANG']) {
+            return false;
+        }
+
+        if ($landlordValType === $MAJ_VALUE_TYPE['DUI_ZI']) {
+            if ($normalMemberValType === $MAJ_VALUE_TYPE['DUI_ZI']) {
+                if ($normalMemberCount['one'] > $landlordCount['one']) {
+                    return false;
+                } else {
                     return true;
                 }
-                break;
-            case $MAJ_VALUE_TYPE['BI_SHI']:
+            } else {
                 return true;
-                break;
-            case $MAJ_VALUE_TYPE['DIAN']:
-                switch ($compareToType) {
-                    case $MAJ_VALUE_TYPE['DUI_ZI']:
-                        return false;
-                        break;
-                    case $MAJ_VALUE_TYPE['DIAN']:
-                        $targerPonit = $landlordCount['two'] + $landlordCount['one'];
-                        if ($targerPonit > 10) {
-                            $targerPonit = $targerPonit - 10;
-                        }
-                        $compareToPonit = $compareToCount['two'] + $compareToCount['one'];
-                        if ($compareToPonit > 10) {
-                            $compareToPonit = $compareToPonit - 10;
-                        }
-                        if ($targerPonit > $compareToPonit) {
-                            return true;
-                        } else if ($targerPonit < $compareToPonit) {
-                            return false;
-                        } else { //点数相等情况下的判断
-                            if ($landlordCount['one'] === $compareToCount['one'] || $landlordCount['one'] === $compareToCount['two']) {
-                                return true;
-                            } else if (($landlordCount['one'] > $compareToCount['one'] && $landlordCount['one'] > $compareToCount['two'])
-                                || ($landlordCount['two'] > $compareToCount['one'] && $landlordCount['two'] > $compareToCount['two'])
-                            ) {
-                                return true;
-                            } else {
-                                return false;
-                            }
-                        }
-                        break;
-                    case $MAJ_VALUE_TYPE['BI_SHI']:
+            }
+        }
+
+        if ($landlordValType === $MAJ_VALUE_TYPE['BI_SHI']) {
+            if ($normalMemberValType === $MAJ_VALUE_TYPE['BI_SHI']) {
+                return true;
+            }
+            return false;
+        }
+
+        if ($landlordValType === $MAJ_VALUE_TYPE['DIAN']) {
+            switch ($normalMemberValType) {
+                case $MAJ_VALUE_TYPE['DUI_ZI']:
+                    return false;
+                    break;
+                case $MAJ_VALUE_TYPE['DIAN']:
+                    $landlordPonit = ($landlordCount['two'] + $landlordCount['one']) > 10 ?
+                        ($landlordCount['two'] + $landlordCount['one'] - 10) : ($landlordCount['two'] + $landlordCount['one']);
+                    $normalMemberPonit = ($normalMemberCount['two'] + $normalMemberCount['one']) > 10 ?
+                        ($normalMemberCount['two'] + $normalMemberCount['one'] - 10) : ($normalMemberCount['two'] + $normalMemberCount['one']);
+
+                    if ($landlordPonit > $normalMemberPonit) {
                         return true;
-                        break;
-                }
-                break;
+                    } else if ($landlordPonit < $normalMemberPonit) {
+                        return false;
+                    } else { //点数相等情况下的判断
+                        if ($landlordCount['one'] === $normalMemberCount['one'] || $landlordCount['one'] === $normalMemberCount['two']) {
+                            return true;
+                        } else if (($landlordCount['one'] > $normalMemberCount['one'] && $landlordCount['one'] > $normalMemberCount['two'])
+                            || ($landlordCount['two'] > $normalMemberCount['one'] && $landlordCount['two'] > $normalMemberCount['two'])
+                        ) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
+                    break;
+                case $MAJ_VALUE_TYPE['BI_SHI']:
+                    return true;
+                    break;
+            }
         }
         return true;
     }
