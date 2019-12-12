@@ -161,7 +161,11 @@ class Worker extends Server
         }
         $newRoom = new Room($roomId, $raceCount, $this->connectManage, $this->socketServer);
         $this->roomList[$roomId] = $newRoom;
-        $this->enterRoom($roomId, $connection, $userId);
+        $is_success =  $this->enterRoom($roomId, $connection, $userId);
+        if($is_success){
+            $message = array('type' => 'createRoomResultNotice', 'info' =>  array('state' => 1));
+            $connection->send(json_encode($message));
+        }
     }
 
     public function enterRoom($roomId, $connection, $userId)
@@ -169,8 +173,10 @@ class Worker extends Server
         if (isset($this->roomList[$roomId])) {
             $this->roomList[$roomId]->add_member($connection, $userId);
             var_dump('人员加入房间');
+            return true;
         } else {
             var_dump('房间不存在，无法加入');
+            return false;
         }
     }
 
