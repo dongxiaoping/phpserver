@@ -12,14 +12,13 @@
 namespace app\race\service;
 
 use app\race\model\BetRecordOP;
-use app\race\model\RaceOP;
 
 class BetRecordServer
 {
     public function __construct()
     {
         $this->BetRecordOP = new  BetRecordOP();
-        $this->RaceOP = new RaceOP();
+        $this->raceServer = new RaceServer();
     }
 
     public function get_bet_record_by_room_id($id)
@@ -43,7 +42,7 @@ class BetRecordServer
             'roomId' => $roomId,
             'raceNum' => $raceNum,
             'userId' => $userId,
-            $betLocation=>$betVal,
+            $betLocation => $betVal,
             'creatTime' => date("Y-m-d H:i:s"),
             'modTime' => date("Y-m-d H:i:s")
         ];
@@ -77,6 +76,30 @@ class BetRecordServer
             $isWin = $race_item['landCornerResult'];
         }
         return $isWin;
+    }
+
+    //指定用户删除指定场次、指定位置的下注（前提是下注没有结束）
+    public function cancel_bet_by_location($roomId, $raceNum, $userId, $betLocation)
+    {
+        $race_info = $this->raceServer->get_race_by_num($roomId, $raceNum);
+        if (!$race_info) {
+            return false;
+        }
+        $RACE_PLAY_STATE = json_decode(RACE_PLAY_STATE, true);
+        $race_play_state = $race_info["playState"];
+        if ($race_play_state !== $RACE_PLAY_STATE["BET"]) {
+            return false;
+        }
+        $the_record = $this->BetRecordOP->get_the_record($userId, $roomId, $raceNum);
+        if (!$the_record) {
+            return false;
+        }
+        if ($the_record[$betLocation] <= 0) {
+            return false;
+        }
+        $id = $the_record['id'];
+        $this->BetRecordOP->update_bet_val($id, $betLocation, 0);
+        return true;
     }
 
 }

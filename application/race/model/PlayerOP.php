@@ -37,6 +37,11 @@ class PlayerOP {
         return $list;
     }
 
+    public function cancel_member_from_room($user_id, $room_id){
+        $table = new Player();
+        return $table->where("roomId", $room_id)->where("userId", $user_id)->delete();
+    }
+
     /////////////////
     /* $info ["category_name"=>$name,......] 除主键之外的表字段信息集合
  * */

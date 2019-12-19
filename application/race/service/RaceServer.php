@@ -92,4 +92,9 @@ class RaceServer extends RaceBase
     {
         return $this->RaceOP->get_race_result($room_id, $race_num);
     }
+
+    public function get_race_by_num($room_id, $race_num)
+    {
+        return $this->RaceOP->get_race_by_num($room_id, $race_num);
+    }
 }

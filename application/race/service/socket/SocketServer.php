@@ -55,4 +55,16 @@ class SocketServer
     public function get_room_result($room_id){
         return $this->RoomServer->get_room_result($room_id);
     }
+
+    public function cancel_bet_by_location($roomId, $raceNum, $userId, $betLocation){
+        return $this->BetRecordServer->cancel_bet_by_location($roomId, $raceNum, $userId, $betLocation);
+    }
+
+    public function cancel_member_from_room($user_id, $room_id){
+        $this->PlayerOP->cancel_member_from_room($user_id, $room_id);
+    }
+
+    public function get_room_info_by_id($id){
+        return $this->RoomOp->get($id);
+    }
 }

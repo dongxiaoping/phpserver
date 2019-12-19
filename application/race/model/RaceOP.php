@@ -31,6 +31,12 @@ class RaceOP
         Db::query("update race set landlordId=" . $landlordId . " where raceNum=" . $running_race_num . " and roomId=" . $room_id);
     }
 
+    public function get_race_by_num($room_id, $race_num)
+    {
+        $table = new Race();
+        return $table->where("roomId", $room_id)->where("raceNum", $race_num)->find();
+    }
+
     public function get_race_result($room_id, $race_num)
     {
         $COMPARE_DX_RE = json_decode(COMPARE_DX_RE, true);

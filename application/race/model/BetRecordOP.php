@@ -18,8 +18,8 @@ class BetRecordOP
 {
     public function __construct()
     {
-/*        $this->tableOb =BetRecord；
-        parent::__construct($this->bet_record);*/
+        /*        $this->tableOb =BetRecord；
+                parent::__construct($this->bet_record);*/
     }
 
     public function get_the_record($userId, $roomId, $raceNum)
@@ -34,7 +34,7 @@ class BetRecordOP
 
     public function update_bet_val($id, $betLocation, $new_val)
     {
-        Db::query("update bet_record set ".$betLocation."=" . $new_val . " where id=" . $id);
+        Db::query("update bet_record set " . $betLocation . "=" . $new_val . " where id=" . $id);
         return true;
     }
 

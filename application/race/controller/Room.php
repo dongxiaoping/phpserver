@@ -53,11 +53,16 @@ class Room
         if ($_GET["creatUserId"] && $_GET["playCount"] && $_GET["memberLimit"] && $_GET["roomPay"]
             && $_GET["costLimit"]) {
             $content = [];
-            $content['creatUserId'] = $_GET["creatUserId"];
-            $content['playCount'] = $_GET["playCount"];
-            $content['memberLimit'] = $_GET["memberLimit"];
-            $content['roomPay'] = $_GET["roomPay"];
-            $content['costLimit'] = $_GET["costLimit"];
+            $content['creatUserId'] = $_GET["creatUserId"]; //创建者ID
+            $content['playCount'] = $_GET["playCount"];  //游戏场次
+            $content['memberLimit'] = $_GET["memberLimit"];  //成员数量限制
+            $content['roomPay'] = $_GET["roomPay"];  //房间费用支付模式
+            $content['costLimit'] = $_GET["costLimit"];  //下注上限
+            $is_val_all_right = $this->RoomServer->check_vals_create_room($content);
+            if(!$is_val_all_right){
+                echo getJsonStringByParam(0, "param_val_error", "");
+                return;
+            }
             $result_array = $this->RoomServer->create_room($content);
             echo arrayToJson($result_array);
         } else {

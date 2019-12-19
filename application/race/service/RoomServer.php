@@ -53,7 +53,7 @@ class RoomServer extends RoomBase
         }
         $play_count = $info["playCount"];
         $cost_limit = $info["costLimit"];
-        $cost_value = $this->getRoomCostValue($play_count, $cost_limit);
+        $cost_value = $this->getRoomCostValue($play_count, $cost_limit, $info["roomPay"]);
         $diamond = $item["diamond"] - $cost_value;
         $info["roomFee"] = $cost_value;
         if ($diamond < 0) {
@@ -82,7 +82,7 @@ class RoomServer extends RoomBase
 
         ////// 1、判断用户以及房间是否存在 2、判断房间是否已关闭
         $user_info = $this->UserOP->get($user_id);
-        if ($user_info === null) {
+        if (!$user_info) {
             return getInterFaceArray(0, "user_not_exist", "");
         }
         $room_info = $this->RoomOp->get($room_id);
@@ -91,6 +91,12 @@ class RoomServer extends RoomBase
         }
         if ($room_info["roomState"] !== $ROOM_STATE["OPEN"]) {
             return getInterFaceArray(0, "room_not_open_state", "");
+        }
+        $ROOM_PAY = json_decode(ROOM_PAY, true);
+        $diamond = $user_info["diamond"];
+        if ($user_id != $room_info["creatUserId"] && $diamond < $room_info["roomFee"] &&
+            $room_info["roomPay"] == $ROOM_PAY["AA"]) {
+            return getInterFaceArray(0, "diamond_not_enough", $room_info["roomFee"]); //账户钻不够
         }
 
         //////////登录过房间情况的判断
@@ -153,23 +159,4 @@ class RoomServer extends RoomBase
         }
         return $list;
     }
-
-    private function to_race_merge($list, $otherList)
-    {
-        for ($j = 0; $j < count($otherList); $j++) {
-            $is_exist = false;
-            for ($i = 0; $i < count($list); $i++) {
-                if($list[$i]['userId'] === $otherList[$j]['userId']){
-                    $is_exist = true;
-                    $list[$i]['score'] += $otherList[$j]['score'];
-                    break;
-                }
-            }
-            if(!$is_exist){
-                array_push($list, $otherList[$j]);
-            }
-        }
-        return $list;
-    }
-
 }

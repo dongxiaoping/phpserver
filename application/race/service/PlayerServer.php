@@ -24,4 +24,8 @@ class PlayerServer
         $list = $this->PlayerOP->get_members_by_room_id($id);
         return getInterFaceArray(1, "success", $list);
     }
+
+    public function cancel_member_from_room($user_id, $room_id){
+        $this->PlayerOP->cancel_member_from_room($user_id, $room_id);
+    }
 }

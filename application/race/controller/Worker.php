@@ -25,7 +25,7 @@ class Worker extends Server
     public $roomList = array(); //房间对象集合
     private $circle_room_check_timer = null;
     private $invalid_room_check_time = 30;//无效房间检查周期 s
-    private $room_time_out_time = 60*10;//房间存在超时时间 s
+    private $room_time_out_time = 900;//房间存在超时时间 s
 
     public function __construct()
     {
@@ -41,7 +41,6 @@ class Worker extends Server
      */
     public function onMessage($connection, $data)
     {
-        //$connection->send('我收到你的信息了:'.$connection->id);
         $data = json_decode($data, true);
         var_dump($data);
         switch ($data['type']) {
@@ -49,11 +48,10 @@ class Worker extends Server
                 if ($this->circle_room_check_timer === null) {
                     $this->roomCheck();
                 }
-                if (isset($data['info']['roomId']) && isset($data['info']['raceCount']) && isset($data['info']['userId'])) {
+                if (isset($data['info']['roomId']) && isset($data['info']['userId'])) {
                     $roomId = $data['info']['roomId'];
-                    $raceCount = $data['info']['raceCount'];
                     $userId = $data['info']['userId'];
-                    $this->createAndEnterRoom($connection, $roomId, $raceCount, $userId);
+                    $this->createAndEnterRoom($connection, $roomId, $userId);
                 } else {
                     var_dump('参数错误');
                 }
@@ -62,7 +60,16 @@ class Worker extends Server
                 if (isset($data['info']['roomId']) && isset($data['info']['userId'])) {
                     $roomId = $data['info']['roomId'];
                     $userId = $data['info']['userId'];
-                    $this->enterRoom($roomId, $connection, $userId);
+                    $this->enterRoom($roomId, $connection, $userId); //只表示进入socket房间，进入的前提是通过接口进入数据库房间成功
+                } else {
+                    var_dump('参数错误');
+                }
+                break;
+            case 'outRoom': //退出房间
+                if (isset($data['info']['roomId']) && isset($data['info']['userId'])) {
+                    $roomId = $data['info']['roomId'];
+                    $userId = $data['info']['userId'];
+                    $this->outRoom($roomId, $userId);
                 } else {
                     var_dump('参数错误');
                 }
@@ -95,6 +102,18 @@ class Worker extends Server
                     $betLocation = $data['info']['betLocation'];
                     $betVal = $data['info']['betVal'];
                     $this->raceBet($userId, $roomId, $raceNum, $betLocation, $betVal);
+                } else {
+                    var_dump('参数错误');
+                }
+                break;
+            case 'cancelRaceBet': //取消指定房间、指定用户、指定场次、指定位置的下注
+                if (isset($data['info']['userId']) && isset($data['info']['roomId']) && isset($data['info']['raceNum'])
+                    && isset($data['info']['betLocation'])) {
+                    $userId = $data['info']['userId'];
+                    $roomId = $data['info']['roomId'];
+                    $raceNum = $data['info']['raceNum'];
+                    $betLocation = $data['info']['betLocation'];
+                    $this->cancelRaceBet($userId, $roomId, $raceNum, $betLocation);
                 } else {
                     var_dump('参数错误');
                 }
@@ -153,17 +172,40 @@ class Worker extends Server
         $this->roomList[$roomId]->raceBet($userId, $roomId, $raceNum, $betLocation, $betVal);
     }
 
-    public function createAndEnterRoom($connection, $roomId, $raceCount, $userId)
+    public function cancelRaceBet($userId, $roomId, $raceNum, $betLocation)
     {
-        if (isset($this->roomList[$roomId])) {
-            var_dump('房间已存在');
+        if (!isset($this->roomList[$roomId])) {
+            var_dump('房间不存在，无法取消下注');
             return false;
         }
-        $newRoom = new Room($roomId, $raceCount, $this->connectManage, $this->socketServer);
+        $this->roomList[$roomId]->cancel_bet_by_location($userId, $roomId, $raceNum, $betLocation);
+    }
+
+    public function createAndEnterRoom($connection, $roomId, $userId)
+    {
+        if (isset($this->roomList[$roomId])) {
+            var_dump('socket房间已存在,不能重新创建');
+            return false;
+        }
+        $room_info = $this->socketServer->get_room_info_by_id($roomId);
+        if (!$room_info) {
+            var_dump('该房间在数据库中未创建');
+            return false;
+        }
+        if ($room_info["creatUserId"] != $userId) {
+            var_dump('当前用户不是房主，不能创建socket房间');
+            return false;
+        }
+        $ROOM_STATE = json_decode(ROOM_STATE, true);
+        if ($room_info["roomState"] !== $ROOM_STATE["OPEN"]) {
+            var_dump('该房间已存在数据库中，并且已开始游戏，不能创建');
+            return false;
+        }
+        $newRoom = new Room($roomId, $room_info["playCount"], $this->connectManage, $this->socketServer);
         $this->roomList[$roomId] = $newRoom;
-        $is_success =  $this->enterRoom($roomId, $connection, $userId);
-        if($is_success){
-            $message = array('type' => 'createRoomResultNotice', 'info' =>  array('state' => 1));
+        $is_success = $this->enterRoom($roomId, $connection, $userId);
+        if ($is_success) {
+            $message = array('type' => 'createRoomResultNotice', 'info' => array('state' => 1));
             $connection->send(json_encode($message));
         }
     }
@@ -171,11 +213,28 @@ class Worker extends Server
     public function enterRoom($roomId, $connection, $userId)
     {
         if (isset($this->roomList[$roomId])) {
-            $this->roomList[$roomId]->add_member($connection, $userId);
-            var_dump('人员加入房间');
-            return true;
+            $is_right = $this->roomList[$roomId]->add_member($connection, $userId);
+            if ($is_right) {
+                var_dump('人员加入房间成功');
+                return true;
+            } else {
+                var_dump('人员加入房间失败');
+                return false;
+            }
         } else {
             var_dump('房间不存在，无法加入');
+            return false;
+        }
+    }
+
+    public function outRoom($roomId, $userId)
+    {
+        if (isset($this->roomList[$roomId])) {
+            $this->roomList[$roomId]->out_member($userId);
+            var_dump('人员退出房间');
+            return true;
+        } else {
+            var_dump('房间不存在，无法退出房间');
             return false;
         }
     }
@@ -217,15 +276,14 @@ class Worker extends Server
 
     public function roomCheck()
     {
-        var_dump('房间检查');
         $this->circle_room_check_timer = Timer::add($this->invalid_room_check_time, function () {
-            var_dump('定时房间检查,房间数量：'. count($this->roomList));
+            var_dump('定时房间检查,房间数量：' . count($this->roomList));
             foreach ($this->roomList as $roomItem) {
                 $now_time = time();
                 $ROOM_STATE = json_decode(ROOM_STATE, true);
                 $state = $roomItem->get_room_state();
                 if ($state === $ROOM_STATE['ALL_RACE_FINISHED'] || $state === $ROOM_STATE['CLOSE'] || count($roomItem->member_list) <= 0) {
-                    var_dump('销毁房间，房间比赛结束或者米有人');
+                    var_dump('销毁房间，房间比赛结束或者没有人');
                     $this->roomList[$roomItem->room_id]->destroy();
                     unset($this->roomList[$roomItem->room_id]);
                 }

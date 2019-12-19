@@ -66,7 +66,7 @@ class Room
             $item = array('state' => $RACE_PLAY_STATE['NOT_BEGIN']);
             $this->race_list[$i] = $item;
         }
-        var_dump('房间初始化完毕');
+        var_dump('socket房间创建完毕');
     }
 
     public function add_member($connection, $userId)
@@ -75,8 +75,12 @@ class Room
             var_dump('成员在房间中，不能重复加入');
             return false;
         }
-        $this->member_list[$userId] = array('user_id' => $userId, 'connection_id' => $connection->id);
         $member_info = $this->socket_server->get_member_info_in_the_room($userId, $this->room_id);
+        if(!$member_info){
+            var_dump('数据库中该用户不在房间，进入socket房间失败');
+            return false;
+        }
+        $this->member_list[$userId] = array('user_id' => $userId, 'connection_id' => $connection->id);
         $message = array('type' => 'newMemberInRoom', 'info' => $member_info);
         $this->broadcast_to_all_member($message);
 
@@ -86,23 +90,26 @@ class Room
         return true;
     }
 
-    public function remove_member($userId)
+    public function out_member($userId)
     {
-        if (isset($this->member_list[$userId])) {
-            unset($this->member_list[$userId]);
-            $message = array('type' => 'memberOffLine', 'info' => array('user_id' => $userId));//用户离线
-            $this->broadcast_to_all_member($message);
+        if (!$this->is_user_in_room($userId)) {
+            var_dump('成员不在房间中');
+            return false;
         }
+        unset($this->member_list[$userId]);
+        $ROOM_STATE = json_decode(ROOM_STATE, true);
+        if ($this->state == $ROOM_STATE["OPEN"]) { //如果比赛没有开始，从数据库中删除成员
+            $this->socket_server->cancel_member_from_room($userId, $this->room_id);
+        }
+        $message = array('type' => 'memberOutRoom', 'info' => array('user_id' => $userId));//用户离开socket房间
+        $this->broadcast_to_all_member($message);
+        return true;
     }
 
-    //判断在socket的房间中是否存在
+    //判断玩家是否在socket房间中
     public function is_user_in_room($userId)
     {
         if (isset($this->member_list[$userId])) {
-            if ($this->get_member_ob_by_connection_id($this->member_list[$userId]['connection_id']) === null) {
-                $this->remove_member($userId);
-                return false;
-            }
             return true;
         }
         return false;
@@ -136,7 +143,6 @@ class Room
             $member_ob->send(json_encode($message));
         } else {
             var_dump('该成员不在线');
-            $this->remove_member($userId);
         }
     }
 
@@ -306,6 +312,17 @@ class Room
         var_dump('下注成功');
         $message = array('type' => 'betNotice', 'info' => array('userId' => $userId, 'roomId' => $roomId,
             'raceNum' => $raceNum, 'betLocation' => $betLocation, 'betVal' => $betVal));
+        $this->broadcast_to_all_member($message);
+    }
+
+    public function cancel_bet_by_location($userId, $roomId, $raceNum, $betLocation)
+    {
+        $state = $this->socket_server->cancel_bet_by_location($userId, $roomId, $raceNum, $betLocation);
+        if (!$state) {
+            return;
+        }
+        $message = array('type' => 'cancelBetSuccessNotice', 'info' => array('userId' => $userId, 'roomId' => $roomId,
+            'raceNum' => $raceNum, 'betLocation' => $betLocation)); //删除下注通知成功
         $this->broadcast_to_all_member($message);
     }
 

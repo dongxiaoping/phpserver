@@ -78,7 +78,7 @@ class UserOP
     public function get($id)
     {
         $table = new User();
-        return $table->where("id", $id)->find(); //查询一个数据
+        return $table:: get($id);//查询一个数据
     }
 
     public function getListByOneColumn($tag, $val)

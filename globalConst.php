@@ -41,20 +41,20 @@ define('RACE_PLAY_STATE', '{ "NOT_BEGIN": 1, "CHOICE_LANDLORD": 2, "ROLL_DICE": 
 "DEAL": 4, "BET": 5, "SHOW_DOWN": 6,"SHOW_RESULT": 7,"FINISHED": 8}');
 
 
-//值类型
+//麻将值类型
 define('MAJ_VALUE_TYPE', '{ "DUI_ZI": 1, "BI_SHI": 2, "DIAN": 3, "ER_BA_GANG": 4}'); //二八杠
 
 //对比结果
 define('COMPARE_DX_RE', '{ "BIG": "w", "SMALL": "s", "EQ": "e"}');
 
-//当方式
+//当庄方式
 define('BE_LANDLORD_WAY', '{ "TURN": 1,"RAP":2}');
 
 
-//当方式
+//房间成员状态
 define('ROOM_PLAY_MEMBER_STATE', '{ "ON_LINE": 1,"OFF_LINE": 2,"KICK_OUT":3}');
 
-//当方式
+//房间成员类型
 define('ROOM_PLAY_MEMBER_TYPE', '{ "ROOM_OWNER": 1,"PLAYER": 2,"WATCHER":3}');
 
 //用户类型
@@ -65,3 +65,6 @@ define('BET_LOCATION', '{ "SKY": "sky","LAND": "land","MIDDLE":"middle","BRIDG":
 
 //成员在房间中的状态
 define('MEMBER_STATE_IN_ROOM', '{ "ON_LINE": 1,"OFF_LINE":2, "NOT_EXIST":3}');
+
+//房间付费方式  AA 各自付费    CREATOR 代开
+define('ROOM_PAY', '{ "AA": 1,"CREATOR":2}');
