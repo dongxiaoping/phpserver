@@ -83,23 +83,23 @@ class BetRecordServer
     {
         $race_info = $this->raceServer->get_race_by_num($roomId, $raceNum);
         if (!$race_info) {
-            return false;
+            return getInterFaceArray(0, "no_race", "");
         }
         $RACE_PLAY_STATE = json_decode(RACE_PLAY_STATE, true);
         $race_play_state = $race_info["playState"];
         if ($race_play_state !== $RACE_PLAY_STATE["BET"]) {
-            return false;
+            return getInterFaceArray(0, "not_bet_state", "");
         }
         $the_record = $this->BetRecordOP->get_the_record($userId, $roomId, $raceNum);
         if (!$the_record) {
-            return false;
+            return getInterFaceArray(0, "not_bet", "");
         }
         if ($the_record[$betLocation] <= 0) {
-            return false;
+            return getInterFaceArray(0, "not_bet", "");
         }
         $id = $the_record['id'];
         $this->BetRecordOP->update_bet_val($id, $betLocation, 0);
-        return true;
+        return getInterFaceArray(1, "success", "");
     }
 
 }

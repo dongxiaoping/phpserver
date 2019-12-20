@@ -334,10 +334,6 @@ class Room
 
     public function cancel_bet_by_location($userId, $roomId, $raceNum, $betLocation)
     {
-        $state = $this->socket_server->cancel_bet_by_location($userId, $roomId, $raceNum, $betLocation);
-        if (!$state) {
-            return;
-        }
         $message = array('type' => 'cancelBetSuccessNotice', 'info' => array('userId' => $userId, 'roomId' => $roomId,
             'raceNum' => $raceNum, 'betLocation' => $betLocation)); //删除下注通知成功
         $this->broadcast_to_all_member($message);

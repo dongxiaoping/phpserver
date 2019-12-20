@@ -34,4 +34,20 @@ class Betrecord
             echo getJsonStringByParam(0, "param_error", "");
         }
     }
+
+    public function cancel_bet_by_location()
+    {
+        header('Access-Control-Allow-Origin: *');
+        if ($_GET["roomId"] && $_GET["userId"] && $_GET["betLocation"]) { //$_GET["raceNum"] 注意为0的情况
+            $roomId = $_GET["roomId"];
+            $raceNum = $_GET["raceNum"];
+            $userId = $_GET["userId"];
+            $betLocation = $_GET["betLocation"];
+            $result_array = $this->BetRecordServer->cancel_bet_by_location($roomId, $raceNum, $userId, $betLocation);
+            echo arrayToJson($result_array);
+        } else {
+            echo getJsonStringByParam(0, "param_error", "");
+        }
+    }
+
 }
