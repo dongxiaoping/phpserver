@@ -40,12 +40,28 @@ class User
         echo arrayToJson($result_array);
     }
 
+    //游戏开始后调用扣除钻
+    public function cost_diamond_in_room()
+    {
+        header('Access-Control-Allow-Origin: *');
+        if ($_GET["userId"] && $_GET["roomId"]) {
+            $userId = $_GET["userId"];
+            $roomId = $_GET["roomId"];
+            $result_array = $this->UserServer->cost_diamond_in_room($roomId, $userId);
+            echo arrayToJson($result_array);
+        } else {
+            echo getJsonStringByParam(0, "param_error", "");
+        }
+    }
+
     public function mod_account_info()
     {
 
     }
+
     //http://120.26.52.88/phpserver/index.php/race/user/test
-    public function test(){
+    public function test()
+    {
         var_dump('welcome');
     }
 }
