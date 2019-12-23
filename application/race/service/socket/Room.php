@@ -16,8 +16,8 @@ class Room
     private $state = null; //房间状态
     private $running_race_num = 0;
     private $race_count;
+    public $is_valid = true; //房间是否有效标志位 true表示有效 false表示无效
 
-    private $landlordSelectTimer;
     private $rollDiceTimer;//摇色子定时器
     private $dealTimer;//发牌定时器
     private $betTimer;//下注定时器
@@ -47,14 +47,12 @@ class Room
     {
         $landlordLastCount = config('roomGameConfig.landlordLastCount');
         $this->socket_server->change_race_landlord($this->room_id, $this->running_race_num, $landlordId, $landlordLastCount); //数据库修改
-
         $message = array('type' => 'landlordSelected', 'info' => array('roomId' => $this->room_id,
             'raceNum' => $raceNum, 'landlordId' => $landlordId, 'landlordLastCount' => $landlordLastCount));
         $this->broadcast_to_all_member($message); //通知用户
 
-        Timer::add(2, function ($raceNum) {
-            $RACE_PLAY_STATE = json_decode(RACE_PLAY_STATE, true);
-            $this->set_race_state($raceNum, $RACE_PLAY_STATE['ROLL_DICE']);
+        Timer::add(1.5, function ($raceNum) {
+            $this->race_run_after_landlord();
         }, array($raceNum), false);
     }
 
@@ -93,9 +91,6 @@ class Room
         $this->member_list[$userId] = array('user_id' => $userId, 'connection_id' => $connection->id);
         $message = array('type' => 'newMemberInRoom', 'info' => $member_info);
         $this->broadcast_to_all_member($message);
-
-        $message = array('type' => 'roomGameConfigSet', 'info' => config('roomGameConfig'));
-        $this->broadcast_to_member($message, $connection->id, $userId);
         var_dump('房间加入新成员');
         return true;
     }
@@ -245,16 +240,12 @@ class Room
             $message = array('type' => 'raceStateChoiceLandlord', 'info' => array('raceNum' => $raceNum, 'roomId' => $this->room_id));
             $this->broadcast_to_all_member($message); //广播选地主
         } else {
-            $this->set_race_state($raceNum, $race_play_state['ROLL_DICE']);
-        }
-        $this->landlordSelectTimer = Timer::add(2, function () {
             $this->race_run_after_landlord();
-        }, array(), true);
+        }
     }
 
     public function destroy()
     {
-        Timer::del($this->landlordSelectTimer);
         Timer::del($this->rollDiceTimer);
         Timer::del($this->dealTimer);
         Timer::del($this->betTimer);
@@ -265,30 +256,20 @@ class Room
 
     public function race_run_after_landlord()
     {
-        $race_play_state = json_decode(RACE_PLAY_STATE, true);
-        if ($this->race_list[$this->running_race_num]['state'] !== $race_play_state['CHOICE_LANDLORD']) {
-            Timer::del($this->landlordSelectTimer);
-            ///////////////////////
-            $this->change_roll_dice();
-
-            $this->rollDiceTimer = Timer::add(config('roomGameConfig.rollDiceTime'), function () {
-                $this->change_deal();
-
-                $this->dealTimer = Timer::add(config('roomGameConfig.dealTime'), function () {
-                    $this->change_roll_bet();
-
-                    $this->betTimer = Timer::add(config('roomGameConfig.betTime'), function () {
-
-                        $this->change_show_down();
-                        $this->showDownTimer = Timer::add(config('roomGameConfig.showDownTime'), function () {
-                            $this->change_show_result();
-                            $this->showResultTimer = Timer::add(config('roomGameConfig.showResultTime'), function () {
-                                $this->change_finished();
-                                $this->nextRaceTimer = Timer::add(2, function () {
-                                    $this->running_race_num = $this->running_race_num + 1;
-                                    $this->startRace($this->running_race_num);
-                                }, array(), false);
-
+        $this->change_roll_dice();
+        $this->rollDiceTimer = Timer::add(config('roomGameConfig.rollDiceTime'), function () {
+            $this->change_deal();
+            $this->dealTimer = Timer::add(config('roomGameConfig.dealTime'), function () {
+                $this->change_roll_bet();
+                $this->betTimer = Timer::add(config('roomGameConfig.betTime'), function () {
+                    $this->change_show_down();
+                    $this->showDownTimer = Timer::add(config('roomGameConfig.showDownTime'), function () {
+                        $this->change_show_result();
+                        $this->showResultTimer = Timer::add(config('roomGameConfig.showResultTime'), function () {
+                            $this->change_finished();
+                            $this->nextRaceTimer = Timer::add(2, function () {
+                                $this->running_race_num = $this->running_race_num + 1;
+                                $this->startRace($this->running_race_num);
                             }, array(), false);
 
                         }, array(), false);
@@ -298,10 +279,8 @@ class Room
                 }, array(), false);
 
             }, array(), false);
-            /////////////////////////
-        } else {
-            var_dump('等待选地主，房间ID：' . $this->room_id);
-        }
+
+        }, array(), false);
     }
 
     public function startRace($raceNum)
@@ -314,6 +293,7 @@ class Room
             $message = array('type' => 'allRaceFinished', 'info' => array('roomResult' => $info));
             $this->broadcast_to_all_member($message);
             var_dump('所有比赛结束');
+            $this->is_valid = false;
             return;
         }
         $this->broadcast_to_select_landlord($raceNum);

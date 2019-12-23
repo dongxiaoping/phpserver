@@ -24,8 +24,8 @@ class Worker extends Server
     public $socketServer;
     public $roomList = array(); //房间对象集合
     private $circle_room_check_timer = null;
-    private $invalid_room_check_time = 30;//无效房间检查周期 s
-    private $room_time_out_time = 900;//房间存在超时时间 s
+    private $invalid_room_check_time = 10;//无效房间检查周期 s  90
+    private $room_time_out_time = 300;//房间存在超时时间 s  默认1小时 3600
 
     public function __construct()
     {
@@ -280,10 +280,8 @@ class Worker extends Server
             var_dump('定时房间检查,房间数量：' . count($this->roomList));
             foreach ($this->roomList as $roomItem) {
                 $now_time = time();
-                $ROOM_STATE = json_decode(ROOM_STATE, true);
-                $state = $roomItem->get_room_state();
-                if ($state === $ROOM_STATE['ALL_RACE_FINISHED'] || $state === $ROOM_STATE['CLOSE'] || count($roomItem->member_list) <= 0) {
-                    var_dump('销毁房间，房间比赛结束或者没有人');
+                if (!$roomItem->is_valid || count($roomItem->member_list) <= 0) {
+                    var_dump('发现无效socket房间，销毁');
                     $this->roomList[$roomItem->room_id]->destroy();
                     unset($this->roomList[$roomItem->room_id]);
                 }

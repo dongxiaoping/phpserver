@@ -6,17 +6,17 @@ namespace app\race\service\socket;
 
 class ConnectManage
 {
-    public $list = array();
+    public $connections = array(); //连接对象集合
 
     public function add_connect($connection){
         if (isset($connection->id)) {
-            $this->list[$connection->id] = $connection;
+            $this->connections[$connection->id] = $connection;
         }
     }
 
     public function remove_connect($connection){
         if (isset($connection->id)) {
-            unset($this->list[$connection->id]);
+            unset($this->connections[$connection->id]);
         }
     }
 }

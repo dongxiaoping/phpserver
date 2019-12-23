@@ -28,7 +28,9 @@ class UserServer
         if ($item === null) {
             return getInterFaceArray(0, "not_exist", "");
         }
-        return getInterFaceArray(1, "success", $item);
+        $info = getInterFaceArray(1, "success", $item);
+        $info["config"] =  config('roomGameConfig');
+        return $info;
     }
 
     public function create_visit_account()
