@@ -206,6 +206,7 @@ class Worker extends Server
         $is_success = $this->enterRoom($roomId, $connection, $userId);
         if ($is_success) {
             $message = array('type' => 'createRoomResultNotice', 'info' => array('state' => 1));
+            var_dump('通知房主创建房间成功');
             $connection->send(json_encode($message));
         }
     }
@@ -280,7 +281,7 @@ class Worker extends Server
             var_dump('定时房间检查,房间数量：' . count($this->roomList));
             foreach ($this->roomList as $roomItem) {
                 $now_time = time();
-                if (!$roomItem->is_valid || count($roomItem->member_list) <= 0) {
+                if (!($roomItem->is_room_valid()) || count($roomItem->member_list) <= 0) {
                     var_dump('发现无效socket房间，销毁');
                     $this->roomList[$roomItem->room_id]->destroy();
                     unset($this->roomList[$roomItem->room_id]);

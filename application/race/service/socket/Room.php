@@ -16,7 +16,7 @@ class Room
     private $state = null; //房间状态
     private $running_race_num = 0;
     private $race_count;
-    public $is_valid = true; //房间是否有效标志位 true表示有效 false表示无效
+    private $is_valid = true; //房间是否有效标志位 true表示有效 false表示无效
 
     private $rollDiceTimer;//摇色子定时器
     private $dealTimer;//发牌定时器
@@ -40,6 +40,11 @@ class Room
     public function get_race_state($race_num)
     {
         return $this->race_list[$race_num]['state'];
+    }
+
+    public function is_room_valid()
+    {
+        return $this->is_valid;
     }
 
     //1、把数据库里面的比赛地主Id设置完毕 2、向玩家发出地主被选中通知 3、将游戏环节改为开始摇色子
@@ -123,8 +128,9 @@ class Room
     //失败返回null
     public function get_member_ob_by_connection_id($connection_id)
     {
-        if (isset($this->connect_manage->list[$connection_id])) {
-            return $this->connect_manage->list[$connection_id];
+        $connections = $this->connect_manage->get_connections();
+        if (isset($connections[$connection_id])) {
+            return $connections[$connection_id];
         }
         return null;
     }
