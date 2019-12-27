@@ -24,8 +24,8 @@ class Worker extends Server
     public $socketServer;
     public $roomList = array(); //房间对象集合
     private $circle_room_check_timer = null;
-    private $invalid_room_check_time = 10;//无效房间检查周期 s  90
-    private $room_time_out_time = 300;//房间存在超时时间 s  默认1小时 3600
+    private $invalid_room_check_time = 90;//无效房间检查周期 s  90
+    private $room_time_out_time = 3600;//房间存在超时时间 s  默认1小时 3600
 
     public function __construct()
     {
