@@ -12,6 +12,7 @@
 namespace app\race\controller;
 
 use app\race\service\UserServer;
+use think\Log;
 
 class User
 {
@@ -63,5 +64,8 @@ class User
     public function test()
     {
         var_dump('welcome');
+        Log::record('测试日志信息');
+        Log::record('测试日志信息，这是警告级别','error');
+        Log::write('测试日志信息，这是警告级别，并且实时写入','notice');
     }
 }
