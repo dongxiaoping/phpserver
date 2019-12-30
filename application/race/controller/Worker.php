@@ -45,20 +45,11 @@ class Worker extends Server
         $data = json_decode($data, true);
         Log::write('-----------------------------------------------------------------------', 'info');
         Log::write($data, 'info');
+        if ($this->circle_room_check_timer === null) {
+            Log::write('workman/worker:启动房间检查', 'info');
+            $this->roomCheck();
+        }
         switch ($data['type']) {
-            case 'createAndEnterRoom':
-                if ($this->circle_room_check_timer === null) {
-                    Log::write('workman/worker:启动房间检查', 'info');
-                    $this->roomCheck();
-                }
-                if (isset($data['info']['roomId']) && isset($data['info']['userId'])) {
-                    $roomId = $data['info']['roomId'];
-                    $userId = $data['info']['userId'];
-                    $this->createAndEnterRoom($connection, $roomId, $userId);
-                } else {
-                    Log::write('workman/worker:参数错误', 'error');
-                }
-                break;
             case 'enterRoom': //进入房间
                 if (isset($data['info']['roomId']) && isset($data['info']['userId'])) {
                     $roomId = $data['info']['roomId'];
@@ -201,55 +192,37 @@ class Worker extends Server
         $this->roomList[$roomId]->cancel_bet_by_location($userId, $roomId, $raceNum, $betLocation);
     }
 
-    public function createAndEnterRoom($connection, $roomId, $userId)
+    public function enterRoom($roomId, $connection, $userId)
     {
-        if (isset($this->roomList[$roomId])) {
-            Log::write('workman/worker:socket房间已存在,不能重新创建,房间号：' . $roomId, 'error');
-            return false;
-        }
         $room_info = $this->socketServer->get_room_info_by_id($roomId);
         if (!$room_info) {
-            Log::write('workman/worker:创建房间失败，该房间在数据库中不存在，房间号：' . $roomId, 'error');
-            return false;
-        }
-        if ($room_info["creatUserId"] != $userId) {
-            Log::write('workman/worker:创建房间失败，当前用户不是房主，不能创建socket房间,房间ID' . $roomId . ',用户ID' . $userId, 'error');
+            Log::write('workman/worker:无法进入房间，该房间在数据库中不存在，房间号：' . $roomId, 'error');
             return false;
         }
         $ROOM_STATE = json_decode(ROOM_STATE, true);
         if ($room_info["roomState"] !== $ROOM_STATE["OPEN"]) {
-            Log::write('workman/worker:游戏已开始，不能创建房间：' . $roomId, 'error');
+            Log::write('workman/worker:游戏已开始，无法进入房间，房间号：' . $roomId, 'error');
             return false;
         }
-        $member_info = $this->socketServer->get_member_info_in_the_room($userId, $roomId);
-        if (!$member_info) {
-            Log::write('workman/room:数据库中该用户不在房间，创建socket房间失败，房间号：' . $roomId . ',用户ID:' . $userId, 'error');
-            return false;
+        if (isset($this->roomList[$roomId]) && (!$this->roomList[$roomId]->is_room_valid())) {
+            $this->roomList[$roomId]->destroy();
+            unset($this->roomList[$roomId]);
+            Log::write('workman/worker:无效房间，销毁，房间号：' . $roomId, 'info');
         }
-        $newRoom = new Room($roomId, $userId, $room_info["playCount"], $this->connectManage, $this->socketServer);
-        $this->roomList[$roomId] = $newRoom;
-        $is_success = $this->enterRoom($roomId, $connection, $userId);
-        if ($is_success) {
-            $message = array('type' => 'createRoomResultNotice', 'info' => array('state' => 1));
-            Log::write('workman/worker:房间创建成功，房间号：' . $roomId . ',用户ID:' . $userId, 'info');
-            $connection->send(json_encode($message));
-        }
-    }
 
-    public function enterRoom($roomId, $connection, $userId)
-    {
-        Log::write('加入房间,房间号：' . $roomId . ',用户ID:' . $userId, 'info');
-        if (isset($this->roomList[$roomId])) {
-            $is_right = $this->roomList[$roomId]->add_member($connection, $userId);
-            if ($is_right) {
-                Log::write('workman/worker:人员加入房间成功', 'info');
-                return true;
-            } else {
-                Log::write('workman/worker:人员加入房间失败', 'error');
-                return false;
-            }
+        if (!isset($this->roomList[$roomId])) {
+            $create_user_id = $room_info['creatUserId'];
+            $newRoom = new Room($roomId, $create_user_id, $room_info["playCount"], $this->connectManage, $this->socketServer);
+            $this->roomList[$roomId] = $newRoom;
+            Log::write('workman/worker:socket房间创建成功，房间号：' . $roomId, 'info');
+        }
+
+        $is_right = $this->roomList[$roomId]->add_member($connection, $userId);
+        if ($is_right) {
+            Log::write('workman/worker:人员加入房间成功', 'info');
+            return true;
         } else {
-            Log::write('workman/worker:房间不存在，无法加入', 'error');
+            Log::write('workman/worker:人员加入房间失败', 'error');
             return false;
         }
     }

@@ -14,7 +14,7 @@
         "NOT_BEGIN": 1, "CHOICE_LANDLORD": 2, "ROLL_DICE": 3,
         "DEAL": 4, "BET": 5, "SHOW_DOWN": 6, "SHOW_RESULT": 7, "FINISHED": 8
     };
-    var enterRoom = {type: 'enterRoom', info: {roomId: 68}};//进入房间事件
+    var enterRoom = {type: 'enterRoom', info: {roomId: 331, userId:1510}};//进入房间事件
     var startRoomGame = {type: 'startRoomGame', info: {roomId: 1, userId:633}}; //房间开始game raceCount 场次
     var createAndEnterRoom= {type: 'createAndEnterRoom', info: {roomId: 331, userId:1510}};
     var landlordSelected = {type: 'landlordSelected', info: {roomId: 68, raceNum: 0, landlordId: 4}}; //用户抢地主
@@ -24,7 +24,7 @@
     ws.onopen = function () {
         //  alert("连接成功");
           setTimeout(function () {
-              ws.send(JSON.stringify(createAndEnterRoom));
+              ws.send(JSON.stringify(enterRoom));
           }, 3000);
 
         // setTimeout(function () {
