@@ -135,7 +135,7 @@ class RoomServer extends RoomBase
             $room_race_info = $this->get_room_race_info($room_id);
             return getInterFaceArray(1, "success", $room_race_info);
         }
-        return getInterFaceArray(0, "fail", '');
+        return getInterFaceArray(0, "in_room_fail", '');
     }
 
     //获取房间比赛相关的所有信息

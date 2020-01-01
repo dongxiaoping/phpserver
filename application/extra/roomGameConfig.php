@@ -4,8 +4,8 @@ return [
     'dealTime' => 6, //发牌持续时间 s
     'betTime' => 17, //下注持续时间 s
     'showDownTime' => 12, //比大小持续时间 s //翻牌动画固定7.5s
-    'showResultKeepTime' => 8, //结果显示停留时间 s
-    'showResultTime' => 7, //显示结果持续时间 s
+    'showResultKeepTime' => 9, //结果显示停留时间 s
+    'showResultTime' => 6, //显示结果持续时间 s
     'delayTime'=>2, //客户端和服务器延迟时间 s
     'landlordLastCount'=> 5 //每一次当庄场次数
 ];
