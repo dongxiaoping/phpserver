@@ -272,7 +272,8 @@ class Room
                 $this->change_roll_bet();
                 $this->betTimer = Timer::add(config('roomGameConfig.betTime'), function () {
                     $this->change_show_down();
-                    $this->showDownTimer = Timer::add(config('roomGameConfig.showDownTime'), function () {
+                    $setTime = config('roomGameConfig.showDownTime') + config('roomGameConfig.showResultKeepTime');
+                    $this->showDownTimer = Timer::add($setTime, function () {
                         $this->change_show_result();
                         $this->showResultTimer = Timer::add(config('roomGameConfig.showResultTime'), function () {
                             $this->change_finished();
