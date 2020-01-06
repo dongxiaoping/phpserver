@@ -30,7 +30,7 @@ class Room
 
     public $creatTime; //房间创建的时间戳
 
-    public function __construct($room_id,$create_user_id, $race_count, $connect_manage, $socket_server)
+    public function __construct($room_id, $create_user_id, $race_count, $connect_manage, $socket_server)
     {
         $this->connect_manage = $connect_manage;
         $this->socket_server = $socket_server;
@@ -116,9 +116,9 @@ class Room
         if ($this->state == $ROOM_STATE["OPEN"]) { //如果比赛没有开始，从数据库中删除成员
             $this->socket_server->cancel_member_from_room($userId, $this->room_id);
         }
-        if($this->create_user_id == $userId && $this->state == $ROOM_STATE["OPEN"]){
+        if ($this->create_user_id == $userId && $this->state == $ROOM_STATE["OPEN"]) {
             $this->is_valid = false;
-            Log::write('workman/room:房主退出房间，并且比赛未开始，房间设置为无效,用户ID:'.$userId, 'info');
+            Log::write('workman/room:房主退出房间，并且比赛未开始，房间设置为无效,用户ID:' . $userId, 'info');
         }
         $message = array('type' => 'memberOutRoom', 'info' => array('user_id' => $userId));//用户离开socket房间
         $this->broadcast_to_all_member($message);
@@ -311,9 +311,19 @@ class Room
 
     public function raceBet($userId, $roomId, $raceNum, $betLocation, $betVal)
     {
+        //当前场次 以及状态检查
+        if ($raceNum != $this->running_race_num) {
+            Log::write('workman/room:下注失败,比赛场次号不匹配:', 'error');
+            return;
+        }
+        $race_play_state = json_decode(RACE_PLAY_STATE, true);
+        if ($this->get_race_state($this->running_race_num) != $race_play_state['BET']) {
+            Log::write('workman/room:下注失败,当前非下注时间:', 'error');
+            return;
+        }
         $back = $this->socket_server->to_bet($userId, $roomId, $raceNum, $betLocation, $betVal);
         if (!$back['status']) {
-            Log::write('workman/room:下注失败,当前非下注时间段,房间号:' . $this->room_id, 'error');
+            Log::write('workman/room:下注失败,房间号:' . $this->room_id, 'error');
             return;
         }
         Log::write('workman/room:下注成功,房间号:' . $this->room_id, 'info');

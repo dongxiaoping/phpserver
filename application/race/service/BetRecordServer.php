@@ -29,6 +29,7 @@ class BetRecordServer
 
     public function to_bet($userId, $roomId, $raceNum, $betLocation, $betVal)
     {
+        //超限检查
         $the_record = $this->BetRecordOP->get_the_record($userId, $roomId, $raceNum);
         if ($the_record) { //存在记录
             $new_bet_val = $the_record[$betLocation] + $betVal;
