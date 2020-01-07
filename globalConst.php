@@ -68,3 +68,6 @@ define('MEMBER_STATE_IN_ROOM', '{ "ON_LINE": 1,"OFF_LINE":2, "NOT_EXIST":3}');
 
 //房间付费方式  AA 各自付费    CREATOR 代开
 define('ROOM_PAY', '{ "AA": 1,"CREATOR":2}');
+
+//充值平台
+define('RECHARGE_PLATFORM', '{ "WECHAT": 1}');
