@@ -15,7 +15,6 @@ class RechargeServer
 
     public function add_recharge_record($userId, $cost, $platform_type)
     {
-      //  $RECHARGE_PLATFORM = json_decode(RECHARGE_PLATFORM, true);
         $item = [
             'platform' => $platform_type,
             'cost' => $cost,

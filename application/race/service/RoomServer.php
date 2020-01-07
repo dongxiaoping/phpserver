@@ -26,6 +26,7 @@ class RoomServer extends RoomBase
         $this->RaceServer = new RaceServer();
         $this->PlayerOP = new PlayerOP();
         $this->BetRecordOP = new BetRecordOP();
+        $this->CostServer = new CostServer();
     }
 
     public function get_room_info_by_id($id)
@@ -69,6 +70,7 @@ class RoomServer extends RoomBase
             if (!$isCashOk) {
                 return getInterFaceArray(0, "cash_error", "");
             }
+            $this->CostServer->add_cost_record($user_id, $room_id, $cost_value);
             $room_info = $this->RoomOp->get($room_id);
             return getInterFaceArray(1, "success", $room_info);
         }

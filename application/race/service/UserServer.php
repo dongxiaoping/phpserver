@@ -20,6 +20,8 @@ class UserServer
     {
         $this->UserOP = new  UserOP();
         $this->RoomOp = new  RoomOP();
+        $this->RechargeServer = new RechargeServer();
+        $this->CostServer = new CostServer();
     }
 
     public function get_user_info_by_id($id)
@@ -29,16 +31,17 @@ class UserServer
             return getInterFaceArray(0, "not_exist", "");
         }
         $info = getInterFaceArray(1, "success", $item);
-        $info["config"] =  config('roomGameConfig');
+        $info["config"] = config('roomGameConfig');
         return $info;
     }
 
     public function create_visit_account()
     {
         $USER_TYPE = json_decode(USER_TYPE, true);
+        $diamond_val = 100;
         $item = [
             'score' => 0,
-            'diamond' => 1000,
+            'diamond' => $diamond_val,
             'type' => $USER_TYPE['NORMAL_USER'],
             'nick' => '用户' . time(),
             'icon' => 'http://120.26.52.88/default_user_icon.png',
@@ -47,6 +50,8 @@ class UserServer
         ];
         $id = $this->UserOP->insert($item);
         if ($id) {
+            $RECHARGE_PLATFORM = json_decode(RECHARGE_PLATFORM, true);
+            $this->RechargeServer->add_recharge_record($id, $diamond_val, $RECHARGE_PLATFORM['WECHAT']);
             $info = $this->get_user_info_by_id($id);
             return $info;
         }
@@ -70,6 +75,7 @@ class UserServer
         $cost_value = $item["roomFee"];
         $isCashOk = $this->UserOP->mod_cash_by_user_id($userId, $cost_value, 0);
         if ($isCashOk) {
+            $this->CostServer->add_cost_record($userId, $roomId, $cost_value);
             return getInterFaceArray(1, "success", "");
         }
         return getInterFaceArray(0, "cash_error", "");
