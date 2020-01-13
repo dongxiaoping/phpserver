@@ -37,9 +37,7 @@ DATA_PATH 应用数据目录 （默认为 RUNTIME_PATH.'Data/'）
 define('ROOM_STATE', '{ "OPEN": 1, "PLAYING": 2, "ALL_RACE_FINISHED": 3,"CLOSE": 4}');
 
 //比赛状态
-define('RACE_PLAY_STATE', '{ "NOT_BEGIN": 1, "CHOICE_LANDLORD": 2, "ROLL_DICE": 3,
-"DEAL": 4, "BET": 5, "SHOW_DOWN": 6,"SHOW_RESULT": 7,"FINISHED": 8}');
-
+define('RACE_PLAY_STATE', '{ "NOT_BEGIN": 1, "CHOICE_LANDLORD": 2,"DEAL": 3, "BET": 4, "SHOW_DOWN": 5,"FINISHED": 6}');
 
 //麻将值类型
 define('MAJ_VALUE_TYPE', '{ "DUI_ZI": 1, "BI_SHI": 2, "DIAN": 3, "ER_BA_GANG": 4}'); //二八杠

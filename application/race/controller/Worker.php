@@ -200,17 +200,19 @@ class Worker extends Server
             return false;
         }
         $ROOM_STATE = json_decode(ROOM_STATE, true);
-        if ($room_info["roomState"] !== $ROOM_STATE["OPEN"]) {
-            Log::write('workman/worker:游戏已开始，无法进入房间，房间号：' . $roomId, 'error');
+        if ($room_info["roomState"] === $ROOM_STATE["ALL_RACE_FINISHED"] || $room_info["roomState"] === $ROOM_STATE["CLOSE"]) {
+            Log::write('workman/worker:游戏已结束，无法进入房间，房间号：' . $roomId, 'error');
             return false;
         }
-        if (isset($this->roomList[$roomId]) && (!$this->roomList[$roomId]->is_room_valid())) {
+
+
+        if (isset($this->roomList[$roomId]) && (!$this->roomList[$roomId]->is_room_valid())) { //socket房间存在 并且无效 删除socket房间
             $this->roomList[$roomId]->destroy();
             unset($this->roomList[$roomId]);
             Log::write('workman/worker:无效房间，销毁，房间号：' . $roomId, 'info');
         }
 
-        if (!isset($this->roomList[$roomId])) {
+        if (!isset($this->roomList[$roomId])) { //socket房间不存在
             $create_user_id = $room_info['creatUserId'];
             $newRoom = new Room($roomId, $create_user_id, $room_info["playCount"], $this->connectManage, $this->socketServer);
             $this->roomList[$roomId] = $newRoom;
@@ -260,7 +262,7 @@ class Worker extends Server
             Log::write('workman/worker:房间游戏不能重复开始,或者用户不在该房间', 'error');
             return;
         } else {
-            var_dump('游戏开始');
+            Log::write('workman/worker:房间游戏开始', 'info');
         }
         $this->roomList[$roomId]->start_game();
     }
@@ -268,17 +270,11 @@ class Worker extends Server
     //抢地主
     public function landlordSelected($roomId, $raceNum, $landlordId)
     {
-        $RACE_PLAY_STATE = json_decode(RACE_PLAY_STATE, true);
         if (!isset($this->roomList[$roomId])) {
             Log::write('workman/worker:房间不存在,无法抢地主', 'error');
             return;
         }
-        $the_race_state = $this->roomList[$roomId]->get_race_state($raceNum);
-        if ($the_race_state === $RACE_PLAY_STATE['CHOICE_LANDLORD']) {//该用户抢到地主了
-            $this->roomList[$roomId]->landlord_selected($raceNum, $landlordId);
-        } else {
-            Log::write('workman/worker:地主已经被抢', 'error');
-        }
+        $this->roomList[$roomId]->landlord_selected($raceNum, $landlordId);
     }
 
     public function roomCheck()

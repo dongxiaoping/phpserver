@@ -19,12 +19,9 @@ class Room
     private $race_count;
     private $is_valid = true; //房间是否有效标志位 true表示有效 false表示无效
 
-    private $rollDiceTimer;//摇色子定时器
-    private $dealTimer;//发牌定时器
+    private $dealActionTimer;//摇色子、发牌定时器
     private $betTimer;//下注定时器
     private $showDownTimer;//比大小定时器
-    private $showResultTimer;//显示结果定时器
-    private $nextRaceTimer;//开始下场比赛定时器
 
     private $create_user_id = null; //房间创建者ID
 
@@ -46,6 +43,25 @@ class Room
         return $this->race_list[$race_num]['state'];
     }
 
+    public function get_race_landlord_id($race_num)
+    {
+        return $this->race_list[$race_num]['landlord_id'];
+    }
+
+    public function set_race_landlord($race_num, $landlord_id)
+    {
+        try {
+            $count = config('roomGameConfig.landlordLastCount');
+            for ($i = 0; $i < $count; $i++) {
+                if (isset($this->race_list[$race_num + $i])) {
+                    $this->race_list[$race_num + $i]['landlord_id'] = $landlord_id;
+                }
+            }
+        } catch (Exception $e) {
+            Log::write($e->getMessage(), 'error');
+        }
+    }
+
     public function is_room_valid()
     {
         return $this->is_valid;
@@ -54,15 +70,24 @@ class Room
     //1、把数据库里面的比赛地主Id设置完毕 2、向玩家发出地主被选中通知 3、将游戏环节改为开始摇色子
     public function landlord_selected($raceNum, $landlordId)
     {
-        $landlordLastCount = config('roomGameConfig.landlordLastCount');
-        $this->socket_server->change_race_landlord($this->room_id, $this->running_race_num, $landlordId, $landlordLastCount); //数据库修改
-        $message = array('type' => 'landlordSelected', 'info' => array('roomId' => $this->room_id,
-            'raceNum' => $raceNum, 'landlordId' => $landlordId, 'landlordLastCount' => $landlordLastCount));
-        $this->broadcast_to_all_member($message); //通知用户
-
-        Timer::add(1.5, function ($raceNum) {
-            $this->race_run_after_landlord();
-        }, array($raceNum), false);
+        try {
+            if ($this->running_race_num != $raceNum) {
+                Log::write('workman/worker:抢地主失败，比赛场次异常', 'error');
+                return;
+            }
+            $RACE_PLAY_STATE = json_decode(RACE_PLAY_STATE, true);
+            $the_race_state = $this->get_race_state($this->running_race_num);
+            if ($the_race_state != $RACE_PLAY_STATE['CHOICE_LANDLORD']) {
+                Log::write('workman/worker:抢失败', 'info');
+                return;
+            }
+            $this->set_race_landlord($this->running_race_num, $landlordId);
+            $landlordLastCount = config('roomGameConfig.landlordLastCount');
+            $this->socket_server->change_race_landlord($this->room_id, $this->running_race_num, $landlordId, $landlordLastCount); //数据库修改
+            $this->startRace();
+        } catch (Exception $e) {
+            Log::write($e->getMessage(), 'error');
+        }
     }
 
 
@@ -78,7 +103,7 @@ class Room
         $this->state = $ROOM_STATE['OPEN'];
         $RACE_PLAY_STATE = json_decode(RACE_PLAY_STATE, true);
         for ($i = 0; $i < $race_count; $i++) {
-            $item = array('state' => $RACE_PLAY_STATE['NOT_BEGIN']);
+            $item = array('state' => $RACE_PLAY_STATE['NOT_BEGIN'], 'landlord_id' => null);
             $this->race_list[$i] = $item;
         }
         Log::write('workman/room:场次信息初始化完毕', 'info');
@@ -86,43 +111,51 @@ class Room
 
     public function add_member($connection, $userId)
     {
-        $ROOM_STATE = json_decode(ROOM_STATE, true);
-        if ($this->state != $ROOM_STATE["OPEN"]) {
-            Log::write('workman/room:socket房间已经开始，不能加入玩家:' . $userId, 'info');
-            return false;
-        }
+        try {
+            $ROOM_STATE = json_decode(ROOM_STATE, true);
+            if ($this->state === $ROOM_STATE["ALL_RACE_FINISHED"] || $this->state === $ROOM_STATE["CLOSE"]) {
+                Log::write('workman/room:socket房间比赛已结束，不能加入玩家:' . $userId, 'info');
+                return false;
+            }
 
-        $member_info = $this->socket_server->get_member_info_in_the_room($userId, $this->room_id);
-        if (!$member_info) {
-            Log::write('workman/room:数据库中该用户不在房间，进入socket房间失败:' . $userId, 'error');
-            return false;
+            $member_info = $this->socket_server->get_member_info_in_the_room($userId, $this->room_id);
+            if (!$member_info) {
+                Log::write('workman/room:数据库中该用户不在房间，进入socket房间失败:' . $userId, 'error');
+                return false;
+            }
+            $this->member_list[$userId] = array('user_id' => $userId, 'connection_id' => $connection->id);
+            $this->connect_manage->add_room_id($connection->id, $this->room_id);
+            $message = array('type' => 'newMemberInRoom', 'info' => $member_info);
+            $this->broadcast_to_all_member($message);
+            Log::write('workman/room:socket房间加入成员成功:' . $userId . ',房间ID' . $this->room_id, 'info');
+            return true;
+        } catch (Exception $e) {
+            Log::write($e->getMessage(), 'error');
         }
-        $this->member_list[$userId] = array('user_id' => $userId, 'connection_id' => $connection->id);
-        $this->connect_manage->add_room_id($connection->id, $this->room_id);
-        $message = array('type' => 'newMemberInRoom', 'info' => $member_info);
-        $this->broadcast_to_all_member($message);
-        Log::write('workman/room:socket房间加入成员成功:' . $userId . ',房间ID' . $this->room_id, 'info');
-        return true;
     }
 
     public function out_member($userId)
     {
-        if (!$this->is_user_in_room($userId)) {
-            Log::write('workman/room:成员不在房间中，退出房间失败，用户ID：' . $userId . ',房间ID：' . $this->room_id, 'error');
-            return false;
+        try {
+            if (!$this->is_user_in_room($userId)) {
+                Log::write('workman/room:成员不在房间中，退出房间失败，用户ID：' . $userId . ',房间ID：' . $this->room_id, 'error');
+                return false;
+            }
+            unset($this->member_list[$userId]);
+            $ROOM_STATE = json_decode(ROOM_STATE, true);
+            if ($this->state == $ROOM_STATE["OPEN"]) { //如果比赛没有开始，从数据库中删除成员
+                // $this->socket_server->cancel_member_from_room($userId, $this->room_id);  //TODO 为了方便测试 注释掉
+            }
+            if ($this->create_user_id == $userId && $this->state == $ROOM_STATE["OPEN"]) {
+                $this->is_valid = false;
+                Log::write('workman/room:房主退出房间，并且比赛未开始，房间设置为无效,用户ID:' . $userId, 'info');
+            }
+            $message = array('type' => 'memberOutRoom', 'info' => array('user_id' => $userId));//用户离开socket房间
+            $this->broadcast_to_all_member($message);
+            return true;
+        } catch (Exception $e) {
+            Log::write($e->getMessage(), 'error');
         }
-        unset($this->member_list[$userId]);
-        $ROOM_STATE = json_decode(ROOM_STATE, true);
-        if ($this->state == $ROOM_STATE["OPEN"]) { //如果比赛没有开始，从数据库中删除成员
-            $this->socket_server->cancel_member_from_room($userId, $this->room_id);
-        }
-        if ($this->create_user_id == $userId && $this->state == $ROOM_STATE["OPEN"]) {
-            $this->is_valid = false;
-            Log::write('workman/room:房主退出房间，并且比赛未开始，房间设置为无效,用户ID:' . $userId, 'info');
-        }
-        $message = array('type' => 'memberOutRoom', 'info' => array('user_id' => $userId));//用户离开socket房间
-        $this->broadcast_to_all_member($message);
-        return true;
     }
 
     public function get_member_by_connection_id($connection_id)
@@ -179,26 +212,16 @@ class Room
             return;
         }
         $this->socket_server->change_room_state($this->room_id, $ROOM_STATE['PLAYING']);
-        $message = array('type' => 'gameBegin', 'info' => array('roomId' => $this->room_id));
-        $this->broadcast_to_all_member($message);
         $this->state = $ROOM_STATE['PLAYING'];
-        $this->startRace(0);
+        $this->startRace();
     }
 
-    public function change_roll_dice()
-    { //摇色子
-        $race_play_state = json_decode(RACE_PLAY_STATE, true);
-        $this->set_race_state($this->running_race_num, $race_play_state['ROLL_DICE']);
-        $message = array('type' => 'raceStateRollDice', 'info' => array('raceNum' => $this->running_race_num, 'roomId' => $this->room_id));
-        $this->broadcast_to_all_member($message);
-        Log::write('workman/room:启动摇色子流程，房间号：' . $this->room_id . '场次号：' . $this->running_race_num, 'info');
-    }
-
-    public function change_deal()
-    { ////发牌
+    public function change_deal_action()
+    { //发牌
         $race_play_state = json_decode(RACE_PLAY_STATE, true);
         $this->set_race_state($this->running_race_num, $race_play_state['DEAL']);
-        $message = array('type' => 'raceStateDeal', 'info' => array('raceNum' => $this->running_race_num, 'roomId' => $this->room_id));
+        $the_landlord_id = $this->get_race_landlord_id($this->running_race_num);
+        $message = array('type' => 'raceStateDeal', 'info' => array('raceNum' => $this->running_race_num, 'roomId' => $this->room_id, 'landlordId' => $the_landlord_id));
         $this->broadcast_to_all_member($message);
         Log::write('workman/room:启动发牌流程，房间号：' . $this->room_id . '场次号：' . $this->running_race_num, 'info');
     }
@@ -216,120 +239,83 @@ class Room
     { //比大小
         $race_play_state = json_decode(RACE_PLAY_STATE, true);
         $this->set_race_state($this->running_race_num, $race_play_state['SHOW_DOWN']);
-        $message = array('type' => 'raceStateShowDown', 'info' => array('raceNum' => $this->running_race_num, 'roomId' => $this->room_id));
+        $result_list = $this->socket_server->get_race_result($this->room_id, $this->running_race_num);
+        $message = array('type' => 'raceStateShowDown', 'info' => array('raceNum' => $this->running_race_num, 'roomId' => $this->room_id, 'resultList' => $result_list));
         $this->broadcast_to_all_member($message);
         Log::write('workman/room:启动比大小流程，房间号：' . $this->room_id . '场次号：' . $this->running_race_num, 'info');
     }
 
-    public function change_show_result()
-    { //显示结果
-        $race_play_state = json_decode(RACE_PLAY_STATE, true);
-        $this->set_race_state($this->running_race_num, $race_play_state['SHOW_RESULT']);
-        $result_list = $this->socket_server->get_race_result($this->room_id, $this->running_race_num);
-        $message = array('type' => 'raceStateShowResult', 'info' => array('raceNum' => $this->running_race_num, 'roomId' => $this->room_id, 'resultList' => $result_list));
-        $this->broadcast_to_all_member($message);
-        Log::write('workman/room:启动显示结果流程，房间号：' . $this->room_id . '场次号：' . $this->running_race_num, 'info');
-    }
-
-    public function change_finished()
-    { //结束
-        $race_play_state = json_decode(RACE_PLAY_STATE, true);
-        $this->set_race_state($this->running_race_num, $race_play_state['FINISHED']);
-        $message = array('type' => 'raceStateFinished', 'info' => array('raceNum' => $this->running_race_num, 'roomId' => $this->room_id));
-        $this->broadcast_to_all_member($message);
-        Log::write('workman/room:本场比赛结束，房间号：' . $this->room_id . '场次号：' . $this->running_race_num, 'info');
-    }
-
-    public function broadcast_to_select_landlord($raceNum)
-    {
-        $race_play_state = json_decode(RACE_PLAY_STATE, true);
-        $count = config('roomGameConfig.landlordLastCount');
-        if ($raceNum % $count === 0) {
-            $this->set_race_state($raceNum, $race_play_state['CHOICE_LANDLORD']);
-            $message = array('type' => 'raceStateChoiceLandlord', 'info' => array('raceNum' => $raceNum, 'roomId' => $this->room_id));
-            $this->broadcast_to_all_member($message); //广播选地主
-        } else {
-            $this->race_run_after_landlord();
-        }
-    }
-
     public function destroy()
     {
-        Timer::del($this->rollDiceTimer);
-        Timer::del($this->dealTimer);
+        Timer::del($this->dealActionTimer);
         Timer::del($this->betTimer);
         Timer::del($this->showDownTimer);
-        Timer::del($this->showResultTimer);
-        Timer::del($this->nextRaceTimer);
     }
 
-    public function race_run_after_landlord()
+    public function startRace()
     {
-        $this->change_roll_dice();
-        $this->rollDiceTimer = Timer::add(config('roomGameConfig.rollDiceTime'), function () {
-            $this->change_deal();
-            $this->dealTimer = Timer::add(config('roomGameConfig.dealTime'), function () {
-                $this->change_roll_bet();
-                $this->betTimer = Timer::add(config('roomGameConfig.betTime'), function () {
-                    $this->change_show_down();
-                    $setTime = config('roomGameConfig.showDownTime') + config('roomGameConfig.showResultKeepTime');
-                    $this->showDownTimer = Timer::add($setTime, function () {
-                        $this->change_show_result();
-                        $this->showResultTimer = Timer::add(config('roomGameConfig.showResultTime'), function () {
-                            $this->change_finished();
-                            $this->nextRaceTimer = Timer::add(2, function () {
-                                $this->running_race_num = $this->running_race_num + 1;
-                                $this->startRace($this->running_race_num);
-                            }, array(), false);
-
+        try {
+            if ($this->running_race_num >= $this->race_count) {
+                $ROOM_STATE = json_decode(ROOM_STATE, true);
+                $this->socket_server->change_room_state($this->room_id, $ROOM_STATE['ALL_RACE_FINISHED']);
+                $this->state = $ROOM_STATE['ALL_RACE_FINISHED'];
+                $info = $this->socket_server->get_room_result($this->room_id);
+                $message = array('type' => 'allRaceFinished', 'info' => array('roomResult' => $info));
+                $this->broadcast_to_all_member($message);
+                Log::write('workman/room:所有比赛结束,房间号:' . $this->room_id, 'info');
+                $this->is_valid = false;
+                return;
+            }
+            $race_play_state = json_decode(RACE_PLAY_STATE, true);
+            $the_landlord_id = $this->get_race_landlord_id($this->running_race_num);
+            if ($the_landlord_id == null) {
+                $this->set_race_state($this->running_race_num, $race_play_state['CHOICE_LANDLORD']);
+                $message = array('type' => 'raceStateChoiceLandlord', 'info' => array('raceNum' => $this->running_race_num, 'roomId' => $this->room_id));
+                $this->broadcast_to_all_member($message); //广播选地主
+                Log::write('workman/room:广播选地主,房间号:' . $this->room_id . ',场次号：' . $this->running_race_num, 'info');
+            } else {
+                $this->change_deal_action();
+                $this->dealActionTimer = Timer::add(config('roomGameConfig.dealAction'), function () {
+                    $this->change_roll_bet();
+                    $this->betTimer = Timer::add(config('roomGameConfig.betTime'), function () {
+                        $this->change_show_down();
+                        $this->showDownTimer = Timer::add(config('roomGameConfig.showDownTime'), function () {
+                            $this->running_race_num = $this->running_race_num + 1;
+                            $this->startRace();
                         }, array(), false);
-
                     }, array(), false);
-
                 }, array(), false);
-
-            }, array(), false);
-
-        }, array(), false);
-    }
-
-    public function startRace($raceNum)
-    {
-        if ($raceNum >= $this->race_count) {
-            $ROOM_STATE = json_decode(ROOM_STATE, true);
-            $this->socket_server->change_room_state($this->room_id, $ROOM_STATE['ALL_RACE_FINISHED']);
-            $this->state = $ROOM_STATE['ALL_RACE_FINISHED'];
-            $info = $this->socket_server->get_room_result($this->room_id);
-            $message = array('type' => 'allRaceFinished', 'info' => array('roomResult' => $info));
-            $this->broadcast_to_all_member($message);
-            Log::write('workman/room:所有比赛结束,房间号:' . $this->room_id, 'info');
-            $this->is_valid = false;
-            return;
+            }
+        } catch (Exception $e) {
+            Log::write($e->getMessage(), 'error');
         }
-        $this->broadcast_to_select_landlord($raceNum);
     }
 
     public function raceBet($userId, $roomId, $raceNum, $betLocation, $betVal)
     {
-        //当前场次 以及状态检查
-        if ($raceNum != $this->running_race_num) {
-            Log::write('workman/room:下注失败,比赛场次号不匹配:', 'error');
-            return;
+        try {
+            //当前场次 以及状态检查
+            if ($raceNum != $this->running_race_num) {
+                Log::write('workman/room:下注失败,比赛场次号不匹配:', 'error');
+                return;
+            }
+            $race_play_state = json_decode(RACE_PLAY_STATE, true);
+            if ($this->get_race_state($this->running_race_num) != $race_play_state['BET']) {
+                Log::write('workman/room:下注失败,当前非下注时间:', 'error');
+                return;
+            }
+            $back = $this->socket_server->to_bet($userId, $roomId, $raceNum, $betLocation, $betVal);
+            if (!$back['status']) {
+                Log::write('workman/room:下注失败,房间号:' . $this->room_id, 'error');
+                return;
+            }
+            Log::write('workman/room:下注成功,房间号:' . $this->room_id, 'info');
+            $message = array('type' => 'betNotice', 'info' => array('userId' => $userId, 'roomId' => $roomId,
+                'raceNum' => $raceNum, 'betLocation' => $betLocation, 'betVal' => $betVal));
+            $this->broadcast_to_all_member($message);
+        } catch (Exception $e) {
+            Log::write($e->getMessage(), 'error');
         }
-        $race_play_state = json_decode(RACE_PLAY_STATE, true);
-        if ($this->get_race_state($this->running_race_num) != $race_play_state['BET']) {
-            Log::write('workman/room:下注失败,当前非下注时间:', 'error');
-            return;
-        }
-        $back = $this->socket_server->to_bet($userId, $roomId, $raceNum, $betLocation, $betVal);
-        if (!$back['status']) {
-            Log::write('workman/room:下注失败,房间号:' . $this->room_id, 'error');
-            return;
-        }
-        Log::write('workman/room:下注成功,房间号:' . $this->room_id, 'info');
-        $message = array('type' => 'betNotice', 'info' => array('userId' => $userId, 'roomId' => $roomId,
-            'raceNum' => $raceNum, 'betLocation' => $betLocation, 'betVal' => $betVal));
-        $this->broadcast_to_all_member($message);
     }
 
     public function cancel_bet_by_location($userId, $roomId, $raceNum, $betLocation)
