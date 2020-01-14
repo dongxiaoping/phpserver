@@ -10,17 +10,25 @@
 // +----------------------------------------------------------------------
 
 namespace app\race\model;
+
 use app\race\model\table\Room;
 use think\Db;
 
-class RoomOP {
-    public function __construct() {
+class RoomOP
+{
+    public function __construct()
+    {
 
     }
 
-    public function change_room_state($room_id , $state)
+    public function change_room_state($room_id, $state)
     {
         Db::query("update room set roomState=" . $state . " where id=" . $room_id);
+    }
+
+    public function change_on_race($room_id, $on_race_num)
+    {
+        Db::query("update room set oningRaceNum=" . $on_race_num . " where id=" . $room_id);
     }
 
     /////////////////

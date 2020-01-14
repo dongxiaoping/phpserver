@@ -113,7 +113,7 @@ class Room
     {
         try {
             $ROOM_STATE = json_decode(ROOM_STATE, true);
-            if ($this->state === $ROOM_STATE["ALL_RACE_FINISHED"] || $this->state === $ROOM_STATE["CLOSE"]) {
+            if ($this->state === $ROOM_STATE["CLOSE"]) {
                 Log::write('workman/room:socket房间比赛已结束，不能加入玩家:' . $userId, 'info');
                 return false;
             }
@@ -121,6 +121,11 @@ class Room
             $member_info = $this->socket_server->get_member_info_in_the_room($userId, $this->room_id);
             if (!$member_info) {
                 Log::write('workman/room:数据库中该用户不在房间，进入socket房间失败:' . $userId, 'error');
+                return false;
+            }
+            $ROOM_PLAY_MEMBER_STATE = json_decode(ROOM_PLAY_MEMBER_STATE, true);
+            if ($member_info['state'] == $ROOM_PLAY_MEMBER_STATE['KICK_OUT']) {
+                Log::write('workman/room:该用户被踢出，不能进入:' . $userId, 'error');
                 return false;
             }
             $this->member_list[$userId] = array('user_id' => $userId, 'connection_id' => $connection->id);
@@ -257,8 +262,8 @@ class Room
         try {
             if ($this->running_race_num >= $this->race_count) {
                 $ROOM_STATE = json_decode(ROOM_STATE, true);
-                $this->socket_server->change_room_state($this->room_id, $ROOM_STATE['ALL_RACE_FINISHED']);
-                $this->state = $ROOM_STATE['ALL_RACE_FINISHED'];
+                $this->socket_server->change_room_state($this->room_id, $ROOM_STATE['CLOSE']);
+                $this->state = $ROOM_STATE['CLOSE'];
                 $info = $this->socket_server->get_room_result($this->room_id);
                 $message = array('type' => 'allRaceFinished', 'info' => array('roomResult' => $info));
                 $this->broadcast_to_all_member($message);
@@ -266,6 +271,8 @@ class Room
                 $this->is_valid = false;
                 return;
             }
+
+            $this->socket_server->change_on_race($this->room_id, $this->running_race_num);
             $race_play_state = json_decode(RACE_PLAY_STATE, true);
             $the_landlord_id = $this->get_race_landlord_id($this->running_race_num);
             if ($the_landlord_id == null) {

@@ -200,7 +200,7 @@ class Worker extends Server
             return false;
         }
         $ROOM_STATE = json_decode(ROOM_STATE, true);
-        if ($room_info["roomState"] === $ROOM_STATE["ALL_RACE_FINISHED"] || $room_info["roomState"] === $ROOM_STATE["CLOSE"]) {
+        if ($room_info["roomState"] == $ROOM_STATE["CLOSE"]) {
             Log::write('workman/worker:游戏已结束，无法进入房间，房间号：' . $roomId, 'error');
             return false;
         }

@@ -31,10 +31,9 @@ DATA_PATH 应用数据目录 （默认为 RUNTIME_PATH.'Data/'）
 /* 房间状态
  * OPEN ：开启
  * PLAYING：游戏中
- * ALL_RACE_FINISHED：所有比赛结束
  * CLOSE： 关闭
  * */
-define('ROOM_STATE', '{ "OPEN": 1, "PLAYING": 2, "ALL_RACE_FINISHED": 3,"CLOSE": 4}');
+define('ROOM_STATE', '{ "OPEN": 1, "PLAYING": 2, "CLOSE": 3}');
 
 //比赛状态
 define('RACE_PLAY_STATE', '{ "NOT_BEGIN": 1, "CHOICE_LANDLORD": 2,"DEAL": 3, "BET": 4, "SHOW_DOWN": 5,"FINISHED": 6}');

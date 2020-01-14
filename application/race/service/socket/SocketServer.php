@@ -26,6 +26,11 @@ class SocketServer
         $this->RaceServer->change_race_state($room_id, $race_num, $state);
     }
 
+    public function change_on_race($room_id, $on_race_num)
+    {
+        $this->RoomOp->change_on_race($room_id, $on_race_num);
+    }
+
     public function change_room_state($room_id, $state)
     {
         $this->RoomOp->change_room_state($room_id, $state);

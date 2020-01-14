@@ -31,6 +31,12 @@ class PlayerOP {
         return $count;
     }
 
+    public function get_member_count_without_kickout($room_id){ //不包含踢出的
+        $table = new Player();
+        $count = $table->where("roomId",$room_id)->where('state!=3')->count();
+        return $count;
+    }
+
     public function get_members_by_room_id($id){
         $table = new Player();
         $list = $table->where('roomId',$id)->select();

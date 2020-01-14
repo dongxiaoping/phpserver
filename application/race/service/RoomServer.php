@@ -91,8 +91,8 @@ class RoomServer extends RoomBase
         if ($room_info === null) {
             return getInterFaceArray(0, "room_not_exist", "");
         }
-        if ($room_info["roomState"] !== $ROOM_STATE["OPEN"]) {
-            return getInterFaceArray(0, "room_not_open_state", "");
+        if ($room_info["roomState"] == $ROOM_STATE["CLOSE"]) {
+            return getInterFaceArray(0, "room_close", "");
         }
         $ROOM_PAY = json_decode(ROOM_PAY, true);
         $diamond = $user_info["diamond"];
@@ -114,7 +114,7 @@ class RoomServer extends RoomBase
 
         /////////房间已满的判断
         $ROOM_PLAY_MEMBER_TYPE = json_decode(ROOM_PLAY_MEMBER_TYPE, true);
-        $member_in_count = $this->PlayerOP->get_member_count_in_the_room($room_id);
+        $member_in_count = $this->PlayerOP->get_member_count_without_kickout($room_id);
         if ($member_in_count >= $room_info["memberLimit"]) {
             return getInterFaceArray(0, "member_count_limit", "");
         }
