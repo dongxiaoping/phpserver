@@ -235,7 +235,9 @@ class Room
     { //下注
         $race_play_state = json_decode(RACE_PLAY_STATE, true);
         $this->set_race_state($this->running_race_num, $race_play_state['BET']);
-        $message = array('type' => 'raceStateBet', 'info' => array('raceNum' => $this->running_race_num, 'roomId' => $this->room_id));
+        $the_landlord_id = $this->get_race_landlord_id($this->running_race_num);
+        $message = array('type' => 'raceStateBet', 'info' => array('raceNum' => $this->running_race_num,
+            'roomId' => $this->room_id, 'landlordId' => $the_landlord_id));
         $this->broadcast_to_all_member($message);
         Log::write('workman/room:启动下注流程，房间号：' . $this->room_id . '场次号：' . $this->running_race_num, 'info');
     }
@@ -245,7 +247,9 @@ class Room
         $race_play_state = json_decode(RACE_PLAY_STATE, true);
         $this->set_race_state($this->running_race_num, $race_play_state['SHOW_DOWN']);
         $result_list = $this->socket_server->get_race_result($this->room_id, $this->running_race_num);
-        $message = array('type' => 'raceStateShowDown', 'info' => array('raceNum' => $this->running_race_num, 'roomId' => $this->room_id, 'resultList' => $result_list));
+        $the_landlord_id = $this->get_race_landlord_id($this->running_race_num);
+        $message = array('type' => 'raceStateShowDown', 'info' => array('raceNum' => $this->running_race_num,
+            'roomId' => $this->room_id, 'resultList' => $result_list, 'landlordId' => $the_landlord_id));
         $this->broadcast_to_all_member($message);
         Log::write('workman/room:启动比大小流程，房间号：' . $this->room_id . '场次号：' . $this->running_race_num, 'info');
     }

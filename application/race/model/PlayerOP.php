@@ -10,40 +10,49 @@
 // +----------------------------------------------------------------------
 
 namespace app\race\model;
+
 use app\race\model\table\Player;
 use think\Db;
 
-class PlayerOP {
-    public function __construct() {
+class PlayerOP
+{
+    public function __construct()
+    {
 
     }
 
     public function get_member_info_in_the_room($user_id, $room_id)
     {
         $table = new Player();
-        $info = $table->where("userId",$user_id)->where("roomId",$room_id)->find();
+        $info = $table->where("userId", $user_id)->where("roomId", $room_id)->find();
         return $info;
     }
 
-    public function get_member_count_in_the_room($room_id){
+    public function get_member_count_in_the_room($room_id)
+    {
         $table = new Player();
-        $count = $table->where("roomId",$room_id)->count();
+        $count = $table->where("roomId", $room_id)->count();
         return $count;
     }
 
-    public function get_member_count_without_kickout($room_id){ //不包含踢出的
+    public function get_member_count_without_kickout($room_id)
+    { //不包含踢出的
         $table = new Player();
-        $count = $table->where("roomId",$room_id)->where('state!=3')->count();
+        $ROOM_PLAY_MEMBER_STATE = json_decode(ROOM_PLAY_MEMBER_STATE, true);
+        $stringItem = 'state!=' . $ROOM_PLAY_MEMBER_STATE['KICK_OUT'];
+        $count = $table->where("roomId", $room_id)->where($stringItem)->count();
         return $count;
     }
 
-    public function get_members_by_room_id($id){
+    public function get_members_by_room_id($id)
+    {
         $table = new Player();
-        $list = $table->where('roomId',$id)->select();
+        $list = $table->where('roomId', $id)->select();
         return $list;
     }
 
-    public function cancel_member_from_room($user_id, $room_id){
+    public function cancel_member_from_room($user_id, $room_id)
+    {
         $table = new Player();
         return $table->where("roomId", $room_id)->where("userId", $user_id)->delete();
     }
