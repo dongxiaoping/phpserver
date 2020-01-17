@@ -130,7 +130,7 @@ class Room
             }
             $this->member_list[$userId] = array('user_id' => $userId, 'connection_id' => $connection->id);
             $this->connect_manage->add_room_id($connection->id, $this->room_id);
-            $message = array('type' => 'newMemberInRoom', 'info' => $member_info);
+            $message = array('type' => 'memberInSocketRoom', 'info' => $member_info);
             $this->broadcast_to_all_member($message);
             Log::write('workman/room:socket房间加入成员成功:' . $userId . ',房间ID' . $this->room_id, 'info');
             return true;
@@ -148,14 +148,13 @@ class Room
             }
             unset($this->member_list[$userId]);
             $ROOM_STATE = json_decode(ROOM_STATE, true);
-            if ($this->state == $ROOM_STATE["OPEN"]) { //如果比赛没有开始，从数据库中删除成员
-                // $this->socket_server->cancel_member_from_room($userId, $this->room_id);  //TODO 为了方便测试 注释掉
+            if ($this->state == $ROOM_STATE["OPEN"] && $this->create_user_id != $userId) { //如果比赛没有开始，并且当前用户不是房主，从数据库中删除成员
+                $this->socket_server->cancel_member_from_room($userId, $this->room_id);
+            } else {
+                $ROOM_PLAY_MEMBER_STATE = json_decode(ROOM_PLAY_MEMBER_STATE, true);
+                $this->socket_server->change_member_state_in_room($userId, $this->room_id, $ROOM_PLAY_MEMBER_STATE['OFF_LINE']);
             }
-            if ($this->create_user_id == $userId && $this->state == $ROOM_STATE["OPEN"]) {
-                $this->is_valid = false;
-                Log::write('workman/room:房主退出房间，并且比赛未开始，房间设置为无效,用户ID:' . $userId, 'info');
-            }
-            $message = array('type' => 'memberOutRoom', 'info' => array('user_id' => $userId));//用户离开socket房间
+            $message = array('type' => 'memberOutSocketRoom', 'info' => array('userId' => $userId));//用户离开socket房间
             $this->broadcast_to_all_member($message);
             return true;
         } catch (Exception $e) {

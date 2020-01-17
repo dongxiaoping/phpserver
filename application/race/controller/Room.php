@@ -70,6 +70,17 @@ class Room
         }
     }
 
+    public function is_room_exist()
+    {
+        header("Access-Control-Allow-Origin: *");
+        if (isset($_GET["roomId"])) {
+            $result_array = $this->RoomServer->is_room_exist($_GET["roomId"]);
+            echo arrayToJson($result_array);
+        } else {
+            echo getJsonStringByParam(0, "param_error", "");
+        }
+    }
+
 
     //http://localhost/phpserver/public/index.php/race/room/test
     public function test()

@@ -57,6 +57,11 @@ class PlayerOP
         return $table->where("roomId", $room_id)->where("userId", $user_id)->delete();
     }
 
+    public function change_state_in_room($user_id, $room_id, $state)
+    {
+        Db::query("update room_player set state=" . $state . " where userId=" . $user_id . " and roomId=" . $room_id);
+    }
+
     /////////////////
     /* $info ["category_name"=>$name,......] 除主键之外的表字段信息集合
  * */

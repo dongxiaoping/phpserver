@@ -77,6 +77,15 @@ class RoomServer extends RoomBase
         return getInterFaceArray(0, "faill", "");
     }
 
+    public function is_room_exist($room_id)
+    {
+        $room_info = $this->RoomOp->get($room_id);
+        if($room_info){
+            return getInterFaceArray(1, "exist", '');
+        }
+        return getInterFaceArray(0, "not_exist", '');
+    }
+
     public function login_in_room($user_id, $room_id)
     {
         $ROOM_STATE = json_decode(ROOM_STATE, true);
@@ -91,7 +100,8 @@ class RoomServer extends RoomBase
         if ($room_info === null) {
             return getInterFaceArray(0, "room_not_exist", "");
         }
-        if ($room_info["roomState"] == $ROOM_STATE["CLOSE"]) {
+        $member_info = $this->PlayerOP->get_member_info_in_the_room($user_id, $room_id);
+        if (!$member_info && $room_info["roomState"] == $ROOM_STATE["CLOSE"]) {
             return getInterFaceArray(0, "room_close", "");
         }
         $ROOM_PAY = json_decode(ROOM_PAY, true);
@@ -102,7 +112,6 @@ class RoomServer extends RoomBase
         }
 
         //////////登录过房间情况的判断
-        $member_info = $this->PlayerOP->get_member_info_in_the_room($user_id, $room_id);
         if ($member_info) {
             if ($member_info["state"] === $ROOM_PLAY_MEMBER_STATE["KICK_OUT"]) {
                 return getInterFaceArray(0, "has_kickout", "");

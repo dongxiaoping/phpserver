@@ -52,20 +52,29 @@ class SocketServer
     }
 
     //一个房间单场比赛的结果
-    public function get_race_result($room_id, $race_num){
+    public function get_race_result($room_id, $race_num)
+    {
         return $this->RaceServer->get_race_result($room_id, $race_num);
     }
 
     //一个房间所有比赛完毕后总的结果
-    public function get_room_result($room_id){
+    public function get_room_result($room_id)
+    {
         return $this->RoomServer->get_room_result($room_id);
     }
 
-    public function cancel_member_from_room($user_id, $room_id){
+    public function cancel_member_from_room($user_id, $room_id)
+    {
         $this->PlayerOP->cancel_member_from_room($user_id, $room_id);
     }
 
-    public function get_room_info_by_id($id){
+    public function change_member_state_in_room($user_id, $room_id, $state)
+    {
+        $this->PlayerOP->change_state_in_room($user_id, $room_id, $state);
+    }
+
+    public function get_room_info_by_id($id)
+    {
         return $this->RoomOp->get($id);
     }
 }
