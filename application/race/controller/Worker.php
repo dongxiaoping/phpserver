@@ -25,8 +25,6 @@ class Worker extends Server
     public $socketServer;
     public $roomList = array(); //房间对象集合
     private $circle_room_check_timer = null;
-    private $invalid_room_check_time = 90;//无效房间检查周期 s  90
-    private $room_time_out_time = 3600;//房间存在超时时间 s  默认1小时 3600
 
     public function __construct()
     {
@@ -135,15 +133,16 @@ class Worker extends Server
     {
         Log::write('workman/worker:用户断开连接', 'info');
         $in_room_id = $this->connectManage->get_room_id($connection->id);
-        if ($in_room_id !== null && isset($this->roomList[$in_room_id])) {
+        if ($in_room_id != null && isset($this->roomList[$in_room_id])) {
+            if (!$this->roomList[$in_room_id]->is_room_valid()) {
+                Log::write('workman/worker:房间无效，销毁房间,房间ID:' . $in_room_id, 'info');
+                $this->roomList[$in_room_id]->destroy();
+                unset($this->roomList[$in_room_id]);
+                return;
+            }
             $member_info = $this->roomList[$in_room_id]->get_member_by_connection_id($connection->id);
-            if ($member_info !== null) {
+            if ($member_info != null) {
                 $this->roomList[$in_room_id]->out_member($member_info['user_id']);
-                if (!$this->roomList[$in_room_id]->is_room_valid()) {
-                    Log::write('workman/worker:房间无效，销毁房间,房间ID:' . $in_room_id, 'info');
-                    $this->roomList[$in_room_id]->destroy();
-                    unset($this->roomList[$in_room_id]);
-                }
                 Log::write('workman/worker:断开连接，用户退出房间', 'info');
             } else {
                 Log::write('workman/worker:房间中未找到用户相关信息', 'error');
@@ -279,18 +278,11 @@ class Worker extends Server
 
     public function roomCheck()
     {
-        $this->circle_room_check_timer = Timer::add($this->invalid_room_check_time, function () {
+        $this->circle_room_check_timer = Timer::add(config('roomGameConfig.invalidRoomCheckTime'), function () {
             Log::write('workman/worker:定时房间检查,房间数量：' . count($this->roomList), 'info');
             foreach ($this->roomList as $roomItem) {
-                $now_time = time();
-                if (!($roomItem->is_room_valid()) || count($roomItem->member_list) <= 0) {
+                if (!$roomItem->is_room_valid()) {
                     Log::write('workman/worker:发现无效socket房间，销毁,房间ID:' . $roomItem->room_id, 'info');
-                    $this->roomList[$roomItem->room_id]->destroy();
-                    unset($this->roomList[$roomItem->room_id]);
-                }
-                //  var_dump('当前时间：' . $now_time . '__房间创建时间：' . $roomItem->creatTime);
-                if ($now_time - $roomItem->creatTime >= $this->room_time_out_time) {
-                    // var_dump('销毁房间，房间超时');
                     $this->roomList[$roomItem->room_id]->destroy();
                     unset($this->roomList[$roomItem->room_id]);
                 }

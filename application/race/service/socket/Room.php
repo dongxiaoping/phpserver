@@ -64,6 +64,10 @@ class Room
 
     public function is_room_valid()
     {
+        $now_time = time();
+        if ($now_time - $this->creatTime >= config('roomGameConfig.roomTimeoutTime')) {
+            $this->is_valid = false;
+        }
         return $this->is_valid;
     }
 
@@ -84,6 +88,7 @@ class Room
             $this->set_race_landlord($this->running_race_num, $landlordId);
             $landlordLastCount = config('roomGameConfig.landlordLastCount');
             $this->socket_server->change_race_landlord($this->room_id, $this->running_race_num, $landlordId, $landlordLastCount); //数据库修改
+            $this->creatTime = time();
             $this->startRace();
         } catch (Exception $e) {
             Log::write($e->getMessage(), 'error');

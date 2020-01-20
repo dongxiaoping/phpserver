@@ -34,9 +34,10 @@ class ConnectManage
         return null;
     }
 
-    public function get_room_id($connection_id){
+    public function get_room_id($connection_id)
+    {
         if (isset($this->connection_room_list[$connection_id])) {
-           return $this->connection_room_list[$connection_id];
+            return $this->connection_room_list[$connection_id];
         }
         return null;
     }
@@ -51,6 +52,8 @@ class ConnectManage
 
     public function remove_room_id($connection_id)
     {
-        unset($this->connection_room_list[$connection_id]);
+        if (isset($this->connection_room_list[$connection_id])) {
+            unset($this->connection_room_list[$connection_id]);
+        }
     }
 }
