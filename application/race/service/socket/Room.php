@@ -67,6 +67,11 @@ class Room
         $now_time = time();
         if ($now_time - $this->creatTime >= config('roomGameConfig.roomTimeoutTime')) {
             $this->is_valid = false;
+            $ROOM_STATE = json_decode(ROOM_STATE, true);
+            if ($this->state != $ROOM_STATE['CLOSE']) {
+                $this->state = $ROOM_STATE['CLOSE'];
+                $this->socket_server->change_room_state($this->room_id, $ROOM_STATE['CLOSE']);
+            }
         }
         return $this->is_valid;
     }
