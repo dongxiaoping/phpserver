@@ -138,6 +138,7 @@ class Room
                 Log::write('workman/room:该用户被踢出，不能进入:' . $userId, 'error');
                 return false;
             }
+            $this->socket_server->change_member_state_in_room($userId, $this->room_id, $ROOM_PLAY_MEMBER_STATE['ON_LINE']);
             $this->member_list[$userId] = array('user_id' => $userId, 'connection_id' => $connection->id);
             $this->connect_manage->add_room_id($connection->id, $this->room_id);
             $message = array('type' => 'memberInSocketRoom', 'info' => $member_info);
