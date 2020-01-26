@@ -13,6 +13,7 @@ class Room
 
     public $room_id = null;
     public $member_list = array(); //connect 对象id集合   $this->member_list[$userId] = array('user_id' => $userId, 'connection_id' => $connection->id);
+    public $score_list = array(); //已发布场次的玩家得分集合
     public $race_list = array();
     private $state = null; //房间状态
     private $running_race_num = 0;
@@ -257,12 +258,25 @@ class Room
         $race_play_state = json_decode(RACE_PLAY_STATE, true);
         $this->set_race_state($this->running_race_num, $race_play_state['SHOW_DOWN']);
         $race_result = $this->socket_server->get_race_result($this->room_id, $this->running_race_num);
-        $room_result = $this->socket_server->get_room_result($this->room_id, $this->running_race_num);
+        $this->add_score_list($race_result);
         $the_landlord_id = $this->get_race_landlord_id($this->running_race_num);
         $message = array('type' => 'raceStateShowDown', 'info' => array('raceNum' => $this->running_race_num,
-            'roomId' => $this->room_id, 'raceResult' => $race_result, 'roomResult' => $room_result, 'landlordId' => $the_landlord_id));
+            'roomId' => $this->room_id, 'raceResult' => $race_result, 'roomResult' => $this->score_list, 'landlordId' => $the_landlord_id));
         $this->broadcast_to_all_member($message);
         Log::write('workman/room:启动比大小流程，房间号：' . $this->room_id . '场次号：' . $this->running_race_num, 'info');
+    }
+
+    public function add_score_list($race_score_list)
+    {
+        for ($i = 0; $i < count($race_score_list); $i++) {
+            $user_id = $race_score_list[$i]['userId'];
+            $score = $race_score_list[$i]['score'];
+            if (isset($this->score_list[$user_id])) {
+                $this->score_list[$user_id] += $score;
+            } else {
+                $this->score_list[$user_id] = $score;
+            }
+        }
     }
 
     public function destroy()
