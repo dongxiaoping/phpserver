@@ -57,10 +57,10 @@ class SocketServer
         return $this->RaceServer->get_race_result($room_id, $race_num);
     }
 
-    //一个房间所有比赛完毕后总的结果
-    public function get_room_result($room_id)
+    //一个房间0-指定场次号的比赛的分汇总
+    public function get_room_result($room_id, $race_num)
     {
-        return $this->RoomServer->get_room_result($room_id);
+        return $this->RoomServer->get_room_result($room_id, $race_num);
     }
 
     public function cancel_member_from_room($user_id, $room_id)

@@ -80,7 +80,7 @@ class RoomServer extends RoomBase
     public function is_room_exist($room_id)
     {
         $room_info = $this->RoomOp->get($room_id);
-        if($room_info){
+        if ($room_info) {
             return getInterFaceArray(1, "exist", '');
         }
         return getInterFaceArray(0, "not_exist", '');
@@ -159,12 +159,10 @@ class RoomServer extends RoomBase
         return array('room' => $room_info, 'races' => $race_info, 'members' => $member_info, 'betRecords' => $bet_record_info);
     }
 
-    public function get_room_result($room_id)
+    public function get_room_result($room_id, $race_num)
     {
-        $room_info = $this->RoomOp->get($room_id);
-        $playCount = $room_info['playCount'];
         $list = $this->RaceServer->get_race_result($room_id, 0);
-        for ($i = 1; $i < $playCount; $i++) {
+        for ($i = 1; $i <= $race_num; $i++) {
             $otherList = $this->RaceServer->get_race_result($room_id, $i);
             $list = $this->to_race_merge($list, $otherList);
         }

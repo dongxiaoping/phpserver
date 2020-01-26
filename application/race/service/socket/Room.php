@@ -256,10 +256,11 @@ class Room
     { //比大小
         $race_play_state = json_decode(RACE_PLAY_STATE, true);
         $this->set_race_state($this->running_race_num, $race_play_state['SHOW_DOWN']);
-        $result_list = $this->socket_server->get_race_result($this->room_id, $this->running_race_num);
+        $race_result = $this->socket_server->get_race_result($this->room_id, $this->running_race_num);
+        $room_result = $this->socket_server->get_room_result($this->room_id, $this->running_race_num);
         $the_landlord_id = $this->get_race_landlord_id($this->running_race_num);
         $message = array('type' => 'raceStateShowDown', 'info' => array('raceNum' => $this->running_race_num,
-            'roomId' => $this->room_id, 'resultList' => $result_list, 'landlordId' => $the_landlord_id));
+            'roomId' => $this->room_id, 'raceResult' => $race_result, 'roomResult' => $room_result, 'landlordId' => $the_landlord_id));
         $this->broadcast_to_all_member($message);
         Log::write('workman/room:启动比大小流程，房间号：' . $this->room_id . '场次号：' . $this->running_race_num, 'info');
     }
@@ -278,7 +279,7 @@ class Room
                 $ROOM_STATE = json_decode(ROOM_STATE, true);
                 $this->socket_server->change_room_state($this->room_id, $ROOM_STATE['CLOSE']);
                 $this->state = $ROOM_STATE['CLOSE'];
-                $info = $this->socket_server->get_room_result($this->room_id);
+                $info = $this->socket_server->get_room_result($this->room_id, $this->race_count - 1);
                 $message = array('type' => 'allRaceFinished', 'info' => array('roomResult' => $info));
                 $this->broadcast_to_all_member($message);
                 Log::write('workman/room:所有比赛结束,房间号:' . $this->room_id, 'info');
