@@ -59,7 +59,7 @@ class Room
             $content['roomPay'] = $_GET["roomPay"];  //房间费用支付模式
             $content['costLimit'] = $_GET["costLimit"];  //下注上限
             $is_val_all_right = $this->RoomServer->check_vals_create_room($content);
-            if(!$is_val_all_right){
+            if (!$is_val_all_right) {
                 echo getJsonStringByParam(0, "param_val_error", "");
                 return;
             }
@@ -75,6 +75,17 @@ class Room
         header("Access-Control-Allow-Origin: *");
         if (isset($_GET["roomId"])) {
             $result_array = $this->RoomServer->is_room_exist($_GET["roomId"]);
+            echo arrayToJson($result_array);
+        } else {
+            echo getJsonStringByParam(0, "param_error", "");
+        }
+    }
+
+    public function get_room_result()
+    {
+        header("Access-Control-Allow-Origin: *");
+        if (isset($_GET["roomId"]) && isset($_GET["raceNum"])) {
+            $result_array = $this->RoomServer->get_room_result($_GET["roomId"], $_GET["raceNum"]);
             echo arrayToJson($result_array);
         } else {
             echo getJsonStringByParam(0, "param_error", "");

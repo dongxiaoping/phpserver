@@ -60,7 +60,8 @@ class SocketServer
     //一个房间0-指定场次号的比赛的分汇总
     public function get_room_result($room_id, $race_num)
     {
-        return $this->RoomServer->get_room_result($room_id, $race_num);
+        $info = $this->RoomServer->get_room_result($room_id, $race_num);
+        return $info['data'];
     }
 
     public function cancel_member_from_room($user_id, $room_id)

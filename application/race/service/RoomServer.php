@@ -101,9 +101,9 @@ class RoomServer extends RoomBase
             return getInterFaceArray(0, "room_not_exist", "");
         }
         $member_info = $this->PlayerOP->get_member_info_in_the_room($user_id, $room_id);
-        if (!$member_info && $room_info["roomState"] == $ROOM_STATE["CLOSE"]) {
-            return getInterFaceArray(0, "room_close", "");
-        }
+//        if (!$member_info && $room_info["roomState"] == $ROOM_STATE["CLOSE"]) {
+//            return getInterFaceArray(0, "room_close", "");
+//        }
         $ROOM_PAY = json_decode(ROOM_PAY, true);
         $diamond = $user_info["diamond"];
         if ($user_id != $room_info["creatUserId"] && $diamond < $room_info["roomFee"] &&
@@ -166,6 +166,6 @@ class RoomServer extends RoomBase
             $otherList = $this->RaceServer->get_race_result($room_id, $i);
             $list = $this->to_race_merge($list, $otherList);
         }
-        return $list;
+        return getInterFaceArray(1, "success", $list);
     }
 }
