@@ -119,7 +119,10 @@ class RoomServer extends RoomBase
             $room_race_info = $this->get_room_race_info($room_id);
             return getInterFaceArray(1, "success", $room_race_info);
         }
-
+        if ($room_info["roomState"] == $ROOM_STATE["CLOSE"]) {
+            $room_race_info = $this->get_room_race_info($room_id);
+            return getInterFaceArray(1, "success", $room_race_info);
+        }
 
         /////////房间已满的判断
         $ROOM_PLAY_MEMBER_TYPE = json_decode(ROOM_PLAY_MEMBER_TYPE, true);
