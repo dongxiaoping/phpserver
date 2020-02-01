@@ -15,29 +15,52 @@ class RoomBase
     public function getRoomCostValue($playCount, $costLimit, $roomPay)
     {
         $ROOM_PAY = json_decode(ROOM_PAY, true);
-        $cost = 10;
-        if ($playCount <= 20) { //次数
-            $cost = $cost + 2;
-        } else if ($playCount <= 30) {
-            $cost = $cost + 3;
-        } else { //40
-            $cost = $cost + 4;
+        $diamond = 0;
+        $rate = 1;
+        if ($roomPay == $ROOM_PAY["AA"]) { //代开
+            switch ($playCount) {
+                case 15:
+                    $diamond = 3;
+                    break;
+                case 20:
+                    $diamond = 3;
+                    break;
+                case 25:
+                    $diamond = 4;
+                    break;
+                default:
+                    break;
+            }
+        } else {
+            switch ($playCount) {
+                case 15:
+                    $diamond = 20;
+                    break;
+                case 20:
+                    $diamond = 25;
+                    break;
+                case 25:
+                    $diamond = 30;
+                    break;
+                default:
+                    break;
+            }
         }
 
-
-        if ($costLimit <= 40) { //下注值
-            $cost = $cost * 2;
-        } else if ($playCount <= 80) {
-            $cost = $cost * 2;
-        } else if ($playCount <= 100) {
-            $cost = $cost * 3;
-        } else {//200
-            $cost = $cost * 3;
+        switch ($costLimit) {
+            case 200:
+                $rate = 1;
+                break;
+            case 300:
+                $rate = 1.5;
+                break;
+            case 500:
+                $rate = 2;
+                break;
+            default:
+                break;
         }
-        if ($roomPay === $ROOM_PAY["CREATOR"]) {
-            return 3 * $cost;
-        }
-        return $cost;
+        return $diamond * $rate;
     }
 
     public function to_race_merge($list, $otherList)

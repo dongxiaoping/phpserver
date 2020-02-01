@@ -26,11 +26,11 @@ class UserOP
     {
         $item = $this->get($id);
         if ($item) {
-            $new_cash = $type?($item["diamond"] + $cash):($item["diamond"] - $cash);
+            $new_cash = $type ? ($item["diamond"] + $cash) : ($item["diamond"] - $cash);
             Db::query("update user set diamond=" . $new_cash . " where id=" . $id);
-            return true;
+            return $new_cash;
         } else {
-            return false;
+            return -1;
         }
     }
 

@@ -58,7 +58,10 @@ class RoomServer extends RoomBase
         $diamond = $item["diamond"] - $cost_value;
         $info["roomFee"] = $cost_value;
         if ($diamond < 0) {
-            return getInterFaceArray(0, "diamond_not_enough", "");
+            $back_content = [];
+            $back_content['has'] = $item["diamond"];
+            $back_content['need'] = $cost_value;
+            return getInterFaceArray(0, "diamond_not_enough", $back_content);
         }
         $room_id = $this->RoomOp->insert($info);
         if ($room_id) {
@@ -66,11 +69,11 @@ class RoomServer extends RoomBase
             if (!$isRaceOk) {
                 return getInterFaceArray(0, "race_error", "");
             }
-            $isCashOk = $this->UserOP->mod_cash_by_user_id($user_id, $cost_value, 0);
-            if (!$isCashOk) {
-                return getInterFaceArray(0, "cash_error", "");
-            }
-            $this->CostServer->add_cost_record($user_id, $room_id, $cost_value);
+//            $isCashOk = $this->UserOP->mod_cash_by_user_id($user_id, $cost_value, 0);
+//            if (!$isCashOk) {
+//                return getInterFaceArray(0, "cash_error", "");
+//            }
+//            $this->CostServer->add_cost_record($user_id, $room_id, $cost_value);
             $room_info = $this->RoomOp->get($room_id);
             return getInterFaceArray(1, "success", $room_info);
         }
@@ -101,14 +104,17 @@ class RoomServer extends RoomBase
             return getInterFaceArray(0, "room_not_exist", "");
         }
         $member_info = $this->PlayerOP->get_member_info_in_the_room($user_id, $room_id);
-//        if (!$member_info && $room_info["roomState"] == $ROOM_STATE["CLOSE"]) {
-//            return getInterFaceArray(0, "room_close", "");
-//        }
+
         $ROOM_PAY = json_decode(ROOM_PAY, true);
-        $diamond = $user_info["diamond"];
-        if ($user_id != $room_info["creatUserId"] && $diamond < $room_info["roomFee"] &&
+        $back_content = [];
+        $back_content['has'] = $user_info["diamond"];
+        $back_content['need'] = $room_info["roomFee"];
+        if ($user_id == $room_info["creatUserId"] && $user_info["diamond"] < $room_info["roomFee"]) {
+            return getInterFaceArray(0, "diamond_not_enough", $back_content); //账户钻不够
+        }
+        if ($user_id != $room_info["creatUserId"] && $user_info["diamond"] < $room_info["roomFee"] &&
             $room_info["roomPay"] == $ROOM_PAY["AA"]) {
-            return getInterFaceArray(0, "diamond_not_enough", $room_info["roomFee"]); //账户钻不够
+            return getInterFaceArray(0, "diamond_not_enough", $back_content);
         }
 
         //////////登录过房间情况的判断

@@ -38,7 +38,7 @@ class UserServer
     public function create_visit_account()
     {
         $USER_TYPE = json_decode(USER_TYPE, true);
-        $diamond_val = 100;
+        $diamond_val = 0;
         $item = [
             'score' => 0,
             'diamond' => $diamond_val,
@@ -74,10 +74,20 @@ class UserServer
         }
         $cost_value = $item["roomFee"];
         $isCashOk = $this->UserOP->mod_cash_by_user_id($userId, $cost_value, 0);
-        if ($isCashOk) {
+        if ($isCashOk != -1) {
             $this->CostServer->add_cost_record($userId, $roomId, $cost_value);
             return getInterFaceArray(1, "success", "");
         }
         return getInterFaceArray(0, "cash_error", "");
+    }
+
+    public function recharge_diamond($userId, $diamondCount)
+    {
+        $val = $this->UserOP->mod_cash_by_user_id($userId, $diamondCount, 1);
+        if ($val == -1) {
+            return getInterFaceArray(0, "fail", "");
+        } else {
+            return getInterFaceArray(1, "success", $val);
+        }
     }
 }

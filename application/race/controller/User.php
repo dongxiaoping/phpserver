@@ -55,6 +55,18 @@ class User
         }
     }
 
+    //冲钻
+    public function recharge_diamond()
+    {
+        header('Access-Control-Allow-Origin: *');
+        if ($_GET["userId"] && $_GET["diamondCount"]) {
+            $result_array = $this->UserServer->recharge_diamond($_GET["userId"], $_GET["diamondCount"]);
+            echo arrayToJson($result_array);
+        } else {
+            echo getJsonStringByParam(0, "param_error", "");
+        }
+    }
+
     public function mod_account_info()
     {
 
