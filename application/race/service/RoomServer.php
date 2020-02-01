@@ -22,6 +22,7 @@ class RoomServer extends RoomBase
     public function __construct()
     {
         $this->RoomOp = new  RoomOP();
+        $this->UserServer = new  UserServer();
         $this->UserOP = new  UserOP();
         $this->RaceServer = new RaceServer();
         $this->PlayerOP = new PlayerOP();
@@ -152,6 +153,9 @@ class RoomServer extends RoomBase
         ];
         $isOk = $this->PlayerOP->insert($item);
         if ($isOk) {
+            if ($room_info["roomState"] == $ROOM_STATE["PLAYING"]) { //扣费
+                $this->UserServer->cost_diamond_in_room($room_info['id'], $user_id);
+            }
             $room_race_info = $this->get_room_race_info($room_id);
             return getInterFaceArray(1, "success", $room_race_info);
         }

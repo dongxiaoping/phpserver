@@ -30,7 +30,7 @@ class UserOP
             Db::query("update user set diamond=" . $new_cash . " where id=" . $id);
             return $new_cash;
         } else {
-            return -1;
+            return null;
         }
     }
 

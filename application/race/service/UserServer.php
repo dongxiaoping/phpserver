@@ -35,6 +35,16 @@ class UserServer
         return $info;
     }
 
+    public function get_user_diamond($id)
+    {
+        $item = $this->UserOP->get($id);
+        if ($item == null) {
+            return getInterFaceArray(0, "not_exist", "");
+        }
+        $info = getInterFaceArray(1, "success", $item['diamond']);
+        return $info;
+    }
+
     public function create_visit_account()
     {
         $USER_TYPE = json_decode(USER_TYPE, true);
@@ -65,18 +75,14 @@ class UserServer
             return getInterFaceArray(0, "room_not_exist", "");
         }
         $ROOM_PAY = json_decode(ROOM_PAY, true);
-        $roomPay = $item["roomPay"];
-        if ($roomPay == $ROOM_PAY["CREATOR"]) {
-            return getInterFaceArray(0, "not_aa", "");
-        }
-        if ($userId == $item["creatUserId"]) {
-            return getInterFaceArray(0, "is_creator", "");
+        if ($userId != $item["creatUserId"] && $item["roomPay"] == $ROOM_PAY["CREATOR"]) {
+            return getInterFaceArray(0, "not_need_diamond", "");
         }
         $cost_value = $item["roomFee"];
-        $isCashOk = $this->UserOP->mod_cash_by_user_id($userId, $cost_value, 0);
-        if ($isCashOk != -1) {
+        $diamond_count = $this->UserOP->mod_cash_by_user_id($userId, $cost_value, 0);
+        if ($diamond_count != null) {
             $this->CostServer->add_cost_record($userId, $roomId, $cost_value);
-            return getInterFaceArray(1, "success", "");
+            return getInterFaceArray(1, "success", $diamond_count);
         }
         return getInterFaceArray(0, "cash_error", "");
     }
@@ -84,7 +90,7 @@ class UserServer
     public function recharge_diamond($userId, $diamondCount)
     {
         $val = $this->UserOP->mod_cash_by_user_id($userId, $diamondCount, 1);
-        if ($val == -1) {
+        if ($val == null) {
             return getInterFaceArray(0, "fail", "");
         } else {
             return getInterFaceArray(1, "success", $val);

@@ -55,6 +55,18 @@ class User
         }
     }
 
+    public function get_user_diamond()
+    {
+        header('Access-Control-Allow-Origin: *');
+        if ($_GET["userId"]) {
+            $result_array = $this->UserServer->get_user_diamond($_GET["userId"]);
+            echo arrayToJson($result_array);
+        } else {
+            echo getJsonStringByParam(0, "param_error", "");
+        }
+    }
+
+
     //冲钻
     public function recharge_diamond()
     {
@@ -77,7 +89,7 @@ class User
     {
         var_dump('welcome');
         Log::record('测试日志信息');
-        Log::record('测试日志信息，这是警告级别','error');
-        Log::write('测试日志信息，这是警告级别，并且实时写入','notice');
+        Log::record('测试日志信息，这是警告级别', 'error');
+        Log::write('测试日志信息，这是警告级别，并且实时写入', 'notice');
     }
 }
