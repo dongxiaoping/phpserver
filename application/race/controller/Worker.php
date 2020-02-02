@@ -41,10 +41,10 @@ class Worker extends Server
     public function onMessage($connection, $data)
     {
         $data = json_decode($data, true);
-        Log::write('-----------------------------------------------------------------------', 'info');
-        Log::write($data, 'info');
+        //Log::write('-----------------------------------------------------------------------', 'info');
+        //Log::write($data, 'info');
         if ($this->circle_room_check_timer === null) {
-            Log::write('workman/worker:启动房间检查', 'info');
+            //Log::write('workman/worker:启动房间检查', 'info');
             $this->roomCheck();
         }
         switch ($data['type']) {
@@ -54,7 +54,7 @@ class Worker extends Server
                     $userId = $data['info']['userId'];
                     $this->enterRoom($roomId, $connection, $userId); //只表示进入socket房间，进入的前提是通过接口进入数据库房间成功
                 } else {
-                    Log::write('workman/worker:参数错误', 'error');
+                    //Log::write('workman/worker:参数错误', 'error');
                 }
                 break;
             case 'outRoom': //退出房间
@@ -63,7 +63,7 @@ class Worker extends Server
                     $userId = $data['info']['userId'];
                     $this->outRoom($roomId, $userId, $connection->id);
                 } else {
-                    Log::write('workman/worker:参数错误', 'error');
+                    //Log::write('workman/worker:参数错误', 'error');
                 }
                 break;
             case 'startRoomGame':
@@ -72,7 +72,7 @@ class Worker extends Server
                     $userId = $data['info']['userId'];
                     $this->startRoomGame($connection, $roomId, $userId);
                 } else {
-                    Log::write('workman/worker:参数错误', 'error');
+                    //Log::write('workman/worker:参数错误', 'error');
                 }
                 break;
             case 'landlordSelected': //玩家选择当地主通知
@@ -82,7 +82,7 @@ class Worker extends Server
                     $landlordId = $data['info']['landlordId'];
                     $this->landlordSelected($roomId, $raceNum, $landlordId);
                 } else {
-                    Log::write('workman/worker:参数错误', 'error');
+                    //Log::write('workman/worker:参数错误', 'error');
                 }
                 break;
             case 'raceBet': //下注
@@ -95,7 +95,7 @@ class Worker extends Server
                     $betVal = $data['info']['betVal'];
                     $this->raceBet($userId, $roomId, $raceNum, $betLocation, $betVal);
                 } else {
-                    Log::write('workman/worker:参数错误', 'error');
+                    //Log::write('workman/worker:参数错误', 'error');
                 }
                 break;
             case 'cancelRaceBet': //取消指定房间、指定用户、指定场次、指定位置的下注
@@ -107,7 +107,7 @@ class Worker extends Server
                     $betLocation = $data['info']['betLocation'];
                     $this->cancelRaceBet($userId, $roomId, $raceNum, $betLocation);
                 } else {
-                    Log::write('workman/worker:参数错误', 'error');
+                    //Log::write('workman/worker:参数错误', 'error');
                 }
                 break;
             default:
@@ -122,7 +122,7 @@ class Worker extends Server
     public function onConnect($connection)
     {
         $this->connectManage->add_connect($connection);
-        Log::write('workman/worker:连接成功', 'info');
+        //Log::write('workman/worker:连接成功', 'info');
     }
 
     /**
@@ -131,11 +131,11 @@ class Worker extends Server
      */
     public function onClose($connection)
     {
-        Log::write('workman/worker:用户断开连接', 'info');
+        //Log::write('workman/worker:用户断开连接', 'info');
         $in_room_id = $this->connectManage->get_room_id($connection->id);
         if ($in_room_id != null && isset($this->roomList[$in_room_id])) {
             if (!$this->roomList[$in_room_id]->is_room_valid()) {
-                Log::write('workman/worker:房间无效，销毁房间,房间ID:' . $in_room_id, 'info');
+                //Log::write('workman/worker:房间无效，销毁房间,房间ID:' . $in_room_id, 'info');
                 $this->roomList[$in_room_id]->destroy();
                 unset($this->roomList[$in_room_id]);
                 return;
@@ -143,12 +143,12 @@ class Worker extends Server
             $member_info = $this->roomList[$in_room_id]->get_member_by_connection_id($connection->id);
             if ($member_info != null) {
                 $this->roomList[$in_room_id]->out_member($member_info['user_id']);
-                Log::write('workman/worker:断开连接，用户退出房间', 'info');
+                //Log::write('workman/worker:断开连接，用户退出房间', 'info');
             } else {
-                Log::write('workman/worker:房间中未找到用户相关信息', 'error');
+                //Log::write('workman/worker:房间中未找到用户相关信息', 'error');
             }
         } else {
-            Log::write('workman/worker:用户不在房间或者房间未创建', 'info');
+            //Log::write('workman/worker:用户不在房间或者房间未创建', 'info');
         }
         $this->connectManage->remove_connect($connection);
     }
@@ -176,7 +176,7 @@ class Worker extends Server
     public function raceBet($userId, $roomId, $raceNum, $betLocation, $betVal)
     {
         if (!isset($this->roomList[$roomId])) {
-            Log::write('workman/worker:房间不存在，无法下注', 'error');
+            //Log::write('workman/worker:房间不存在，无法下注', 'error');
             return false;
         }
         $this->roomList[$roomId]->raceBet($userId, $roomId, $raceNum, $betLocation, $betVal);
@@ -185,7 +185,7 @@ class Worker extends Server
     public function cancelRaceBet($userId, $roomId, $raceNum, $betLocation)
     {
         if (!isset($this->roomList[$roomId])) {
-            Log::write('workman/worker:房间不存在，无法取消下注', 'error');
+            //Log::write('workman/worker:房间不存在，无法取消下注', 'error');
             return false;
         }
         $this->roomList[$roomId]->cancel_bet_by_location($userId, $roomId, $raceNum, $betLocation);
@@ -195,12 +195,12 @@ class Worker extends Server
     {
         $room_info = $this->socketServer->get_room_info_by_id($roomId);
         if (!$room_info) {
-            Log::write('workman/worker:无法进入房间，该房间在数据库中不存在，房间号：' . $roomId, 'error');
+            //Log::write('workman/worker:无法进入房间，该房间在数据库中不存在，房间号：' . $roomId, 'error');
             return false;
         }
         $ROOM_STATE = json_decode(ROOM_STATE, true);
         if ($room_info["roomState"] == $ROOM_STATE["CLOSE"]) {
-            Log::write('workman/worker:游戏已结束，无法进入房间，房间号：' . $roomId, 'error');
+            //Log::write('workman/worker:游戏已结束，无法进入房间，房间号：' . $roomId, 'error');
             return false;
         }
 
@@ -208,22 +208,22 @@ class Worker extends Server
         if (isset($this->roomList[$roomId]) && (!$this->roomList[$roomId]->is_room_valid())) { //socket房间存在 并且无效 删除socket房间
             $this->roomList[$roomId]->destroy();
             unset($this->roomList[$roomId]);
-            Log::write('workman/worker:无效房间，销毁，房间号：' . $roomId, 'info');
+            //Log::write('workman/worker:无效房间，销毁，房间号：' . $roomId, 'info');
         }
 
         if (!isset($this->roomList[$roomId])) { //socket房间不存在
             $create_user_id = $room_info['creatUserId'];
             $newRoom = new Room($roomId, $create_user_id, $room_info["playCount"], $this->connectManage, $this->socketServer);
             $this->roomList[$roomId] = $newRoom;
-            Log::write('workman/worker:socket房间创建成功，房间号：' . $roomId, 'info');
+            //Log::write('workman/worker:socket房间创建成功，房间号：' . $roomId, 'info');
         }
 
         $is_right = $this->roomList[$roomId]->add_member($connection, $userId);
         if ($is_right) {
-            Log::write('workman/worker:人员加入房间成功', 'info');
+            //Log::write('workman/worker:人员加入房间成功', 'info');
             return true;
         } else {
-            Log::write('workman/worker:人员加入房间失败', 'error');
+            //Log::write('workman/worker:人员加入房间失败', 'error');
             return false;
         }
     }
@@ -234,15 +234,15 @@ class Worker extends Server
         if (isset($this->roomList[$roomId])) {
             $this->roomList[$roomId]->out_member($userId);
             if (!$this->roomList[$roomId]->is_room_valid()) {
-                Log::write('workman/worker:房间无效，销毁房间,房间ID:' . $roomId, 'info');
+                //Log::write('workman/worker:房间无效，销毁房间,房间ID:' . $roomId, 'info');
                 $this->roomList[$roomId]->destroy();
                 unset($this->roomList[$roomId]);
             }
-            Log::write('workman/worker:用户主动退出房间', 'info');
+            //Log::write('workman/worker:用户主动退出房间', 'info');
             return true;
         } else {
-            Log::write('workman/worker:用户主动退出房间,但是房间不存在', 'error');
-            Log::write('workman/worker:房间ID:' . $roomId . ',用户ID:' . $userId . ',连接ID:' . $connection_id, 'error');
+            //Log::write('workman/worker:用户主动退出房间,但是房间不存在', 'error');
+            //Log::write('workman/worker:房间ID:' . $roomId . ',用户ID:' . $userId . ',连接ID:' . $connection_id, 'error');
             return false;
         }
     }
@@ -250,7 +250,7 @@ class Worker extends Server
     public function startRoomGame($connection, $roomId, $userId)
     {
         if (!isset($this->roomList[$roomId])) {
-            Log::write('workman/worker:房间不存在,不能启动游戏', 'error');
+            //Log::write('workman/worker:房间不存在,不能启动游戏', 'error');
             return false;
         }
 
@@ -258,10 +258,10 @@ class Worker extends Server
         $room_state = $this->roomList[$roomId]->get_room_state();
         $is_user_in_room = $this->roomList[$roomId]->is_user_in_room($userId);
         if ($room_state !== $ROOM_STATE['OPEN'] || (!$is_user_in_room)) {
-            Log::write('workman/worker:房间游戏不能重复开始,或者用户不在该房间', 'error');
+            //Log::write('workman/worker:房间游戏不能重复开始,或者用户不在该房间', 'error');
             return;
         } else {
-            Log::write('workman/worker:房间游戏开始', 'info');
+            //Log::write('workman/worker:房间游戏开始', 'info');
         }
         $this->roomList[$roomId]->start_game();
     }
@@ -270,7 +270,7 @@ class Worker extends Server
     public function landlordSelected($roomId, $raceNum, $landlordId)
     {
         if (!isset($this->roomList[$roomId])) {
-            Log::write('workman/worker:房间不存在,无法抢地主', 'error');
+            //Log::write('workman/worker:房间不存在,无法抢地主', 'error');
             return;
         }
         $this->roomList[$roomId]->landlord_selected($raceNum, $landlordId);
@@ -279,10 +279,10 @@ class Worker extends Server
     public function roomCheck()
     {
         $this->circle_room_check_timer = Timer::add(config('roomGameConfig.invalidRoomCheckTime'), function () {
-            Log::write('workman/worker:定时房间检查,房间数量：' . count($this->roomList), 'info');
+            //Log::write('workman/worker:定时房间检查,房间数量：' . count($this->roomList), 'info');
             foreach ($this->roomList as $roomItem) {
                 if (!$roomItem->is_room_valid()) {
-                    Log::write('workman/worker:发现无效socket房间，销毁,房间ID:' . $roomItem->room_id, 'info');
+                    //Log::write('workman/worker:发现无效socket房间，销毁,房间ID:' . $roomItem->room_id, 'info');
                     $this->roomList[$roomItem->room_id]->destroy();
                     unset($this->roomList[$roomItem->room_id]);
                 }
