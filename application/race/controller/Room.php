@@ -92,6 +92,15 @@ class Room
         }
     }
 
+    //http://localhost/phpserver/public/index.php/race/room/get_config
+    public function get_config()
+    {
+        header("Access-Control-Allow-Origin: *");
+        $info = [];
+        $info["roomGame"] = config('roomGameConfig');
+        $info["createDiamond"] = config('createDiamondConfig');
+        echo getJsonStringByParam(1, "success", $info);
+    }
 
     //http://localhost/phpserver/public/index.php/race/room/test
     public function test()

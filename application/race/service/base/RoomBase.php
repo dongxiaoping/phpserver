@@ -15,50 +15,67 @@ class RoomBase
     public function getRoomCostValue($playCount, $costLimit, $roomPay)
     {
         $ROOM_PAY = json_decode(ROOM_PAY, true);
+        $createDiamondConfig = config('createDiamondConfig');
         $diamond = 0;
         $rate = 1;
         if ($roomPay == $ROOM_PAY["AA"]) { //代开
             switch ($playCount) {
-                case 15:
-                    $diamond = 3;
+                case $createDiamondConfig['totalRace']['one']['raceCount']:
+                    $diamond = $createDiamondConfig['totalRace']['one']['aaDiamond'];
                     break;
-                case 20:
-                    $diamond = 3;
+                case $createDiamondConfig['totalRace']['two']['raceCount'];
+                    $diamond = $createDiamondConfig['totalRace']['two']['aaDiamond'];
                     break;
-                case 25:
-                    $diamond = 4;
+                case $createDiamondConfig['totalRace']['three']['raceCount'];
+                    $diamond = $createDiamondConfig['totalRace']['three']['aaDiamond'];
                     break;
                 default:
                     break;
             }
         } else {
             switch ($playCount) {
-                case 15:
-                    $diamond = 20;
+                case $createDiamondConfig['totalRace']['one']['raceCount']:
+                    $diamond = $createDiamondConfig['totalRace']['one']['daiKaiDiamond'];
                     break;
-                case 20:
-                    $diamond = 25;
+                case $createDiamondConfig['totalRace']['two']['raceCount'];
+                    $diamond = $createDiamondConfig['totalRace']['two']['daiKaiDiamond'];
                     break;
-                case 25:
-                    $diamond = 30;
+                case $createDiamondConfig['totalRace']['three']['raceCount'];
+                    $diamond = $createDiamondConfig['totalRace']['three']['daiKaiDiamond'];
                     break;
                 default:
                     break;
             }
         }
 
-        switch ($costLimit) {
-            case 200:
-                $rate = 1;
-                break;
-            case 300:
-                $rate = 1.5;
-                break;
-            case 500:
-                $rate = 2;
-                break;
-            default:
-                break;
+        if ($roomPay == $ROOM_PAY["AA"]) { //代开
+            switch ($costLimit) {
+                case $createDiamondConfig['betLimit']['one']['limitVal']:
+                    $rate = $createDiamondConfig['betLimit']['one']['aaRate'];
+                    break;
+                case $createDiamondConfig['betLimit']['two']['limitVal']:
+                    $rate = $createDiamondConfig['betLimit']['two']['aaRate'];
+                    break;
+                case $createDiamondConfig['betLimit']['three']['limitVal']:
+                    $rate = $createDiamondConfig['betLimit']['three']['aaRate'];
+                    break;
+                default:
+                    break;
+            }
+        } else {
+            switch ($costLimit) {
+                case $createDiamondConfig['betLimit']['one']['limitVal']:
+                    $rate = $createDiamondConfig['betLimit']['one']['daiKaiRate'];
+                    break;
+                case $createDiamondConfig['betLimit']['two']['limitVal']:
+                    $rate = $createDiamondConfig['betLimit']['two']['daiKaiRate'];
+                    break;
+                case $createDiamondConfig['betLimit']['three']['limitVal']:
+                    $rate = $createDiamondConfig['betLimit']['three']['daiKaiRate'];
+                    break;
+                default:
+                    break;
+            }
         }
         return $diamond * $rate;
     }
