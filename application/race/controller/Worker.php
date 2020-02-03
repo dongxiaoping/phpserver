@@ -110,6 +110,17 @@ class Worker extends Server
                     //Log::write('workman/worker:参数错误', 'error');
                 }
                 break;
+            case 'chatCartonMessage': //消息动画
+                if (isset($data['info']['roomId']) && isset($data['info']['info'])) {
+                    $roomId = $data['info']['roomId'];
+                    $info = $data['info']['info'];
+                    if (isset($this->roomList[$roomId])) {
+                        $this->roomList[$roomId]->chat_carton_message($info);
+                    }
+                } else {
+                    //Log::write('workman/worker:参数错误', 'error');
+                }
+                break;
             default:
 
         }

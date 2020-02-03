@@ -101,6 +101,12 @@ class Room
         }
     }
 
+    //发送动画消息信息
+    public function chat_carton_message($info)
+    {
+        $message = array('type' => 'chatCartonMessage', 'info' => $info);
+        $this->broadcast_to_all_member($message);
+    }
 
     public function set_race_state($race_num, $state)
     {
