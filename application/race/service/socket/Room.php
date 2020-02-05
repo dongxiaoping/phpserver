@@ -57,7 +57,8 @@ class Room
         if (count($this->rapLandlordUserList) <= 0) {//没有人抢庄
             $selected_landlord_user_id = $this->socket_server->get_rand_landlord_user_id($this->room_id);
         } else {
-            $selected_landlord_user_id = $this->rapLandlordUserList[rand(0, count($this->rapLandlordUserList))];
+            $indexSet = rand(0, count($this->rapLandlordUserList) - 1);
+            $selected_landlord_user_id = $this->rapLandlordUserList[$indexSet];
         }
         return $selected_landlord_user_id;
     }
