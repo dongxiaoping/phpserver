@@ -78,4 +78,14 @@ class SocketServer
     {
         return $this->RoomOp->get($id);
     }
+
+    public function get_rand_landlord_user_id($room_id)
+    {
+        $info = $this->PlayerOP->get_rand_landlord_info($room_id);
+        if ($info == null) {
+            return null;
+        } else {
+            return $info['userId'];
+        }
+    }
 }

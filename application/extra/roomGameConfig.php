@@ -1,5 +1,6 @@
 <?php
 return [
+    'rapLandlordTime' => 6,//抢庄倒计时时间
     'dealAction' => 11, //摇色子以及发牌行为耗时 s
     'betTime' => 15, //下注持续时间 s
     'showDownTime' => 17, //开牌 大小对比 结果显示 s

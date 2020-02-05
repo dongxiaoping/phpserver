@@ -12,8 +12,9 @@ class Room
     public $socket_server = null;
 
     public $room_id = null;
-    public $member_list = array(); //connect 对象id集合   $this->member_list[$userId] = array('user_id' => $userId, 'connection_id' => $connection->id);
+    public $member_list = array(); //connect 对象id集合 在线成员集合   $this->member_list[$userId] = array('user_id' => $userId, 'connection_id' => $connection->id);
     public $score_list = array(); //已发布场次的玩家得分集合
+    public $rapLandlordUserList = array();//当前场次发起抢庄者用户ID集合
     public $race_list = array();
     private $state = null; //房间状态
     private $running_race_num = 0;
@@ -23,7 +24,7 @@ class Room
     private $dealActionTimer;//摇色子、发牌定时器
     private $betTimer;//下注定时器
     private $showDownTimer;//比大小定时器
-
+    private $rapLandlordTimer;//抢庄定时器
     private $create_user_id = null; //房间创建者ID
 
     public $creatTime; //房间创建的时间戳
@@ -48,6 +49,19 @@ class Room
     {
         return $this->race_list[$race_num]['landlord_id'];
     }
+
+    //为比赛选取一个庄家，返回改庄家的用户id
+    public function get_one_landlord_id()
+    {
+        $selected_landlord_user_id = null;
+        if (count($this->rapLandlordUserList) <= 0) {//没有人抢庄
+            $selected_landlord_user_id = $this->socket_server->get_rand_landlord_user_id($this->room_id);
+        } else {
+            $selected_landlord_user_id = $this->rapLandlordUserList[rand(0, count($this->rapLandlordUserList))];
+        }
+        return $selected_landlord_user_id;
+    }
+
 
     public function set_race_landlord($race_num, $landlord_id)
     {
@@ -78,7 +92,7 @@ class Room
     }
 
     //1、把数据库里面的比赛地主Id设置完毕 2、向玩家发出地主被选中通知 3、将游戏环节改为开始摇色子
-    public function landlord_selected($raceNum, $landlordId)
+    public function landlord_selected($raceNum, $userId)
     {
         try {
             if ($this->running_race_num != $raceNum) {
@@ -91,11 +105,7 @@ class Room
                 //Log::write('workman/worker:抢失败', 'info');
                 return;
             }
-            $this->set_race_landlord($this->running_race_num, $landlordId);
-            $landlordLastCount = config('roomGameConfig.landlordLastCount');
-            $this->socket_server->change_race_landlord($this->room_id, $this->running_race_num, $landlordId, $landlordLastCount); //数据库修改
-            $this->creatTime = time();
-            $this->startRace();
+            $this->rapLandlordUserList[] = $userId;
         } catch (Exception $e) {
             //Log::write($e->getMessage(), 'error');
         }
@@ -290,6 +300,7 @@ class Room
         Timer::del($this->dealActionTimer);
         Timer::del($this->betTimer);
         Timer::del($this->showDownTimer);
+        Timer::del($this->rapLandlordTimer);
     }
 
     public function startRace()
@@ -308,29 +319,49 @@ class Room
             }
 
             $this->socket_server->change_on_race($this->room_id, $this->running_race_num);
-            $race_play_state = json_decode(RACE_PLAY_STATE, true);
             $the_landlord_id = $this->get_race_landlord_id($this->running_race_num);
             if ($the_landlord_id == null) {
+                $race_play_state = json_decode(RACE_PLAY_STATE, true);
                 $this->set_race_state($this->running_race_num, $race_play_state['CHOICE_LANDLORD']);
                 $message = array('type' => 'raceStateChoiceLandlord', 'info' => array('raceNum' => $this->running_race_num, 'roomId' => $this->room_id));
                 $this->broadcast_to_all_member($message); //广播选地主
                 //Log::write('workman/room:广播选地主,房间号:' . $this->room_id . ',场次号：' . $this->running_race_num, 'info');
-            } else {
-                $this->change_deal_action();
-                $this->dealActionTimer = Timer::add(config('roomGameConfig.dealAction'), function () {
-                    $this->change_roll_bet();
-                    $this->betTimer = Timer::add(config('roomGameConfig.betTime'), function () {
-                        $this->change_show_down();
-                        $this->showDownTimer = Timer::add(config('roomGameConfig.showDownTime'), function () {
-                            $this->running_race_num = $this->running_race_num + 1;
-                            $this->startRace();
-                        }, array(), false);
-                    }, array(), false);
+                $this->rapLandlordTimer = Timer::add(config('roomGameConfig.rapLandlordTime'), function () {
+                    $selected_landlord_user_id = $this->get_one_landlord_id();
+                    if ($selected_landlord_user_id == null) {
+                        $this->is_valid = false;
+                        Log::write('workman/room:没有可当地主的成员，房间关闭,房间号:' . $this->room_id);
+                        return;
+                    }
+                    $this->set_race_landlord($this->running_race_num, $selected_landlord_user_id);
+                    $landlordLastCount = config('roomGameConfig.landlordLastCount');
+                    $this->socket_server->change_race_landlord($this->room_id, $this->running_race_num, $selected_landlord_user_id, $landlordLastCount); //数据库修改
+                    $this->next_race_no_landlord_select();
                 }, array(), false);
+            } else {
+                $this->next_race_no_landlord_select();
             }
+
         } catch (Exception $e) {
             //Log::write($e->getMessage(), 'error');
         }
+    }
+
+    //除选地主外的比赛定时流程
+    public function next_race_no_landlord_select()
+    {
+        $this->change_deal_action();
+        $this->dealActionTimer = Timer::add(config('roomGameConfig.dealAction'), function () {
+            $this->change_roll_bet();
+            $this->betTimer = Timer::add(config('roomGameConfig.betTime'), function () {
+                $this->change_show_down();
+                $this->showDownTimer = Timer::add(config('roomGameConfig.showDownTime'), function () {
+                    $this->rapLandlordUserList = array();
+                    $this->running_race_num = $this->running_race_num + 1;
+                    $this->startRace();
+                }, array(), false);
+            }, array(), false);
+        }, array(), false);
     }
 
     public function raceBet($userId, $roomId, $raceNum, $betLocation, $betVal)

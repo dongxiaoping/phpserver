@@ -28,6 +28,16 @@ class PlayerOP
         return $info;
     }
 
+    public function get_rand_landlord_info($room_id)
+    {
+        $count = $this->get_member_count_without_kickout($room_id);
+        if ($count <= 0) {
+            return null;
+        }
+        $member_list = $this->get_members_without_kickout($room_id);
+        return $member_list[rand(0, count($member_list))];
+    }
+
     public function get_member_count_in_the_room($room_id)
     {
         $table = new Player();
@@ -42,6 +52,15 @@ class PlayerOP
         $stringItem = 'state!=' . $ROOM_PLAY_MEMBER_STATE['KICK_OUT'];
         $count = $table->where("roomId", $room_id)->where($stringItem)->count();
         return $count;
+    }
+
+    public function get_members_without_kickout($room_id)
+    {
+        $table = new Player();
+        $ROOM_PLAY_MEMBER_STATE = json_decode(ROOM_PLAY_MEMBER_STATE, true);
+        $stringItem = 'state!=' . $ROOM_PLAY_MEMBER_STATE['KICK_OUT'];
+        $list = $table->where('roomId', $room_id)->where($stringItem)->select();
+        return $list;
     }
 
     public function get_members_by_room_id($id)
