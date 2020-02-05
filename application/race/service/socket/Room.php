@@ -92,7 +92,7 @@ class Room
         return $this->is_valid;
     }
 
-    //1、把数据库里面的比赛地主Id设置完毕 2、向玩家发出地主被选中通知 3、将游戏环节改为开始摇色子
+    //用户选择抢庄
     public function landlord_selected($raceNum, $userId)
     {
         try {
@@ -107,6 +107,8 @@ class Room
                 return;
             }
             $this->rapLandlordUserList[] = $userId;
+            $message = array('type' => 'memberWaitForLandlord', 'info' => array('userId' => $userId));//用户选择当庄
+            $this->broadcast_to_all_member($message);
         } catch (Exception $e) {
             //Log::write($e->getMessage(), 'error');
         }

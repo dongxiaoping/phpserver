@@ -35,7 +35,7 @@ class PlayerOP
             return null;
         }
         $member_list = $this->get_members_without_kickout($room_id);
-        return $member_list[rand(0, count($member_list))];
+        return $member_list[rand(0, count($member_list) - 1)];
     }
 
     public function get_member_count_in_the_room($room_id)
