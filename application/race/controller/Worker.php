@@ -45,7 +45,7 @@ class Worker extends Server
         //Log::write($data, 'info');
         if ($this->circle_room_check_timer === null) {
             //Log::write('workman/worker:启动房间检查', 'info');
-            $this->roomCheck();
+            $this->startRoomCheck();
         }
         switch ($data['type']) {
             case 'enterRoom': //进入房间
@@ -226,6 +226,7 @@ class Worker extends Server
             $create_user_id = $room_info['creatUserId'];
             $newRoom = new Room($roomId, $create_user_id, $room_info["playCount"], $this->connectManage, $this->socketServer);
             $this->roomList[$roomId] = $newRoom;
+            $this->delInvalidRoom(); //创建一个房间的同时，检查删除无效房间
             //Log::write('workman/worker:socket房间创建成功，房间号：' . $roomId, 'info');
         }
 
@@ -287,17 +288,23 @@ class Worker extends Server
         $this->roomList[$roomId]->landlord_selected($raceNum, $landlordId);
     }
 
-    public function roomCheck()
+    //删除无效的房间
+    public function delInvalidRoom()
+    {
+        foreach ($this->roomList as $roomItem) {
+            if (!$roomItem->is_room_valid()) {
+                //Log::write('workman/worker:发现无效socket房间，销毁,房间ID:' . $roomItem->room_id, 'info');
+                $this->roomList[$roomItem->room_id]->destroy();
+                unset($this->roomList[$roomItem->room_id]);
+            }
+        }
+    }
+
+    public function startRoomCheck()
     {
         $this->circle_room_check_timer = Timer::add(config('roomGameConfig.invalidRoomCheckTime'), function () {
             //Log::write('workman/worker:定时房间检查,房间数量：' . count($this->roomList), 'info');
-            foreach ($this->roomList as $roomItem) {
-                if (!$roomItem->is_room_valid()) {
-                    //Log::write('workman/worker:发现无效socket房间，销毁,房间ID:' . $roomItem->room_id, 'info');
-                    $this->roomList[$roomItem->room_id]->destroy();
-                    unset($this->roomList[$roomItem->room_id]);
-                }
-            }
+            $this->delInvalidRoom();
         }, array(), true);
     }
 
