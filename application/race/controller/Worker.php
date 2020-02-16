@@ -32,11 +32,6 @@ class Worker extends Server
         $this->socketServer = new SocketServer();
         parent::__construct();
     }
-    //测试
-    public function stop()
-    {
-        $this->worker->stop();
-    }
 
     /**
      * 收到信息
