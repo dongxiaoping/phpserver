@@ -121,6 +121,15 @@ class RaceBase
         $MAJ_VALUE_TYPE = json_decode(MAJ_VALUE_TYPE, true);
         $landlordValType = $this->getMajhongValueType($landlordCount);
         $normalMemberValType = $this->getMajhongValueType($normalMemberCount);
+        if($landlordValType === $MAJ_VALUE_TYPE['DUI_ZI'] && $landlordCount['one'] == 0.5){
+            $landlordCount['one'] = 10.5;
+            $landlordCount['two'] = 10.5;
+        }
+        if($normalMemberValType === $MAJ_VALUE_TYPE['DUI_ZI'] && $normalMemberCount['one'] == 0.5){
+            $normalMemberCount['one'] = 10.5;
+            $normalMemberCount['two'] = 10.5;
+        }
+
         if ($landlordValType === $MAJ_VALUE_TYPE['ER_BA_GANG']) {
             return true;
         }
