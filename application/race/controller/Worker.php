@@ -261,19 +261,31 @@ class Worker extends Server
 
     public function startRoomGame($connection, $roomId, $userId)
     {
-        if (!isset($this->roomList[$roomId])) {
-            //Log::write('workman/worker:房间不存在,不能启动游戏', 'error');
+        $ROOM_STATE = json_decode(ROOM_STATE, true);
+        $room_info = $this->socketServer->get_room_info_by_id($roomId);
+        if (!$room_info) { //房间在数据库中不存在
             return false;
         }
 
-        $ROOM_STATE = json_decode(ROOM_STATE, true);
+        if ($room_info["roomState"] != $ROOM_STATE["OPEN"]) { //房间不需要开始
+            return false;
+        }
+
+        if (isset($this->roomList[$roomId]) && (!$this->roomList[$roomId]->is_room_valid())) { //socket房间存在 并且无效 删除socket房间
+            $this->roomList[$roomId]->destroy();
+            unset($this->roomList[$roomId]);
+        }
+
+        if (!isset($this->roomList[$roomId])) { //socket房间不存在
+            $create_user_id = $room_info['creatUserId'];
+            $newRoom = new Room($roomId, $create_user_id, $room_info["playCount"], $this->connectManage, $this->socketServer);
+            $this->roomList[$roomId] = $newRoom;
+            $this->delInvalidRoom();
+        }
+
         $room_state = $this->roomList[$roomId]->get_room_state();
-        $is_user_in_room = $this->roomList[$roomId]->is_user_in_room($userId);
-        if ($room_state !== $ROOM_STATE['OPEN'] || (!$is_user_in_room)) {
-            //Log::write('workman/worker:房间游戏不能重复开始,或者用户不在该房间', 'error');
-            return;
-        } else {
-            //Log::write('workman/worker:房间游戏开始', 'info');
+        if ($room_state != $ROOM_STATE['OPEN']) { //房间游戏不能重复开始
+            return false;
         }
         $this->roomList[$roomId]->start_game();
     }
