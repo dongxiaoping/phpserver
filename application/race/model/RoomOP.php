@@ -43,7 +43,7 @@ class RoomOP
     {
         $table = new Room();
         $list = $table->where("creatUserId", $id)->where("roomState", "<=", 2)
-            ->order('roomState desc,creatTime')->select();
+            ->order('roomState desc,creatTime desc')->select();
         return $list;
     }
 
