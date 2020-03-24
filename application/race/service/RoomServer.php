@@ -49,6 +49,16 @@ class RoomServer extends RoomBase
         return getInterFaceArray(1, "success", $list);
     }
 
+    public function get_on_room_list_by_user_id($id)
+    {
+        $list = $this->RoomOp->get_on_room_list_by_user_id($id);
+        for ($i = 0; $i < count($list); $i++) {
+            $member_count = $this->PlayerOP ->get_member_count_without_kickout($list[$i]["id"]);
+            $list[$i]["memberCount"] = $member_count;
+        }
+        return getInterFaceArray(1, "success", $list);
+    }
+
 
     public function create_room($info)
     {

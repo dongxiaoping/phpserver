@@ -31,10 +31,19 @@ class RoomOP
         Db::query("update room set oningRaceNum=" . $on_race_num . " where id=" . $room_id);
     }
 
-    public function get_not_begin_room_list_by_user_id($id){
+    public function get_not_begin_room_list_by_user_id($id)
+    {
         $table = new Room();
         $ROOM_STATE = json_decode(ROOM_STATE, true);
         $list = $table->where("creatUserId", $id)->where("roomState", $ROOM_STATE['OPEN'])->select();
+        return $list;
+    }
+
+    public function get_on_room_list_by_user_id($id)
+    {
+        $table = new Room();
+        $list = $table->where("creatUserId", $id)->where("roomState", "<=", 2)
+            ->order('roomState desc,creatTime')->select();
         return $list;
     }
 

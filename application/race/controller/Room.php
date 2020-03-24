@@ -44,6 +44,18 @@ class Room
         }
     }
 
+    //根据创建者id获取已创建，未结束的比赛房间信息
+    public function get_on_room_list_by_user_id(){
+        header("Access-Control-Allow-Origin: *");
+        if (isset($_GET["userId"])) {
+            $user_id = $_GET["userId"];
+            $result_array = $this->RoomServer->get_on_room_list_by_user_id($user_id);
+            echo arrayToJson($result_array);
+        } else {
+            echo getJsonStringByParam(0, "param_error", "");
+        }
+    }
+
     // http://127.0.0.1/phpserver/public/index.php/race/room/login_in_room
     public function login_in_room()
     {
