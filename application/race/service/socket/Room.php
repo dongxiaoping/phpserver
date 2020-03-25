@@ -121,6 +121,16 @@ class Room
         $this->broadcast_to_all_member($message);
     }
 
+    //从房间中踢出玩家，房间开始后不能执行
+    public function kick_out_member_from_room($kickUserId)
+    {
+        $ROOM_STATE = json_decode(ROOM_STATE, true);
+        if ($this->state != $ROOM_STATE['OPEN']) {
+            return;
+        }
+        $this->out_member($kickUserId, true);
+    }
+
     public function set_race_state($race_num, $state)
     {
         $this->race_list[$race_num]['state'] = $state;
@@ -170,7 +180,7 @@ class Room
         }
     }
 
-    public function out_member($userId)
+    public function out_member($userId,$is_kickout)
     {
         try {
             if (!$this->is_user_in_room($userId)) {
@@ -180,7 +190,12 @@ class Room
             unset($this->member_list[$userId]);
             $ROOM_STATE = json_decode(ROOM_STATE, true);
             if ($this->state == $ROOM_STATE["OPEN"] && $this->create_user_id != $userId) { //如果比赛没有开始，并且当前用户不是房主，从数据库中删除成员
-                $this->socket_server->cancel_member_from_room($userId, $this->room_id);
+                if($is_kickout){
+                    $ROOM_PLAY_MEMBER_STATE = json_decode(ROOM_PLAY_MEMBER_STATE, true);
+                    $this->socket_server->change_member_state_in_room($userId, $this->room_id, $ROOM_PLAY_MEMBER_STATE['KICK_OUT']);
+                }else{
+                    $this->socket_server->cancel_member_from_room($userId, $this->room_id);
+                }
             } else {
                 $ROOM_PLAY_MEMBER_STATE = json_decode(ROOM_PLAY_MEMBER_STATE, true);
                 $this->socket_server->change_member_state_in_room($userId, $this->room_id, $ROOM_PLAY_MEMBER_STATE['OFF_LINE']);

@@ -121,6 +121,17 @@ class Worker extends Server
                     //Log::write('workman/worker:参数错误', 'error');
                 }
                 break;
+            case 'kickOutMemberFromRoom': //踢出玩家，只能在游戏未开始调用
+                if (isset($data['info']['roomId']) && isset($data['info']['kickUserId'])) {
+                    $roomId = $data['info']['roomId'];
+                    $kickUserId = $data['info']['kickUserId'];
+                    if (isset($this->roomList[$roomId])) {
+                        $this->roomList[$roomId]->kick_out_member_from_room($kickUserId);
+                    }
+                } else {
+                    //Log::write('workman/worker:参数错误', 'error');
+                }
+                break;
             default:
 
         }
@@ -153,7 +164,7 @@ class Worker extends Server
             }
             $member_info = $this->roomList[$in_room_id]->get_member_by_connection_id($connection->id);
             if ($member_info != null) {
-                $this->roomList[$in_room_id]->out_member($member_info['user_id']);
+                $this->roomList[$in_room_id]->out_member($member_info['user_id'], false);
                 //Log::write('workman/worker:断开连接，用户退出房间', 'info');
             } else {
                 //Log::write('workman/worker:房间中未找到用户相关信息', 'error');
@@ -244,7 +255,7 @@ class Worker extends Server
     {
         $this->connectManage->remove_room_id($connection_id);
         if (isset($this->roomList[$roomId])) {
-            $this->roomList[$roomId]->out_member($userId);
+            $this->roomList[$roomId]->out_member($userId, false);
             if (!$this->roomList[$roomId]->is_room_valid()) {
                 //Log::write('workman/worker:房间无效，销毁房间,房间ID:' . $roomId, 'info');
                 $this->roomList[$roomId]->destroy();
