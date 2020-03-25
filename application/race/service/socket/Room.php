@@ -187,7 +187,6 @@ class Room
                 //Log::write('workman/room:成员不在房间中，退出房间失败，用户ID：' . $userId . ',房间ID：' . $this->room_id, 'error');
                 return false;
             }
-            unset($this->member_list[$userId]);
             $ROOM_STATE = json_decode(ROOM_STATE, true);
             if ($this->state == $ROOM_STATE["OPEN"] && $this->create_user_id != $userId) { //如果比赛没有开始，并且当前用户不是房主，从数据库中删除成员
                 if($is_kickout){
@@ -202,6 +201,7 @@ class Room
             }
             $message = array('type' => 'memberOutSocketRoom', 'info' => array('userId' => $userId));//用户离开socket房间
             $this->broadcast_to_all_member($message);
+            unset($this->member_list[$userId]);
             return true;
         } catch (Exception $e) {
             //Log::write($e->getMessage(), 'error');
