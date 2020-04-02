@@ -41,8 +41,8 @@ class Worker extends Server
     public function onMessage($connection, $data)
     {
         $data = json_decode($data, true);
-        //Log::write('-----------------------------------------------------------------------', 'info');
-        //Log::write($data, 'info');
+        Log::write('-----------------------------------------------------------------------', 'info');
+        Log::write($data, 'info');
         if ($this->circle_room_check_timer === null) {
             //Log::write('workman/worker:启动房间检查', 'info');
             $this->startRoomCheck();
