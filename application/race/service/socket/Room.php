@@ -126,6 +126,7 @@ class Room
     {
         $ROOM_STATE = json_decode(ROOM_STATE, true);
         if ($this->state != $ROOM_STATE['OPEN']) {
+            Log::write("房间游戏进行中，不能踢出玩家", 'error');
             return false;
         }
         return $this->out_member($kickUserId, true);
@@ -184,7 +185,7 @@ class Room
     {
         try {
             if (!$this->is_user_in_room($userId)) {
-                //Log::write('workman/room:成员不在房间中，退出房间失败，用户ID：' . $userId . ',房间ID：' . $this->room_id, 'error');
+                Log::write('workman/room:成员不在房间中，退出房间失败，用户ID：' . $userId . ',房间ID：' . $this->room_id, 'error');
                 return false;
             }
             $ROOM_STATE = json_decode(ROOM_STATE, true);
@@ -205,7 +206,7 @@ class Room
             return true;
         } catch (Exception $e) {
             return false;
-            //Log::write($e->getMessage(), 'error');
+            Log::write($e->getMessage(), 'error');
         }
     }
 
