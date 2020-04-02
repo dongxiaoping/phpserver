@@ -126,7 +126,12 @@ class Worker extends Server
                     $roomId = $data['info']['roomId'];
                     $kickUserId = $data['info']['kickUserId'];
                     if (isset($this->roomList[$roomId])) {
-                        $this->roomList[$roomId]->kick_out_member_from_room($kickUserId);
+                        $is_right = $this->roomList[$roomId]->kick_out_member_from_room($kickUserId);
+                        $message = array('type' => 'kickOutMemberFromRoomResult', 'info' => 0);
+                        if($is_right){
+                            $message["info"] = 1;
+                        }
+                        $connection->send(json_encode($message));
                     }
                 } else {
                     //Log::write('workman/worker:参数错误', 'error');

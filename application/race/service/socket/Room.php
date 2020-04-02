@@ -126,9 +126,9 @@ class Room
     {
         $ROOM_STATE = json_decode(ROOM_STATE, true);
         if ($this->state != $ROOM_STATE['OPEN']) {
-            return;
+            return false;
         }
-        $this->out_member($kickUserId, true);
+        return $this->out_member($kickUserId, true);
     }
 
     public function set_race_state($race_num, $state)
@@ -204,6 +204,7 @@ class Room
             unset($this->member_list[$userId]);
             return true;
         } catch (Exception $e) {
+            return false;
             //Log::write($e->getMessage(), 'error');
         }
     }
