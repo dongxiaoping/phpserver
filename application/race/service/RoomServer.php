@@ -188,7 +188,7 @@ class RoomServer extends RoomBase
     {
         $room_info = $this->get_room_info_by_id($room_id)['data'];
         $race_info = $this->RaceServer->getRacesByRoomId($room_id)["data"];
-        $member_info = $this->PlayerOP->get_members_by_room_id($room_id);
+        $member_info = $this->PlayerOP->get_members_without_kickout($room_id);
         $bet_record_info = $this->BetRecordOP->getListByOneColumn('roomId', $room_id);
         return array('room' => $room_info, 'races' => $race_info, 'members' => $member_info, 'betRecords' => $bet_record_info);
     }
