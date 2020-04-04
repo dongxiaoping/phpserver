@@ -147,6 +147,11 @@ class RoomServer extends RoomBase
             $room_race_info = $this->get_room_race_info($room_id);
             return getInterFaceArray(1, "success", $room_race_info);
         }
+
+        if ($room_info["roomState"] == $ROOM_STATE["PLAYING"]) {
+            return getInterFaceArray(0, "has_playing", "");
+        }
+
         if ($room_info["roomState"] == $ROOM_STATE["CLOSE"]) {
             $room_race_info = $this->get_room_race_info($room_id);
             return getInterFaceArray(1, "success", $room_race_info);
