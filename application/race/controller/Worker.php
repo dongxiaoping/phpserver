@@ -238,6 +238,13 @@ class Worker extends Server
             //Log::write('workman/worker:无效房间，销毁，房间号：' . $roomId, 'info');
         }
 
+        //房间状态进行中，但是没有socket的房间，是异常情况
+        if ($room_info["roomState"] == $ROOM_STATE["PLAYING"] && !isset($this->roomList[$roomId])) {
+            Log::write('workman/worker房间状态进行中，但是没有socket的房间，异常，房间号：'.$roomId, 'error');
+            $this->socketServer->change_room_state($roomId, $ROOM_STATE['CLOSE']);
+            return false;
+        }
+
         if (!isset($this->roomList[$roomId])) { //socket房间不存在
             $create_user_id = $room_info['creatUserId'];
             $newRoom = new Room($roomId, $create_user_id, $room_info["playCount"], $this->connectManage, $this->socketServer);
@@ -292,11 +299,9 @@ class Worker extends Server
             unset($this->roomList[$roomId]);
         }
 
-        if (!isset($this->roomList[$roomId])) { //socket房间不存在
-            $create_user_id = $room_info['creatUserId'];
-            $newRoom = new Room($roomId, $create_user_id, $room_info["playCount"], $this->connectManage, $this->socketServer);
-            $this->roomList[$roomId] = $newRoom;
-            $this->delInvalidRoom();
+        if (!isset($this->roomList[$roomId])) { //
+            Log::write('workman/worker:socket房间不存在,无法开始，房间号：'.$roomId, 'error');
+            return false;
         }
 
         $room_state = $this->roomList[$roomId]->get_room_state();

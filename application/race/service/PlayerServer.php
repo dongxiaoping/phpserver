@@ -28,4 +28,9 @@ class PlayerServer
     public function cancel_member_from_room($user_id, $room_id){
         $this->PlayerOP->cancel_member_from_room($user_id, $room_id);
     }
+
+    //清除房间的所有玩家，只有在房间未开始的时候才能执行
+    public function clear_all_member_in_room($room_id){
+        $this->PlayerOP->cancel_member_from_room($user_id, $room_id);
+    }
 }

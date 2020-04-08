@@ -81,13 +81,11 @@ class Room
     public function is_room_valid()
     {
         $now_time = time();
-        if ($now_time - $this->creatTime >= config('roomGameConfig.roomTimeoutTime')) {
+        $ROOM_STATE = json_decode(ROOM_STATE, true);
+        if (($now_time - $this->creatTime >= config('roomGameConfig.roomTimeoutTime')) && $this->state == $ROOM_STATE['OPEN']) {
             $this->is_valid = false;
-            $ROOM_STATE = json_decode(ROOM_STATE, true);
-            if ($this->state != $ROOM_STATE['CLOSE']) {
-                $this->state = $ROOM_STATE['CLOSE'];
-                $this->socket_server->change_room_state($this->room_id, $ROOM_STATE['CLOSE']);
-            }
+            $this->state = $ROOM_STATE['CLOSE'];
+            $this->socket_server->change_room_state($this->room_id, $ROOM_STATE['CLOSE']);
         }
         return $this->is_valid;
     }
@@ -259,13 +257,19 @@ class Room
             //Log::write('workman/room:比赛不能重复开始，房间号：' . $this->room_id, 'error');
             return;
         }
-        if ($this->running_race_num !== 0) {
+        if ($this->running_race_num != 0) {
             //Log::write('workman/room:场次异常', 'error');
             return;
         }
         $this->socket_server->change_room_state($this->room_id, $ROOM_STATE['PLAYING']);
+        $this->check_room_ember();
         $this->state = $ROOM_STATE['PLAYING'];
         $this->startRace();
+    }
+
+    //做成员核对，将最终玩家信息在socket房间以及数据库中比对完毕，之后下发给所有玩家（在客户端核对同步玩家信息）
+    public function check_room_ember(){
+
     }
 
     public function change_deal_action()
@@ -350,6 +354,8 @@ class Room
                     $selected_landlord_user_id = $this->get_one_landlord_id();
                     if ($selected_landlord_user_id == null) {
                         $this->is_valid = false;
+                        $ROOM_STATE = json_decode(ROOM_STATE, true);
+                        $this->socket_server->change_room_state($this->room_id, $ROOM_STATE['CLOSE']);
                         Log::write('workman/room:没有可当地主的成员，房间关闭,房间号:' . $this->room_id);
                         return;
                     }
