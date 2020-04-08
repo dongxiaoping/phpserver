@@ -262,14 +262,26 @@ class Room
             return;
         }
         $this->socket_server->change_room_state($this->room_id, $ROOM_STATE['PLAYING']);
-        $this->check_room_ember();
+        $this->check_room_member();
         $this->state = $ROOM_STATE['PLAYING'];
         $this->startRace();
     }
 
     //做成员核对，将最终玩家信息在socket房间以及数据库中比对完毕，之后下发给所有玩家（在客户端核对同步玩家信息）
-    public function check_room_ember(){
+    public function check_room_member(){
+        $socket_room_member_list = $this->get_socket_room_member_list();
+        $this->socket_server->check_room_member($this->room_id, $socket_room_member_list);
+        $message = array('type' => 'checkRoomMember', 'info' => $socket_room_member_list); //以socket房间的玩家为准，同步到数据库以及客户端
+        $this->broadcast_to_all_member($message);
+    }
 
+    //获取socket房间成员id 列表
+    public function get_socket_room_member_list(){
+        $member_id_list = array();
+        foreach ($this->member_list as $member_info) {
+            $member_id_list[] = $member_info['user_id'];
+        }
+        return $member_id_list;
     }
 
     public function change_deal_action()

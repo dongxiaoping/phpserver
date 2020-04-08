@@ -88,4 +88,11 @@ class SocketServer
             return $info['userId'];
         }
     }
+
+    //核对房间人员，以传入的为准
+    public function check_room_member($room_id, $member_list)
+    {
+        $this->PlayerOP->check_room_member($room_id, $member_list);
+    }
+
 }

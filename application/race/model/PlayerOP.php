@@ -28,6 +28,25 @@ class PlayerOP
         return $info;
     }
 
+    //从数据库中删除不存在的成员
+    public function check_room_member($room_id, $member_in_socket_list)
+    {
+        $member_in_database_list = $this->get_members_without_kickout($room_id);
+        for ($i = 0; $i < count($member_in_database_list); $i++) {
+            $data_base_user_id = $member_in_database_list[$i]["userId"];
+            $is_exist = false;
+            for ($j = 0; $j < count($member_in_socket_list); $j++) {
+                if($data_base_user_id == $member_in_socket_list[$j]){
+                    $is_exist = true;
+                    break;
+                }
+            }
+            if(!$is_exist){
+                $this->cancel_member_from_room($data_base_user_id,$room_id);
+            }
+        }
+    }
+
     public function get_rand_landlord_info($room_id)
     {
         $count = $this->get_member_count_without_kickout($room_id);
