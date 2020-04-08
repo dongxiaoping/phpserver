@@ -13,6 +13,7 @@ namespace app\race\model;
 
 use app\race\model\table\Player;
 use think\Db;
+use think\Log;
 
 class PlayerOP
 {
