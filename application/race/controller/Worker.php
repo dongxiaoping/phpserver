@@ -70,7 +70,12 @@ class Worker extends Server
                 if (isset($data['info']['roomId']) && isset($data['info']['userId'])) {
                     $roomId = $data['info']['roomId'];
                     $userId = $data['info']['userId'];
-                    $this->startRoomGame($connection, $roomId, $userId);
+                    $is_start_success = $this->startRoomGame($connection, $roomId, $userId);
+                    $message = array('type' => 'startGameResultNotice', 'info' => 0); //开始游戏结果通知
+                    if($is_start_success){
+                        $message["info"] = 1;
+                    }
+                    $connection->send(json_encode($message));
                 } else {
                     //Log::write('workman/worker:参数错误', 'error');
                 }
@@ -308,7 +313,7 @@ class Worker extends Server
         if ($room_state != $ROOM_STATE['OPEN']) { //房间游戏不能重复开始
             return false;
         }
-        $this->roomList[$roomId]->start_game();
+        return $this->roomList[$roomId]->start_game();
     }
 
     //抢地主
@@ -324,9 +329,10 @@ class Worker extends Server
     //删除无效的房间
     public function delInvalidRoom()
     {
+        Log::write('workman/worker:当前socket房间数量：'.count($this->roomList), 'info');
         foreach ($this->roomList as $roomItem) {
             if (!$roomItem->is_room_valid()) {
-                //Log::write('workman/worker:发现无效socket房间，销毁,房间ID:' . $roomItem->room_id, 'info');
+                Log::write('workman/worker:发现无效socket房间，销毁,房间ID:' . $roomItem->room_id, 'info');
                 $this->roomList[$roomItem->room_id]->destroy();
                 unset($this->roomList[$roomItem->room_id]);
             }

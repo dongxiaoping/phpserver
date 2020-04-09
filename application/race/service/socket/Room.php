@@ -250,21 +250,22 @@ class Room
         }
     }
 
-    public function start_game()
+    public  function start_game()
     {
         $ROOM_STATE = json_decode(ROOM_STATE, true);
         if ($this->state !== $ROOM_STATE['OPEN']) {
             //Log::write('workman/room:比赛不能重复开始，房间号：' . $this->room_id, 'error');
-            return;
+            return false;
         }
         if ($this->running_race_num != 0) {
             //Log::write('workman/room:场次异常', 'error');
-            return;
+            return false;
         }
         $this->socket_server->change_room_state($this->room_id, $ROOM_STATE['PLAYING']);
         $this->check_room_member();
         $this->state = $ROOM_STATE['PLAYING'];
         $this->startRace();
+        return true;
     }
 
     //做成员核对，将最终玩家信息在socket房间以及数据库中比对完毕，之后下发给所有玩家（在客户端核对同步玩家信息）
