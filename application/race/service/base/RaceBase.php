@@ -151,6 +151,10 @@ class RaceBase
 
         if ($landlordValType === $MAJ_VALUE_TYPE['BI_SHI']) {
             if ($normalMemberValType === $MAJ_VALUE_TYPE['BI_SHI']) {
+                if (($normalMemberCount['one'] > $landlordCount['one'] && $normalMemberCount['one'] > $landlordCount['two'])
+                    || ($normalMemberCount['two'] > $landlordCount['one'] && $normalMemberCount['two'] > $landlordCount['two'])) {
+                    return false;
+                }
                 return true;
             }
             return false;
