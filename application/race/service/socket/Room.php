@@ -285,6 +285,11 @@ class Room
         return $member_id_list;
     }
 
+    public function get_socket_room_member_count(){
+        return count($this->member_list);
+    }
+
+
     public function change_deal_action()
     { //发牌
         $race_play_state = json_decode(RACE_PLAY_STATE, true);

@@ -313,6 +313,9 @@ class Worker extends Server
         if ($room_state != $ROOM_STATE['OPEN']) { //房间游戏不能重复开始
             return false;
         }
+        if($this->roomList[$roomId]->get_socket_room_member_count() <=0){
+            return false;
+        }
         return $this->roomList[$roomId]->start_game();
     }
 
