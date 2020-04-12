@@ -24,8 +24,12 @@ class RoomOP
 
     public function change_room_state($room_id, $state)
     {
-        $now_time = date("Y-m-d H:i:s");
-        Db::query("update room set roomState=" . $state . ",modTime='" . $now_time . " ' where id=" . $room_id);
+        $table = new Room();
+        $table->where('id', $room_id)
+            ->update([
+                'roomState'  => $state,
+                'modTime' => date("Y-m-d H:i:s"),
+            ]);
     }
 
     public function change_on_race($room_id, $on_race_num)
