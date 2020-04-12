@@ -23,7 +23,8 @@ class RoomOP
 
     public function change_room_state($room_id, $state)
     {
-        Db::query("update room set roomState=" . $state . " where id=" . $room_id);
+        $now_time = date("Y-m-d H:i:s");
+        Db::query("update room set roomState=" . $state . ",modTime='" . $now_time . " ' where id=" . $room_id);
     }
 
     public function change_on_race($room_id, $on_race_num)
@@ -44,7 +45,19 @@ class RoomOP
         $table = new Room();
         $list = $table->where("creatUserId", $id)->where("roomState", "<=", 2)
             ->order('roomState asc,creatTime desc')->select();
-        return $list;
+        $real_list = [];
+        $now_time = time();
+        for ($j = 0; $j < count((array)$list); $j++) {
+            $mod_time = strtotime($list[$j]["modTime"]);
+            if ($now_time - $mod_time < 3600) {
+                $real_list[] = $list[$j];
+            } else {
+                $room_id = $list[$j]["id"];
+                $ROOM_STATE = json_decode(ROOM_STATE, true);
+                $this->change_room_state($room_id, $ROOM_STATE["CLOSE"]);
+            }
+        }
+        return $real_list;
     }
 
     /////////////////
