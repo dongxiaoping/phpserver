@@ -47,14 +47,16 @@ class RoomOP
             ->order('roomState asc,creatTime desc')->select();
         $real_list = [];
         $now_time = time();
+        $ROOM_STATE = json_decode(ROOM_STATE, true);
         for ($j = 0; $j < count((array)$list); $j++) {
             $mod_time = strtotime($list[$j]["modTime"]);
             if ($now_time - $mod_time < 3600) {
                 $real_list[] = $list[$j];
             } else {
-                $room_id = $list[$j]["id"];
-                $ROOM_STATE = json_decode(ROOM_STATE, true);
-                $this->change_room_state($room_id, $ROOM_STATE["CLOSE"]);
+                if ($list[$j]["roomState"] == $ROOM_STATE["PLAYING"]) {
+                    $room_id = $list[$j]["id"];
+                    $this->change_room_state($room_id, $ROOM_STATE["CLOSE"]);
+                }
             }
         }
         return $real_list;
