@@ -51,14 +51,12 @@ class RoomOP
         $ROOM_STATE = json_decode(ROOM_STATE, true);
         for ($j = 0; $j < count((array)$list); $j++) {
             $mod_time = strtotime($list[$j]["modTime"]);
-            if ($now_time - $mod_time < 3600) {
-                $real_list[] = $list[$j];
+            if (($now_time - $mod_time > 3600) && ($list[$j]["roomState"] == $ROOM_STATE["PLAYING"])) {
+                $room_id = $list[$j]["id"];
+                Log::write("房间运行超时，强制关闭，房间号：" . $room_id, 'error');
+                $this->change_room_state($room_id, $ROOM_STATE["CLOSE"]);
             } else {
-                if ($list[$j]["roomState"] == $ROOM_STATE["PLAYING"]) {
-                    $room_id = $list[$j]["id"];
-                    Log::write("房间运行超时，强制关闭，房间号：" . $room_id, 'error');
-                    $this->change_room_state($room_id, $ROOM_STATE["CLOSE"]);
-                }
+                $real_list[] = $list[$j];
             }
         }
         return $real_list;
