@@ -55,7 +55,8 @@ class RoomOP
                 $room_id = $list[$j]["id"];
                 Log::write("当前时间戳:".$now_time.",最后修改时间戳：".$mod_time.",房间运行超时，强制关闭，房间号：" . $room_id, 'error');
                 Log::write("当前时间：".date("Y-m-d H:i:s").",最后修改时间:".$list[$j]["modTime"], 'error');
-                $this->change_room_state($room_id, $ROOM_STATE["CLOSE"]);
+                Log::write($list[$j], 'error');
+              //  $this->change_room_state($room_id, $ROOM_STATE["CLOSE"]);
             } else {
                 $real_list[] = $list[$j];
             }
