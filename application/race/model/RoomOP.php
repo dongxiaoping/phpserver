@@ -13,6 +13,7 @@ namespace app\race\model;
 
 use app\race\model\table\Room;
 use think\Db;
+use think\Log;
 
 class RoomOP
 {
@@ -55,6 +56,7 @@ class RoomOP
             } else {
                 if ($list[$j]["roomState"] == $ROOM_STATE["PLAYING"]) {
                     $room_id = $list[$j]["id"];
+                    Log::write("房间运行超时，强制关闭，房间号：" . $room_id, 'error');
                     $this->change_room_state($room_id, $ROOM_STATE["CLOSE"]);
                 }
             }
