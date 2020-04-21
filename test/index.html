@@ -14,26 +14,26 @@
         "NOT_BEGIN": 1, "CHOICE_LANDLORD": 2, "ROLL_DICE": 3,
         "DEAL": 4, "BET": 5, "SHOW_DOWN": 6, "SHOW_RESULT": 7, "FINISHED": 8
     };
-    var enterRoom = {type: 'enterRoom', info: {roomId: 383, userId:1717}};//进入房间事件
-    var startRoomGame = {type: 'startRoomGame', info: {roomId: 383, userId:1717}}; //房间开始game raceCount 场次
+    var enterRoom = {type: 'enterRoom', info: {roomId: 1036, userId:1716}};//进入房间事件
+    var outRoom = {type: 'outRoom', info: {roomId: 384, userId:1716}};//进入房间事件
+    var startRoomGame = {type: 'startRoomGame', info: {roomId: 1036, userId:1716}}; //房间开始game raceCount 场次
     var createAndEnterRoom= {type: 'createAndEnterRoom', info: {roomId: 331, userId:1510}};
     var landlordSelected = {type: 'landlordSelected', info: {roomId: 383, raceNum: 0, landlordId: 1717}}; //用户抢地主
     var raceBet = {type: 'raceBet', info: {userId: 68, roomId: 68, raceNum: 2, betLocation: 0, betVal: 4}}; //下注
     //ws = new WebSocket("ws://120.26.52.88:2346");
         ws = new WebSocket("ws://127.0.0.1:2346");
     ws.onopen = function () {
-        //  alert("连接成功");
-          setTimeout(function () {
-              ws.send(JSON.stringify(enterRoom));
-          }, 3000);
+          console.log("连接成功");
+        ws.send(JSON.stringify(enterRoom));
 
          setTimeout(function () {
              ws.send(JSON.stringify(startRoomGame));
          },8000);
 
-        setTimeout(function () {
-            ws.send(JSON.stringify(landlordSelected));
-        }, 12000);
+        //
+        // setTimeout(function () {
+        //     ws.send(JSON.stringify(landlordSelected));
+        // }, 12000);
 
         // setTimeout(function () {
         //     ws.send(JSON.stringify(raceBet));
@@ -42,6 +42,7 @@
     };
     ws.onmessage = function (e) {
         // alert("收到服务端的消息：" + e.data);
+        console.log("收到服务端的消息");
         var info = JSON.parse(e.data)
         var type = info.type
         var message = info.info
