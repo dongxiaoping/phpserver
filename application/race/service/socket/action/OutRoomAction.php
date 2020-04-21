@@ -12,9 +12,8 @@ use think\Log;
 
 class OutRoomAction
 {
-    public static $OUT_SOCKET_BREAK = 1; //socket断开退出
-    public static $OUT_USER_EXIT = 2; //表示用户手动退出
-    public static $OUT_KICK_OUT = 3; //表示被踢出
+    public static $OUT_USER_EXIT = 1; //表示用户手动退出
+    public static $OUT_KICK_OUT = 2; //表示被踢出
     private $socketServer;
     private $socketData;
     private $outRoomBack;
@@ -58,38 +57,39 @@ class OutRoomAction
         $this->outRoomBack->setFlag(1);
         $this->outRoomBack->setData(array('outType'=>self::$OUT_KICK_OUT, "userId"=>$userId));
         $room->broadcastToAllMember($this->outRoomBack->getBackData());
-        $this->socketServer->get_connect_people_by_user_id($userId)->set_room_id(null);
+        $people->set_room_id(null);
         return true;
     }
 
     //断开连接退出房间
     public function socketBreakOuRoom($connectId)
     {
+        $this->outRoomBack->setFlag(1);
         $people = $this->socketData->get_connect_people_by_connect_id($connectId);
         if ($people == null) {
+            Log::write('socket断开，直接销毁', 'info');
             return;
         }
         $roomId = $people->get_room_id();
         $userId = $people->get_user_id();
-        if ($roomId == null) {
-            $this->socketData->remove_connect_people_by_connect_id($connectId);
-            return;
+        if($roomId !=null && $userId!=null){
+            $room = $this->socketData->get_room_by_id($roomId);
+            if($room !=null){
+                $people->set_room_id(null);
+                $ROOM_STATE = json_decode(ROOM_STATE, true);
+                $ROOM_PLAY_MEMBER_STATE = json_decode(ROOM_PLAY_MEMBER_STATE, true);
+                if ($room->getState() == $ROOM_STATE["OPEN"]){
+                    $this->socketServer->cancel_member_from_room($userId, $roomId);
+                }else{
+                    $this->socketServer->change_member_state_in_room($userId,$roomId, $ROOM_PLAY_MEMBER_STATE['OFF_LINE']);
+                }
+                $this->outRoomBack->setMessage(WordDes::$USER_OUT_SUCCESS);
+                $this->outRoomBack->setData(array('outType'=>self::$OUT_USER_EXIT, "userId"=>$userId));
+                $room->broadcastToAllMember($this->outRoomBack->getBackData());
+            }
         }
-        $room = $this->socketData->get_room_by_id($roomId);
-        if ($room == null || $userId == null) {
-            $this->socketData->remove_connect_people_by_connect_id($connectId);
-            return;
-        }
-        $this->outRoomBack->setFlag(1);
-        $people->set_room_id(null);
-        $ROOM_STATE = json_decode(ROOM_STATE, true);
-        $ROOM_PLAY_MEMBER_STATE = json_decode(ROOM_PLAY_MEMBER_STATE, true);
-        if ($room->getState() == $ROOM_STATE["OPEN"]){
-            $this->socketServer->cancel_member_from_room($userId, $roomId);
-        }else{
-            $this->socketServer->change_member_state_in_room($userId,$roomId, $ROOM_PLAY_MEMBER_STATE['OFF_LINE']);
-        }
-        $room->broadcastToAllMember($this->outRoomBack->getBackData());
+        Log::write('socket断开，成员离开', 'info');
+        $this->socketData->remove_connect_people_by_connect_id($connectId);
     }
 
 }

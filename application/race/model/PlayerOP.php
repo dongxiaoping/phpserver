@@ -104,7 +104,8 @@ class PlayerOP
 
     public function change_state_in_room($user_id, $room_id, $state)
     {
-        Db::query("update room_player set state=" . $state . " where userId=" . $user_id . " and roomId=" . $room_id);
+        $table = new Player();
+        $table->where('userId', $user_id)->where('roomId', $room_id)->update(['state' => $state]);
     }
 
     /////////////////
