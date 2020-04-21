@@ -75,6 +75,8 @@ class OutRoomAction
             Log::write('socket断开，直接销毁', 'info');
             return;
         }
+        Log::write('退出前的成员信息', 'info');
+        Log::write($this->socketData->get_people_list(), 'info');
         $roomId = $people->get_room_id();
         $userId = $people->get_user_id();
         if($roomId !=null && $userId!=null){
@@ -100,6 +102,8 @@ class OutRoomAction
         }
         Log::write('socket断开，成员离开', 'info');
         $this->socketData->remove_connect_people_by_connect_id($connectId);
+        Log::write('退出后的成员信息', 'info');
+        Log::write($this->socketData->get_people_list(), 'info');
     }
 
 }

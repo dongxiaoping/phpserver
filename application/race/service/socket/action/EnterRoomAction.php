@@ -62,9 +62,12 @@ class EnterRoomAction
             return false;
         }
         $connect_people = $this->socket_data->get_connect_people_by_user_id($this->user_id);
+        //1、用户重复登录  2、上次登录没有断开退出
         if($connect_people){
-            $this->enter_room_back->setMessage(WordDes::$REPEAT_LOGIN_IN);
-            return false;
+            $connectId = $connect_people->get_connection_id();
+            $this->socket_data->remove_connect_people_by_connect_id($connectId);
+           // $this->enter_room_back->setMessage(WordDes::$REPEAT_LOGIN_IN);
+          //  return false;
         }
         $ROOM_PLAY_MEMBER_STATE = json_decode(ROOM_PLAY_MEMBER_STATE, true);
         if (!$this->room_info) {
