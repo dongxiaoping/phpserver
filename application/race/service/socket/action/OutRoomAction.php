@@ -58,6 +58,11 @@ class OutRoomAction
         $this->outRoomBack->setData(array('outType'=>self::$OUT_KICK_OUT, "userId"=>$userId));
         $room->broadcastToAllMember($this->outRoomBack->getBackData());
         $people->set_room_id(null);
+        if(count($this->socketData->get_connect_people_list_by_room_id($roomId))<=0){
+            $room->destroy();
+            $this->socketData->remove_room_by_id($roomId);
+            Log::write('socket房间无成员，房间销毁：'.$roomId, 'info');
+        }
         return true;
     }
 
@@ -86,6 +91,11 @@ class OutRoomAction
                 $this->outRoomBack->setMessage(WordDes::$USER_OUT_SUCCESS);
                 $this->outRoomBack->setData(array('outType'=>self::$OUT_USER_EXIT, "userId"=>$userId));
                 $room->broadcastToAllMember($this->outRoomBack->getBackData());
+                if(count($this->socketData->get_connect_people_list_by_room_id($roomId))<=0){
+                    $room->destroy();
+                    $this->socketData->remove_room_by_id($roomId);
+                    Log::write('socket房间无成员，房间销毁：'.$roomId, 'info');
+                }
             }
         }
         Log::write('socket断开，成员离开', 'info');

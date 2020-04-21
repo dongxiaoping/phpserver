@@ -16,8 +16,6 @@ class Room
     private $state = null;//房间状态
     private $runningRaceNum = 0;
     private $race_count;
-    private $isValid = true; //房间是否有效标志位 true表示有效 false表示无效
-
     private $dealActionTimer;//摇色子、发牌定时器
     private $betTimer;//下注定时器
     private $showDownTimer;//比大小定时器
@@ -187,6 +185,8 @@ class Room
         Timer::del($this->betTimer);
         Timer::del($this->showDownTimer);
         Timer::del($this->rapLandlordTimer);
+        $this->socketData->remove_room_by_id($this->roomId);
+        Log::write('workman/room:房间结束销毁:' . $this->roomId);
     }
 
     public function startRace()
@@ -199,7 +199,7 @@ class Room
                 $info = $this->socketServer->get_room_result($this->roomId, $this->race_count - 1);
                 $message = BackData::getAllRaceFinishBack($info);
                 $this->broadcastToAllMember($message);
-                $this->isValid = false;
+                $this->destroy();
                 return;
             }
 
@@ -213,10 +213,10 @@ class Room
                 $this->rapLandlordTimer = Timer::add(config('roomGameConfig.rapLandlordTime'), function () {
                     $selected_landlord_user_id = $this->getOneLandlordId();
                     if ($selected_landlord_user_id == null) {
-                        $this->isValid = false;
                         $ROOM_STATE = json_decode(ROOM_STATE, true);
                         $this->socketServer->change_room_state($this->roomId, $ROOM_STATE['CLOSE']);
                         Log::write('workman/room:没有可当地主的成员，房间关闭,房间号:' . $this->roomId);
+                        $this->destroy();
                         return;
                     }
                     $this->setRaceLandlord($this->runningRaceNum, $selected_landlord_user_id);
