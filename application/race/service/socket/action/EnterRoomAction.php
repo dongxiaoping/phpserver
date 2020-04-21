@@ -35,6 +35,10 @@ class EnterRoomAction
         $this->socket_data = $socket_data;
         $this->socket_server = $socket_server;
         $this->enter_room_back = new BackData(SocketActionTag::$ENTER_ROOM_RES);
+    }
+
+
+    public function init(){
         $member_info = $this->socket_server->get_member_info_in_the_room($this->user_id, $this->room_id);
         if ($member_info) {
             $this->member_info = $member_info;
@@ -51,6 +55,7 @@ class EnterRoomAction
 
     public function is_room_right_to_enter()
     {
+        $this->init();
         $user_info = $this->socket_server->get_user_info($this->user_id);
         if(!$user_info){
             $this->enter_room_back->setMessage(WordDes::$USER_NOT_EXIST);
@@ -100,6 +105,7 @@ class EnterRoomAction
 
     public function enter_room()
     {
+        $this->init();
         $ROOM_PLAY_MEMBER_STATE = json_decode(ROOM_PLAY_MEMBER_STATE, true);
         if ($this->member_info) {
             $this->socket_server->change_member_state_in_room($this->user_id, $this->room_id, $ROOM_PLAY_MEMBER_STATE['ON_LINE']);
