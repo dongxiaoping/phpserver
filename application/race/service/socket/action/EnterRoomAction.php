@@ -66,8 +66,12 @@ class EnterRoomAction
         if($connect_people){
             $connectId = $connect_people->get_connection_id();
             $this->socket_data->remove_connect_people_by_connect_id($connectId);
-           // $this->enter_room_back->setMessage(WordDes::$REPEAT_LOGIN_IN);
-          //  return false;
+            $connectOb = $connect_people->get_connection();
+            $outRoomBack = new BackData(SocketActionTag::$MEMBER_OUT_ROOM_NOTICE);
+            $outRoomBack->setFlag(1);
+            $outRoomBack->setMessage(WordDes::$REPEAT_LOGIN_IN);
+            $outRoomBack->setData(array('outType'=>OutRoomAction::$ANOTHER_IN_OUT, "userId"=>$this->user_id));
+            $connectOb->send(json_encode($outRoomBack->getBackData()));
         }
         $ROOM_PLAY_MEMBER_STATE = json_decode(ROOM_PLAY_MEMBER_STATE, true);
         if (!$this->room_info) {
