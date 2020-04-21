@@ -4,6 +4,7 @@
 namespace app\race\service\socket\action;
 
 use app\race\service\socket\BackData;
+use app\race\service\socket\SocketActionTag;
 use app\race\service\socket\SocketData;
 use app\race\service\socket\SocketServer;
 use app\race\service\socket\WordDes;
@@ -22,7 +23,7 @@ class OutRoomAction
     {
         $this->socketData = $socketData;
         $this->socketServer = $socketServer;
-        $this->outRoomBack = new BackData("outRoom");
+        $this->outRoomBack = new BackData(SocketActionTag::$MEMBER_OUT_ROOM_NOTICE);
     }
 
     //踢出房间
@@ -55,6 +56,7 @@ class OutRoomAction
         $this->socketServer->change_member_state_in_room($userId, $roomId, $ROOM_PLAY_MEMBER_STATE['KICK_OUT']);
         $this->outRoomBack->setMessage(WordDes::$USER_OUT_SUCCESS);
         $this->outRoomBack->setFlag(1);
+        $this->outRoomBack->setData(array('outType'=>self::$OUT_KICK_OUT, "userId"=>$userId));
         $room->broadcastToAllMember($this->outRoomBack->getBackData());
         $this->socketServer->get_connect_people_by_user_id($userId)->set_room_id(null);
         return true;
@@ -78,8 +80,7 @@ class OutRoomAction
             $this->socketData->remove_connect_people_by_connect_id($connectId);
             return;
         }
-        $this->outRoomBack->setIsSuccess(1);
-        $this->outRoomBack->setUserId($userId);
+        $this->outRoomBack->setFlag(1);
         $people->set_room_id(null);
         $ROOM_STATE = json_decode(ROOM_STATE, true);
         $ROOM_PLAY_MEMBER_STATE = json_decode(ROOM_PLAY_MEMBER_STATE, true);

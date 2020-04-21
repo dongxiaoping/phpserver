@@ -15,7 +15,7 @@ class SocketActionTag
     public static $KICK_OUT_MEMBER_REQ = "kickOutMemberFromRoom";//踢出玩家请求
 
     public static $ENTER_ROOM_RES = "enterRoomRes";//进入房间请求的回复
-
+    public static $MEMBER_OUT_ROOM_NOTICE = "memberOutRoom";//成员离开房间通知
     public static $MEMBER_IN_ROOM_NOTICE = "memberInSocketRoom";//有成员进入房间通知
     public static $RACE_DEAL_NOTICE = "raceStateDeal";//发牌环节通知
     public static $RACE_BET_NOTICE = "raceStateBet";//下注环节通知
