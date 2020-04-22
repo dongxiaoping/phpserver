@@ -50,7 +50,7 @@ class Worker extends Server
             Log::write($data, 'info');
             $data = json_decode($data, true);
             $isParamRight = SocketInParamCheck::isRight($data);
-            if (!$isParamRight) {
+            if (!$isParamRight) {//
                 Log::write("参数错误", 'error');
                 $backDataBase = new BackData($data['type']);
                 $backDataBase->setflag(0);
