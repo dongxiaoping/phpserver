@@ -19,16 +19,30 @@ class Test
 //http://127.0.0.1/phpserver/public/index.php/race/test/test
     public function test()
     {
-        $this->ServerOb = new SocketServer();
-        $cc = $this->ServerOb->get_member_info_in_the_room(3348,1067);
-        var_dump($cc);
-//       $this->ServerOb->add_cost_record('2','3',10);
-//      //  $this->ServerOb2->add_recharge_record('2',15,1);
-//        var_dump('welcome');
-//        $c = 3;
-//        try{
-//        }catch (Exception $e){
-//            Log::write($e->getMessage(), 'error');
-//        }
+        header("Access-Control-Allow-Origin: *");
+        $up_dir = './upload/';//存放在当前目录的upload文件夹下
+        $baseData = trim($_POST['file']);
+        if(!file_exists($up_dir)){
+            mkdir($up_dir,0777);
+        }
+        if (preg_match('/^(data:\s*image\/(\w+);base64,)/', $baseData, $result)) {
+            $type = $result[2];
+            if(in_array($type,array('pjpeg','jpeg','jpg','gif','bmp','png'))){
+                $new_file = $up_dir.date('YmdHis_').'.'.$type;
+                if(file_put_contents($new_file, base64_decode(str_replace($result[1], '', $baseData)))){
+                    $img_path = str_replace('../../..', '', $new_file);
+                    echo '图片上传成功</br>![](' .$img_path. ')';
+                }else{
+                    echo '图片上传失败</br>';
+
+                }
+                echo '文件正确';
+            }else{
+                echo '文件错误';
+            }
+            echo $baseData;
+        }else{
+           echo '数据异常';
+        }
     }
 }
