@@ -41,6 +41,23 @@ class User
         echo arrayToJson($result_array);
     }
 
+    //http://localhost/phpserver/public/index.php/race/user/create_account
+    public function create_account()
+    {
+        header("Access-Control-Allow-Origin: *");
+        $baseData = trim($_POST['file']);
+        $nick = trim($_POST['nick']);
+        $phone = trim($_POST['phone']);
+        $password = trim($_POST['password']);
+        $iconName = $this->UserServer->loadUserIcon($baseData);
+        if($iconName == null){
+            echo getJsonStringByParam(0, "图片错误", "");
+        }else{
+            $result_array = $this->UserServer->create_account($phone, $password, $nick, $iconName);
+            echo arrayToJson($result_array);
+        }
+    }
+
     //游戏开始后调用扣除钻
     public function cost_diamond_in_room()
     {
