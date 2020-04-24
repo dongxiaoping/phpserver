@@ -8,5 +8,5 @@ return [
     'roomTimeoutTime' => 3600, //socket房间存在超时时间，主要产生原因是抢庄以及开始时间不确定s
     'diamondPrice' => 0.5, //每个钻的单价 单位：元
     'chipValList' => [1, 2, 5, 10], //下注值集合
-    'userIconUrl'=>'https://wwww.toplaygame.cn/phpserver/public/upload/'//用户图标地址
+    'userIconUrl'=>'https://www.toplaygame.cn/phpserver/public/upload/'//用户图标地址
 ];
