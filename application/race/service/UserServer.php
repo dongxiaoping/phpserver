@@ -55,7 +55,7 @@ class UserServer
             $type = $result[2];
             if(in_array($type,array('pjpeg','jpeg','jpg','gif','bmp','png'))){
                 $picName = date('YmdHis').'.'.$type;
-                $path = $up_dir.date('YmdHis').$picName;
+                $path = $up_dir.$picName;
                 if(file_put_contents($path, base64_decode(str_replace($result[1], '', $baseData)))){
                     $img_path = str_replace('../../..', '', $path);
                     //echo '图片上传成功</br>![](' .$img_path. ')';
