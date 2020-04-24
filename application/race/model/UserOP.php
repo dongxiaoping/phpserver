@@ -34,6 +34,17 @@ class UserOP
         }
     }
 
+    public function get_user_info_by_login_in($phone, $password)
+    {
+        $table = new User();
+        $item =  $table->where("phone", $phone)->where("password", $password)->find();
+        if ($item) {
+            return $item;
+        }
+        return null;
+    }
+
+
     /////////////////
     /* $info ["category_name"=>$name,......] 除主键之外的表字段信息集合
  * */

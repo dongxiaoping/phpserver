@@ -35,6 +35,17 @@ class UserServer
         return $info;
     }
 
+    public function get_user_info_by_login_in($phone, $password)
+    {
+        $item = $this->UserOP->get_user_info_by_login_in($phone, $password);
+        if ($item == null) {
+            return getInterFaceArray(0, "not_find", "");
+        }
+        $item["gameUrl"] = config('gameAgencyConfig')['gameUrl'];
+        $info = getInterFaceArray(1, "success", $item);
+        return $info;
+    }
+
     public function loadUserIcon($baseData){
         $up_dir = './upload/';//存放在当前目录的upload文件夹下
         if(!file_exists($up_dir)){
@@ -112,7 +123,7 @@ class UserServer
         ];
         $id = $this->UserOP->insert($item);
         if ($id) {
-            return getInterFaceArray(1, "success", $id);
+            return getInterFaceArray(1, "success", array('id'=>$id,'gameUrl'=>config('gameAgencyConfig')['gameUrl']));
         }else{
             return getInterFaceArray(0, "fail", '');
         }

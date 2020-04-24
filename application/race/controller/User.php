@@ -34,6 +34,19 @@ class User
         }
     }
 
+    public function login_in()
+    {
+        header("Access-Control-Allow-Origin: *");
+        if (isset($_GET["phone"]) && isset($_GET["password"])) {
+            $password = $_GET["password"];
+            $phone = $_GET["phone"];
+            $result_array = $this->UserServer->get_user_info_by_login_in($phone, $password);
+            echo arrayToJson($result_array);
+        } else {
+            echo getJsonStringByParam(0, "param_error", "");
+        }
+    }
+
     public function create_visit_account()
     {
         header("Access-Control-Allow-Origin: *");
