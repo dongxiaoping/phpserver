@@ -1,4 +1,4 @@
 <?php
 return [
-    'gameUrl' => "https://www.toplaygame.cn/web-mobile/test/main"//游戏地址
+    'gameUrl' => "https://www.toplaygame.cn/game/build/web-mobile"//游戏地址
 ];
