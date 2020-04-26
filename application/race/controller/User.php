@@ -64,7 +64,7 @@ class User
         $password = trim($_POST['password']);
         $iconName = $this->UserServer->loadUserIcon($baseData);
         if($iconName == null){
-            echo getJsonStringByParam(0, "图片错误", "");
+            echo getJsonStringByParam(0, "上传异常", "");
         }else{
             $result_array = $this->UserServer->create_account($phone, $password, $nick, $iconName);
             echo arrayToJson($result_array);

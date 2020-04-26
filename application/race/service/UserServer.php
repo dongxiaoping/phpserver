@@ -46,30 +46,35 @@ class UserServer
         return $info;
     }
 
-    public function loadUserIcon($baseData){
-        $up_dir = './upload/';//存放在当前目录的upload文件夹下
-        if(!file_exists($up_dir)){
-            mkdir($up_dir,0777);
-        }
-        if (preg_match('/^(data:\s*image\/(\w+);base64,)/', $baseData, $result)) {
-            $type = $result[2];
-            if(in_array($type,array('pjpeg','jpeg','jpg','gif','bmp','png'))){
-                $picName = date('YmdHis').'.'.$type;
-                $path = $up_dir.$picName;
-                if(file_put_contents($path, base64_decode(str_replace($result[1], '', $baseData)))){
-                    $img_path = str_replace('../../..', '', $path);
-                    //echo '图片上传成功</br>![](' .$img_path. ')';
-                    return $picName;
-                }else{
-                    //echo '图片上传失败</br>';
+    public function loadUserIcon($baseData)
+    {
+        try {
+            $up_dir = './upload/';//存放在当前目录的upload文件夹下
+            if (!file_exists($up_dir)) {
+                mkdir($up_dir, 0777);
+            }
+            if (preg_match('/^(data:\s*image\/(\w+);base64,)/', $baseData, $result)) {
+                $type = $result[2];
+                if (in_array($type, array('pjpeg', 'jpeg', 'jpg', 'gif', 'bmp', 'png'))) {
+                    $picName = date('YmdHis') . '.' . $type;
+                    $path = $up_dir . $picName;
+                    if (file_put_contents($path, base64_decode(str_replace($result[1], '', $baseData)))) {
+                        $img_path = str_replace('../../..', '', $path);
+                        //echo '图片上传成功</br>![](' .$img_path. ')';
+                        return $picName;
+                    } else {
+                        //echo '图片上传失败</br>';
+                        return null;
+                    }
+                } else {
+                    //  echo '文件错误';
                     return null;
                 }
-            }else{
-              //  echo '文件错误';
+            } else {
+                //echo '数据异常';
                 return null;
             }
-        }else{
-            //echo '数据异常';
+        } catch (Exception $e) {
             return null;
         }
     }
@@ -110,22 +115,26 @@ class UserServer
     public function create_account($phone, $password, $nick, $iconName)
     {
         $USER_TYPE = json_decode(USER_TYPE, true);
+        $user = $this->UserOP->get_user_info_by_phone($phone);
+        if($user != null){
+            return getInterFaceArray(0, "手机号码已存在！", '');
+        }
         $item = [
             'score' => 0,
             'diamond' => 0,
             'type' => $USER_TYPE['NORMAL_USER'],
             'nick' => $nick,
             'icon' => $iconName,
-            'phone' =>$phone,
-            'password'=>$password,
+            'phone' => $phone,
+            'password' => $password,
             'creatTime' => date("Y-m-d H:i:s"),
             'modTime' => date("Y-m-d H:i:s")
         ];
         $id = $this->UserOP->insert($item);
         if ($id) {
-            return getInterFaceArray(1, "success", array('id'=>$id,'gameUrl'=>config('gameAgencyConfig')['gameUrl']));
-        }else{
-            return getInterFaceArray(0, "fail", '');
+            return getInterFaceArray(1, "账户创建成功！", array('id' => $id, 'gameUrl' => config('gameAgencyConfig')['gameUrl']));
+        } else {
+            return getInterFaceArray(0, "账户创建失败！", '');
         }
     }
 
