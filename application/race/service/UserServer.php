@@ -39,10 +39,10 @@ class UserServer
     {
         $item = $this->UserOP->get_user_info_by_login_in($phone, $password);
         if ($item == null) {
-            return getInterFaceArray(0, "not_find", "");
+            return getInterFaceArray(0, "手机号或者密码错误！", "");
         }
         $item["gameUrl"] = config('gameAgencyConfig')['gameUrl'];
-        $info = getInterFaceArray(1, "success", $item);
+        $info = getInterFaceArray(1, "登录成功！", $item);
         return $info;
     }
 

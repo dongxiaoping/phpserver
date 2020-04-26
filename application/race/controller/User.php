@@ -43,7 +43,7 @@ class User
             $result_array = $this->UserServer->get_user_info_by_login_in($phone, $password);
             echo arrayToJson($result_array);
         } else {
-            echo getJsonStringByParam(0, "param_error", "");
+            echo getJsonStringByParam(0, "参数错误！", "");
         }
     }
 
