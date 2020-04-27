@@ -56,12 +56,12 @@ class PlayerOP
 
     public function get_rand_landlord_info($room_id)
     {
-        $count = $this->get_member_count_without_kickout($room_id);
-        if ($count <= 0) {
+        $member_list = $this->get_members_online($room_id);
+        if($member_list){
+            return $member_list[rand(0, count($member_list) - 1)];
+        }else{
             return null;
         }
-        $member_list = $this->get_members_without_kickout($room_id);
-        return $member_list[rand(0, count($member_list) - 1)];
     }
 
     public function get_member_count_in_the_room($room_id)
@@ -80,12 +80,29 @@ class PlayerOP
         return $count;
     }
 
+
+    public function get_member_count_online($room_id)
+    { //不包含踢出的
+        $table = new Player();
+        $ROOM_PLAY_MEMBER_STATE = json_decode(ROOM_PLAY_MEMBER_STATE, true);
+        $count = $table->where("roomId", $room_id)->where('state', $ROOM_PLAY_MEMBER_STATE['ON_LINE'])->count();
+        return $count;
+    }
+
     public function get_members_without_kickout($room_id)
     {
         $table = new Player();
         $ROOM_PLAY_MEMBER_STATE = json_decode(ROOM_PLAY_MEMBER_STATE, true);
         $stringItem = 'state!=' . $ROOM_PLAY_MEMBER_STATE['KICK_OUT'];
         $list = $table->where('roomId', $room_id)->where($stringItem)->select();
+        return $list;
+    }
+
+    public function get_members_online($room_id)
+    {
+        $table = new Player();
+        $ROOM_PLAY_MEMBER_STATE = json_decode(ROOM_PLAY_MEMBER_STATE, true);
+        $list = $table->where('roomId', $room_id)->where('state', $ROOM_PLAY_MEMBER_STATE['ON_LINE'])->select();
         return $list;
     }
 
