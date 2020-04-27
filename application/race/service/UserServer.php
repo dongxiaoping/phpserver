@@ -28,7 +28,7 @@ class UserServer
     {
         $item = $this->UserOP->get($id);
         if ($item === null) {
-            return getInterFaceArray(0, "not_exist", "");
+            return getInterFaceArray(0, "用户不存在！", "");
         }
         $info = getInterFaceArray(1, "success", $item);
         $info["config"] = config('roomGameConfig');
@@ -117,7 +117,7 @@ class UserServer
         $USER_TYPE = json_decode(USER_TYPE, true);
         $user = $this->UserOP->get_user_info_by_phone($phone);
         if($user != null){
-            return getInterFaceArray(0, "手机号码已存在！", '');
+            return getInterFaceArray(0, "注册失败，手机号码已存在！", '');
         }
         $item = [
             'score' => 0,

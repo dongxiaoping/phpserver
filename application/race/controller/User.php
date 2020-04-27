@@ -30,7 +30,7 @@ class User
             $result_array = $this->UserServer->get_user_info_by_id($id);
             echo arrayToJson($result_array);
         } else {
-            echo getJsonStringByParam(0, "param_error", "");
+            echo getJsonStringByParam(0, "请求参数错误！", "");
         }
     }
 
