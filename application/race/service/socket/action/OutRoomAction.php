@@ -62,7 +62,7 @@ class OutRoomAction
         if(count($this->socketData->get_connect_people_list_by_room_id($roomId))<=0){
             $room->destroy();
             $this->socketData->remove_room_by_id($roomId);
-            Log::write('socket房间无成员，房间销毁：'.$roomId, 'info');
+            //Log::write('socket房间无成员，房间销毁：'.$roomId, 'info');
         }
         return true;
     }
@@ -73,11 +73,11 @@ class OutRoomAction
         $this->outRoomBack->setFlag(1);
         $people = $this->socketData->get_connect_people_by_connect_id($connectId);
         if ($people == null) {
-            Log::write('socket断开，直接销毁', 'info');
+            //Log::write('socket断开，直接销毁', 'info');
             return;
         }
-        Log::write('退出前的成员信息数量', 'info');
-        Log::write(count($this->socketData->get_people_list()), 'info');
+        //Log::write('退出前的成员信息数量', 'info');
+        //Log::write(count($this->socketData->get_people_list()), 'info');
         $roomId = $people->get_room_id();
         $userId = $people->get_user_id();
         if($roomId !=null && $userId!=null){
@@ -97,14 +97,14 @@ class OutRoomAction
                 if(count($this->socketData->get_connect_people_list_by_room_id($roomId))<=0){
                     $room->destroy();
                     $this->socketData->remove_room_by_id($roomId);
-                    Log::write('socket房间无成员，房间销毁：'.$roomId, 'info');
+                   // Log::write('socket房间无成员，房间销毁：'.$roomId, 'info');
                 }
             }
         }
-        Log::write('socket断开，成员离开', 'info');
+        //Log::write('socket断开，成员离开', 'info');
         $this->socketData->remove_connect_people_by_connect_id($connectId);
-        Log::write('退出后的成员信息数量', 'info');
-        Log::write(count($this->socketData->get_people_list()), 'info');
+       // Log::write('退出后的成员信息数量', 'info');
+       // Log::write(count($this->socketData->get_people_list()), 'info');
     }
 
 }

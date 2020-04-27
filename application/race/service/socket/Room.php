@@ -186,7 +186,7 @@ class Room
         Timer::del($this->showDownTimer);
         Timer::del($this->rapLandlordTimer);
         $this->socketData->remove_room_by_id($this->roomId);
-        Log::write('workman/room:房间结束销毁:' . $this->roomId);
+        //Log::write('workman/room:房间结束销毁:' . $this->roomId);
     }
 
     public function startRace()
@@ -215,7 +215,7 @@ class Room
                     if ($selected_landlord_user_id == null) {
                         $ROOM_STATE = json_decode(ROOM_STATE, true);
                         $this->socketServer->change_room_state($this->roomId, $ROOM_STATE['CLOSE']);
-                        Log::write('workman/room:没有可当地主的成员，房间关闭,房间号:' . $this->roomId);
+                        //Log::write('workman/room:没有可当地主的成员，房间关闭,房间号:' . $this->roomId);
                         $this->destroy();
                         return;
                     }

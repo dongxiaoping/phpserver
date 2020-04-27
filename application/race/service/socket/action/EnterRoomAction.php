@@ -121,20 +121,20 @@ class EnterRoomAction
         }
         $room = $this->socket_data->get_room_by_id($this->room_id);
         if ($room) {
-            Log::write('EnterRoomAction：socket房间存在，直接进入：'.$this->room_id, 'info');
+            //Log::write('EnterRoomAction：socket房间存在，直接进入：'.$this->room_id, 'info');
         } else {
             $room = new Room($this->room_id, $this->room_info["creatUserId"], $this->room_info["playCount"],
                 $this->socket_data, $this->socket_server);
             $this->socket_data->add_room($room);
-            Log::write('EnterRoomAction：socket房间创建成功，房间号：'.$this->room_id, 'info');
-            Log::write('EnterRoomAction：当前socket房间总数：'.count($this->socket_data->get_room_list()), 'info');
+            //Log::write('EnterRoomAction：socket房间创建成功，房间号：'.$this->room_id, 'info');
+           // Log::write('EnterRoomAction：当前socket房间总数：'.count($this->socket_data->get_room_list()), 'info');
         }
         $connect_people = $this->socket_data->get_connect_people_by_connect_id($this->connection->id);
         $connect_people->set_user_id($this->user_id);
         $connect_people->set_room_id($this->room_id);
         $message = BackData::getMemberInRoomBack($this->member_info);
         $room->broadcastToAllMember($message);
-        Log::write("用户进入房间，当前房间人数:".count($this->socket_data->get_connect_people_list_by_room_id($this->room_id)), 'info');
+        //Log::write("用户进入房间，当前房间人数:".count($this->socket_data->get_connect_people_list_by_room_id($this->room_id)), 'info');
         $this->enter_room_back->setData($this->socket_server->get_room_race_info($this->room_id));
     }
 }

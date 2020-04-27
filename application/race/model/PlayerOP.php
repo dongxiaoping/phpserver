@@ -32,11 +32,11 @@ class PlayerOP
     //从数据库中删除不存在的成员
     public function check_room_member($room_id, $member_in_socket_list)
     {
-        Log::write("socket房间成员", 'info');
-        Log::write($member_in_socket_list, 'info');
-        Log::write("数据库中的成员", 'info');
+        //Log::write("socket房间成员", 'info');
+        //Log::write($member_in_socket_list, 'info');
+        //Log::write("数据库中的成员", 'info');
         $member_in_database_list = $this->get_members_without_kickout($room_id);
-        Log::write($member_in_database_list, 'info');
+       // Log::write($member_in_database_list, 'info');
         for ($i = 0; $i < count($member_in_database_list); $i++) {
             $data_base_user_id = $member_in_database_list[$i]["userId"];
             $is_exist = false;
@@ -48,8 +48,8 @@ class PlayerOP
             }
             if(!$is_exist){
                 $this->cancel_member_from_room($data_base_user_id,$room_id);
-                Log::write("无效成员", 'info');
-                Log::write($data_base_user_id, 'info');
+               // Log::write("无效成员", 'info');
+               // Log::write($data_base_user_id, 'info');
             }
         }
     }
