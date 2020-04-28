@@ -32,6 +32,7 @@ class UserServer
         }
         $info = getInterFaceArray(1, "success", $item);
         $info["config"] = config('roomGameConfig');
+        $info["gameUrl"] = config('gameAgencyConfig')['gameUrl'];
         return $info;
     }
 
