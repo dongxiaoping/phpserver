@@ -29,6 +29,9 @@ class RoomBase
                 case $createDiamondConfig['totalRace']['three']['raceCount'];
                     $diamond = $createDiamondConfig['totalRace']['three']['aaDiamond'];
                     break;
+                case $createDiamondConfig['totalRace']['four']['raceCount'];
+                    $diamond = $createDiamondConfig['totalRace']['four']['aaDiamond'];
+                    break;
                 default:
                     break;
             }
@@ -42,6 +45,9 @@ class RoomBase
                     break;
                 case $createDiamondConfig['totalRace']['three']['raceCount'];
                     $diamond = $createDiamondConfig['totalRace']['three']['daiKaiDiamond'];
+                    break;
+                case $createDiamondConfig['totalRace']['four']['raceCount'];
+                    $diamond = $createDiamondConfig['totalRace']['four']['daiKaiDiamond'];
                     break;
                 default:
                     break;
@@ -58,6 +64,8 @@ class RoomBase
                     break;
                 case $createDiamondConfig['betLimit']['three']['limitVal']:
                     $rate = $createDiamondConfig['betLimit']['three']['aaRate'];
+                case $createDiamondConfig['betLimit']['four']['limitVal']:
+                    $rate = $createDiamondConfig['betLimit']['four']['aaRate'];
                     break;
                 default:
                     break;
@@ -72,6 +80,9 @@ class RoomBase
                     break;
                 case $createDiamondConfig['betLimit']['three']['limitVal']:
                     $rate = $createDiamondConfig['betLimit']['three']['daiKaiRate'];
+                    break;
+                case $createDiamondConfig['betLimit']['four']['limitVal']:
+                    $rate = $createDiamondConfig['betLimit']['four']['daiKaiRate'];
                     break;
                 default:
                     break;
