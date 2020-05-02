@@ -120,6 +120,10 @@ class UserServer
         if($user != null){
             return getInterFaceArray(0, "注册失败，手机号码已存在！", '');
         }
+        $user = $this->UserOP->get_user_info_by_nick($nick);
+        if($user != null){
+            return getInterFaceArray(0, "注册失败，昵称已存在！", '');
+        }
         $item = [
             'score' => 0,
             'diamond' => 0,

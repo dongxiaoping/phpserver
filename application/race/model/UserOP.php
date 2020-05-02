@@ -55,6 +55,16 @@ class UserOP
         return null;
     }
 
+    public function get_user_info_by_nick($nick)
+    {
+        $table = new User();
+        $item =  $table->where("nick", $nick)->find();
+        if ($item) {
+            return $item;
+        }
+        return null;
+    }
+
 
     /////////////////
     /* $info ["category_name"=>$name,......] 除主键之外的表字段信息集合
