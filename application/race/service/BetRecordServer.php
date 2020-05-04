@@ -12,6 +12,7 @@
 namespace app\race\service;
 
 use app\race\model\BetRecordOP;
+use think\Log;
 
 class BetRecordServer
 {
@@ -101,8 +102,10 @@ class BetRecordServer
         $id = $the_record['id'];
         $updateResult = $this->BetRecordOP->update_bet_val($id, $betLocation, 0);
         if($updateResult){
+            Log::record('del bet success', 'info');
             return getInterFaceArray(1, "success", "");
         }else{
+            Log::record('del bet fail', 'error');
             return getInterFaceArray(0, "update_fail", "");
         }
     }
