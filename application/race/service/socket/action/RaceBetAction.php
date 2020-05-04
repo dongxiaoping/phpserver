@@ -19,6 +19,7 @@ class RaceBetAction
         $this->socketServer = $socketServer;
     }
 
+    //$betVal 负数表示取消下注
     public function raceBet(Room $room, $userId, $raceNum, $betLocation, $betVal)
     {
         if ($raceNum != $room->getRunningRaceNum()) {

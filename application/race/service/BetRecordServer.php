@@ -30,13 +30,19 @@ class BetRecordServer
 
     public function to_bet($userId, $roomId, $raceNum, $betLocation, $betVal)
     {
-        //超限检查
         $the_record = $this->BetRecordOP->get_the_record($userId, $roomId, $raceNum);
         if ($the_record) { //存在记录
-            $new_bet_val = $the_record[$betLocation] + $betVal;
+            if($betVal < 0){
+                $new_bet_val = 0;
+            }else{
+                $new_bet_val = $the_record[$betLocation] + $betVal;
+            }
             $id = $the_record['id'];
-            $this->BetRecordOP->update_bet_val($id, $betLocation, $new_bet_val);
-            return getInterFaceArray(1, "success", '');
+            $updateResult =  $this->BetRecordOP->update_bet_val($id, $betLocation, $new_bet_val);
+            if($updateResult){
+                return getInterFaceArray(1, "success", '');
+            }
+            return getInterFaceArray(0, "update_fail", '');
         }
 
         //记录不存在

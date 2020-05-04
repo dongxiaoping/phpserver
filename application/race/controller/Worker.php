@@ -79,16 +79,10 @@ class Worker extends Server
                     $landlordSelectedAction = new LandlordSelectedAction($this->socketServer, $this->socketData);
                     $landlordSelectedAction->landlordSelected($room, $data['info']['raceNum'], $data['info']['landlordId']);
                     break;
-                case SocketActionTag::$RACE_BET_REQ: //下注
+                case SocketActionTag::$RACE_BET_REQ: //下注 下注值为负数表示取消下注
                     $raceBetAction = new RaceBetAction($this->socketServer, $this->socketData);
                     $raceBetAction->raceBet($room, $data['info']['userId'], $data['info']['raceNum'],
                         $data['info']['betLocation'], $data['info']['betVal']);
-                    break;
-                case SocketActionTag::$CANCEL_BET_REQ: //取消指定房间、指定用户、指定场次、指定位置的下注
-                    $message = array('type' => 'cancelBetSuccessNotice', 'info' => array('userId' => $data['info']['userId'],
-                        'roomId' => $data['info']['roomId'], 'raceNum' => $data['info']['raceNum'],
-                        'betLocation' => $data['info']['betLocation'])); //删除下注通知成功
-                    $room->broadcastToAllMember($message);
                     break;
                 case SocketActionTag::$CHAT_CARTON_MESSAGE_REQ: //消息动画
                     $message = array('type' => 'chatCartonMessage', 'info' => $data['info']['info']);
