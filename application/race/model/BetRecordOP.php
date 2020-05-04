@@ -34,7 +34,8 @@ class BetRecordOP
 
     public function update_bet_val($id, $betLocation, $new_val)
     {
-        Db::query("update bet_record set " . $betLocation . "=" . $new_val . " where id=" . $id);
+        $table = new BetRecord();
+        $table->where('id', $id)->update([$betLocation => $new_val]);
         return true;
     }
 
