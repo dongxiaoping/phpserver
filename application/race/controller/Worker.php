@@ -88,6 +88,11 @@ class Worker extends Server
                     $message = array('type' => 'chatCartonMessage', 'info' => $data['info']['info']);
                     $room->broadcastToAllMember($message);
                     break;
+                case SocketActionTag::$AUDIO_PLAY_NOTICE: //语音
+                    $message = array('type' => SocketActionTag::$AUDIO_PLAY_NOTICE,
+                        'info' => array('userId'=>$data['info']['userId']),'voiceName'=> $data['info']['voiceName']);
+                    $room->broadcastToAllMember($message);
+                    break;
                 case SocketActionTag::$KICK_OUT_MEMBER_REQ: //踢出玩家，只能在游戏未开始调用
                     $outRoomAction = new OutRoomAction($this->socketServer, $this->socketData);
                     $outRoomAction->kickOutRoom($data['info']['roomId'], $data['info']['kickUserId']);

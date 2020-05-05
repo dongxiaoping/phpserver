@@ -43,6 +43,11 @@ class SocketInParamCheck
                 if (isset($data['info']['roomId']) && isset($data['info']['kickUserId'])) {
                     return true;
                 }
+            case 'audioPlayNotice': //
+                if (isset($data['info']['roomId']) && isset($data['info']['userId'])
+                    && isset($data['info']['voiceName'])) {
+                    return true;
+                }
             default:
                 return false;
         }

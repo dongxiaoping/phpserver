@@ -13,6 +13,7 @@ class SocketActionTag
     public static $CANCEL_BET_REQ = "cancelRaceBet";//取消下注请求
     public static $CHAT_CARTON_MESSAGE_REQ = "chatCartonMessage";//图片表情发送请求
     public static $KICK_OUT_MEMBER_REQ = "kickOutMemberFromRoom";//踢出玩家请求
+    public static $AUDIO_PLAY_NOTICE = "audioPlayNotice";//语音通知
 
     public static $ENTER_ROOM_RES = "enterRoomRes";//进入房间请求的回复
     public static $MEMBER_OUT_ROOM_NOTICE = "memberOutRoom";//成员离开房间通知
