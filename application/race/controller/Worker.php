@@ -85,7 +85,7 @@ class Worker extends Server
                         $data['info']['betLocation'], $data['info']['betVal']);
                     break;
                 case SocketActionTag::$CHAT_CARTON_MESSAGE_REQ: //消息动画
-                    $message = array('type' => 'chatCartonMessage', 'info' => $data['info']['info']);
+                    $message = array('type' => SocketActionTag::$CHAT_CARTON_MESSAGE_REQ, 'info' => $data['info']['info']);
                     $room->broadcastToAllMember($message);
                     break;
                 case SocketActionTag::$AUDIO_PLAY_NOTICE: //语音

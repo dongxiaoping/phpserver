@@ -13,37 +13,37 @@ class SocketInParamCheck
     public static function isRight($data): bool
     {
         switch ($data['type']) {
-            case 'enterRoom': //进入房间
+            case SocketActionTag::$ENTER_ROOM_REQ: //进入房间
                 if (isset($data['info']['roomId']) && isset($data['info']['userId'])) {
                     return true;
                 }
-            case 'startRoomGame': //
+            case SocketActionTag::$START_GAME_REQ: //
                 if (isset($data['info']['roomId']) && isset($data['info']['userId'])) {
                     return true;
                 }
-            case 'landlordSelected': //
+            case SocketActionTag::$LANDLORD_SELECTED_REQ: //
                 if (isset($data['info']['roomId']) && isset($data['info']['raceNum']) && isset($data['info']['landlordId'])) {
                     return true;
                 }
-            case 'raceBet': //
+            case SocketActionTag::$RACE_BET_REQ: //
                 if (isset($data['info']['userId']) && isset($data['info']['roomId']) && isset($data['info']['raceNum'])
                     && isset($data['info']['betLocation']) && isset($data['info']['betVal'])) {
                     return true;
                 }
-            case 'cancelRaceBet': //
+            case SocketActionTag::$CANCEL_BET_REQ: //
                 if (isset($data['info']['userId']) && isset($data['info']['roomId']) && isset($data['info']['raceNum'])
                     && isset($data['info']['betLocation'])) {
                     return true;
                 }
-            case 'chatCartonMessage': //
+            case SocketActionTag::$CHAT_CARTON_MESSAGE_REQ: //
                 if (isset($data['info']['roomId']) && isset($data['info']['info'])) {
                     return true;
                 }
-            case 'kickOutMemberFromRoom': //
+            case SocketActionTag::$KICK_OUT_MEMBER_REQ: //
                 if (isset($data['info']['roomId']) && isset($data['info']['kickUserId'])) {
                     return true;
                 }
-            case 'audioPlayNotice': //
+            case SocketActionTag::$AUDIO_PLAY_NOTICE: //
                 if (isset($data['info']['roomId']) && isset($data['info']['userId'])
                     && isset($data['info']['voiceName'])) {
                     return true;
