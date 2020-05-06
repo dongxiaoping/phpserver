@@ -90,7 +90,8 @@ class Worker extends Server
                     break;
                 case SocketActionTag::$AUDIO_PLAY_NOTICE: //语音
                     $message = array('type' => SocketActionTag::$AUDIO_PLAY_NOTICE,
-                        'info' => array('userId'=>$data['info']['userId'],'voiceName'=> $data['info']['voiceName']));
+                        'info' => array('userId'=>$data['info']['userId'],'voiceName'=> $data['info']['voiceName'],
+                         'duration'=> $data['info']['duration']));
                     $room->broadcastToAllMember($message);
                     break;
                 case SocketActionTag::$KICK_OUT_MEMBER_REQ: //踢出玩家，只能在游戏未开始调用
