@@ -28,7 +28,7 @@ class Voice
 
     private function loadVoiceFile($baseData){
         try {
-            $today = date( "Ymd ");
+            $today = date("Ymd");
             $up_dir = './voice/'.$today."/";
             if (!file_exists($up_dir)) {
                 mkdir($up_dir, 0777);
@@ -36,7 +36,7 @@ class Voice
             if (preg_match('/^(data:\s*audio\/(\w+);base64,)/', $baseData, $result)) {
                 $type = $result[2];
                 if (in_array($type, array('mp3'))) {
-                    $picName = date('YmdHis') . '.' . $type;
+                    $picName = date('YmdHis').'.'.$type;
                     $path = $up_dir . $picName;
                     if (file_put_contents($path, base64_decode(str_replace($result[1], '', $baseData)))) {
                         $img_path = str_replace('../../..', '', $path);
