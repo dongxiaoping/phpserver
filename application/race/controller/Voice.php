@@ -28,7 +28,8 @@ class Voice
 
     private function loadVoiceFile($baseData){
         try {
-            $up_dir = './voice/';
+            $today = date( "Ymd ");
+            $up_dir = './voice/'.$today."/";
             if (!file_exists($up_dir)) {
                 mkdir($up_dir, 0777);
             }
@@ -39,7 +40,7 @@ class Voice
                     $path = $up_dir . $picName;
                     if (file_put_contents($path, base64_decode(str_replace($result[1], '', $baseData)))) {
                         $img_path = str_replace('../../..', '', $path);
-                        return $picName;
+                        return $today."/".$picName;
                     } else {
                         return null;
                     }
