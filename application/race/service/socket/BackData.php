@@ -100,13 +100,19 @@ class BackData
 
     //选地主通知
     public static function getChoiceLandLordBack($raceNum, $roomId){
-        return array('type' => SocketActionTag::$RACE_CHOICE_LANDLORD_NOTICEC,
+        return array('type' => SocketActionTag::$RACE_CHOICE_LANDLORD_NOTICE,
             'info' => array('raceNum' => $raceNum, 'roomId' => $roomId));
     }
 
-    //选地主通知
+    //成员进入房间通知数据结构
     public static function getMemberInRoomBack($memberInfo){
         return array('type' => SocketActionTag::$MEMBER_IN_ROOM_NOTICE,
             'info' => $memberInfo);
+    }
+
+    //在线成员核对
+    public static function getCheckRoomMemberBack($memberList){
+        return array('type' => SocketActionTag::$CHECK_ROOM_MEMBER_NOTICE,
+            'info' => $memberList);
     }
 }

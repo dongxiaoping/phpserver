@@ -3,6 +3,7 @@
 
 namespace app\race\service\socket\action;
 
+use app\race\service\socket\BackData;
 use app\race\service\socket\SocketData;
 use app\race\service\socket\SocketServer;
 
@@ -17,11 +18,11 @@ class StartGameAction
         $this->socketServer = $socketServer;
     }
 
-    public function startGame($roomId):bool
+    public function startGame($roomId): bool
     {
         $ROOM_STATE = json_decode(ROOM_STATE, true);
         $room = $this->socketData->get_room_by_id($roomId);
-        if($room == null){
+        if ($room == null) {
             return false;
         }
         if ($room->getState() != $ROOM_STATE['OPEN']) {
@@ -30,6 +31,7 @@ class StartGameAction
         if ($room->getRunningRaceNum() != 0) {
             return false;
         }
+        $room->broadcastToAllMember(BackData::getCheckRoomMemberBack($this->socketServer->get_members_without_kickout($roomId)));
         $this->socketServer->change_room_state($roomId, $ROOM_STATE['PLAYING']);
         $room->setState($ROOM_STATE['PLAYING']);
         $room->startRace();

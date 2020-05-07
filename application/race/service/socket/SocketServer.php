@@ -137,4 +137,10 @@ class SocketServer
     {
         return $this->RoomServer->get_room_race_info($room_id);
     }
+
+    public function get_members_without_kickout($room_id)
+    {
+        return $this->PlayerOP->get_members_without_kickout($room_id);
+    }
+
 }

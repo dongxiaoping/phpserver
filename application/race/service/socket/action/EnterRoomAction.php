@@ -135,6 +135,7 @@ class EnterRoomAction
         $message = BackData::getMemberInRoomBack($this->member_info);
         $room->broadcastToAllMember($message);
         //Log::write("用户进入房间，当前房间人数:".count($this->socket_data->get_connect_people_list_by_room_id($this->room_id)), 'info');
-        $this->enter_room_back->setData($this->socket_server->get_room_race_info($this->room_id));
+        //$this->enter_room_back->setData($this->socket_server->get_room_race_info($this->room_id));
+        $this->enter_room_back->setData("");
     }
 }

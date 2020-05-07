@@ -94,8 +94,7 @@ class PlayerOP
         $table = new Player();
         $ROOM_PLAY_MEMBER_STATE = json_decode(ROOM_PLAY_MEMBER_STATE, true);
         $stringItem = 'state!=' . $ROOM_PLAY_MEMBER_STATE['KICK_OUT'];
-        $list = $table->where('roomId', $room_id)->where($stringItem)->select();
-        return $list;
+        return $table->where('roomId', $room_id)->where($stringItem)->select();
     }
 
     public function get_members_online($room_id)
