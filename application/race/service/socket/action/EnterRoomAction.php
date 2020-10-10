@@ -129,7 +129,11 @@ class EnterRoomAction
             //Log::write('EnterRoomAction：socket房间创建成功，房间号：'.$this->room_id, 'info');
            // Log::write('EnterRoomAction：当前socket房间总数：'.count($this->socket_data->get_room_list()), 'info');
         }
-        $connect_people = $this->socket_data->get_connect_people_by_connect_id($this->connection->id);
+        $connect_people = $this->socket_data->get_connect_people_by_connect_id($this->connection->id); //为空的情况
+        if($connect_people == null){
+            Log::write('连接对象不存在'.$this->room_id, 'error');
+            return;
+        }
         $connect_people->set_user_id($this->user_id);
         $connect_people->set_room_id($this->room_id);
         $message = BackData::getMemberInRoomBack($this->member_info);
