@@ -16,6 +16,7 @@ use app\race\model\PlayerOP;
 use app\race\model\RoomOP;
 use app\race\model\UserOP;
 use app\race\service\base\RoomBase;
+use think\Log;
 
 class RoomServer extends RoomBase
 {
@@ -115,22 +116,25 @@ class RoomServer extends RoomBase
     {
         $ROOM_STATE = json_decode(ROOM_STATE, true);
         $ROOM_PLAY_MEMBER_STATE = json_decode(ROOM_PLAY_MEMBER_STATE, true);
-
-        ////// 1、判断用户以及房间是否存在 2、判断房间是否已关闭
+        $ROOM_PLAY_MEMBER_TYPE = json_decode(ROOM_PLAY_MEMBER_TYPE, true);
+        // 1、判断用户以及房间是否存在 2、判断房间是否已关闭
         $user_info = $this->UserOP->get($user_id);
         if (!$user_info) {
+            Log::record('用户不存在,用户：'.$user_id);
             return getInterFaceArray(0, "user_not_exist", "");
         }
         $room_info = $this->RoomOp->get($room_id);
         if ($room_info === null) {
+            Log::record('房间不存在,用户：'.$room_id);
             return getInterFaceArray(0, "room_not_exist", "");
         }
         $member_info = $this->PlayerOP->get_member_info_in_the_room($user_id, $room_id);
-
         $ROOM_PAY = json_decode(ROOM_PAY, true);
         $back_content = [];
         $back_content['has'] = $user_info["diamond"];
         $back_content['need'] = $room_info["roomFee"];
+
+        //是否有足够的钻进房间
         if ($user_id == $room_info["creatUserId"] && $user_info["diamond"] < $room_info["roomFee"]) {
             return getInterFaceArray(0, "diamond_not_enough", $back_content); //账户钻不够
         }
@@ -139,37 +143,53 @@ class RoomServer extends RoomBase
             return getInterFaceArray(0, "diamond_not_enough", $back_content);
         }
 
-        //////////登录过房间情况的判断
         if ($member_info) {
-            if ($member_info["state"] === $ROOM_PLAY_MEMBER_STATE["KICK_OUT"]) {
+            Log::record('用户进入过房间');
+            if ($member_info["state"] === $ROOM_PLAY_MEMBER_STATE["KICK_OUT"] || $member_info["roleType"] === $ROOM_PLAY_MEMBER_TYPE["LIMIT"]) {
+                Log::record('用户被踢出过,不能进入房间');
                 return getInterFaceArray(0, "has_kickout", "");
+            }
+            $room_race_info = $this->get_room_race_info($room_id);
+            Log::record('用户正常进入房间');
+            return getInterFaceArray(1, "success", $room_race_info);
+        }
+
+        if ($room_info["roomState"] == $ROOM_STATE["CLOSE"]) {
+            Log::record('用户初次进入房间，并且房间以关闭');
+            $room_race_info = $this->get_room_race_info($room_id);
+            return getInterFaceArray(1, "success", $room_race_info);
+        }
+
+        Log::record('用户初次进入房间，并且房间没有关闭');
+        //根据房间的人数、房间的状态来决定当前用户的角色类型
+        $valid_member = $this->PlayerOP->get_member_count_without_limit_member($room_id);
+        Log::record('房间当前有效人数：'.$valid_member);
+        Log::record('房间限制人数：'.$room_info["memberLimit"]);
+        $role_type = $this->the_user_role_type($room_info["memberLimit"], $valid_member);//玩家类型
+        //创建进入房间
+        $new_member = $this->create_player_member($user_id, $room_id, $role_type,$user_info);
+        Log::record('执行进入房间数据库操作');
+        $isOk = $this->PlayerOP->insert($new_member);
+        if ($isOk) {
+            Log::record('进入房间成功');
+            if ($room_info["roomState"] == $ROOM_STATE["PLAYING"]) { //扣费
+                Log::record('进行扣除费用操作');
+                $this->UserServer->cost_diamond_in_room($room_info['id'], $user_id);
             }
             $room_race_info = $this->get_room_race_info($room_id);
             return getInterFaceArray(1, "success", $room_race_info);
         }
+        Log::record('进入房间失败异常','error');
+        return getInterFaceArray(0, "in_room_fail", '');
+    }
 
-        if ($room_info["roomState"] == $ROOM_STATE["PLAYING"]) {
-            return getInterFaceArray(0, "has_playing", "");
-        }
-
-        if ($room_info["roomState"] == $ROOM_STATE["CLOSE"]) {
-            $room_race_info = $this->get_room_race_info($room_id);
-            return getInterFaceArray(1, "success", $room_race_info);
-        }
-
-        /////////房间已满的判断
-        $ROOM_PLAY_MEMBER_TYPE = json_decode(ROOM_PLAY_MEMBER_TYPE, true);
-        $member_in_count = $this->PlayerOP->get_member_count_without_kickout($room_id);
-        if ($member_in_count >= $room_info["memberLimit"]) {
-            return getInterFaceArray(0, "member_count_limit", "");
-        }
-
-
-        //创建进入房间
-        $item = [
+    public function create_player_member($user_id, $room_id, $role_type,$user_info){
+        $ROOM_PLAY_MEMBER_STATE = json_decode(ROOM_PLAY_MEMBER_STATE, true);
+        Log::record('设置的角色类型值'.$role_type);
+        return  [
             'userId' => $user_id,
             'roomId' => $room_id,
-            'roleType' => $ROOM_PLAY_MEMBER_TYPE["PLAYER"],
+            'roleType' => $role_type,
             'score' => 0,
             'nick' => $user_info['nick'],
             'icon' => $user_info['icon'],
@@ -177,15 +197,18 @@ class RoomServer extends RoomBase
             'creatTime' => date("Y-m-d H:i:s"),
             'modTime' => date("Y-m-d H:i:s")
         ];
-        $isOk = $this->PlayerOP->insert($item);
-        if ($isOk) {
-            if ($room_info["roomState"] == $ROOM_STATE["PLAYING"]) { //扣费
-                $this->UserServer->cost_diamond_in_room($room_info['id'], $user_id);
-            }
-            $room_race_info = $this->get_room_race_info($room_id);
-            return getInterFaceArray(1, "success", $room_race_info);
+    }
+
+    //用户第一次进入一个未关闭的房间时调用，根据房间的状态以及人数(限制进入以外的玩家人数)决定用户的角色
+    public function  the_user_role_type($room_limit_count, $member_count_without_limit_member){
+        $ROOM_PLAY_MEMBER_TYPE = json_decode(ROOM_PLAY_MEMBER_TYPE, true);
+        if($member_count_without_limit_member < $room_limit_count){
+            Log::record('当前用户被判定为普通玩家'.$ROOM_PLAY_MEMBER_TYPE["PLAYER"]);
+            return $ROOM_PLAY_MEMBER_TYPE["PLAYER"];
+        }else{
+            Log::record('当前用户被判定为观战者'.$ROOM_PLAY_MEMBER_TYPE["PLAYER"]);
+            return $ROOM_PLAY_MEMBER_TYPE["WATCHER"];
         }
-        return getInterFaceArray(0, "in_room_fail", '');
     }
 
     //获取房间比赛相关的所有信息

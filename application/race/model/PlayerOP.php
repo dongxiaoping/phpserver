@@ -71,6 +71,14 @@ class PlayerOP
         return $count;
     }
 
+    public function get_member_count_without_limit_member($room_id)
+    {
+        $ROOM_PLAY_MEMBER_TYPE = json_decode(ROOM_PLAY_MEMBER_TYPE, true);
+        $table = new Player();
+        $count = $table->where("roomId", $room_id)->where("roleType",'<' ,$ROOM_PLAY_MEMBER_TYPE['LIMIT'])->count();
+        return $count;
+    }
+
     public function get_member_count_without_kickout($room_id)
     { //不包含踢出的
         $table = new Player();

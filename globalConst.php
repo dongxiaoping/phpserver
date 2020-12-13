@@ -52,7 +52,8 @@ define('BE_LANDLORD_WAY', '{ "TURN": 1,"RAP":2}');
 define('ROOM_PLAY_MEMBER_STATE', '{ "ON_LINE": 1,"OFF_LINE": 2,"KICK_OUT":3}');
 
 //房间成员类型
-define('ROOM_PLAY_MEMBER_TYPE', '{ "ROOM_OWNER": 1,"PLAYER": 2,"WATCHER":3}');
+// 1玩家，2观战者, 3限制进入玩家(游戏未开始就被限制进入的玩家)
+define('ROOM_PLAY_MEMBER_TYPE', '{ "PLAYER":1,"WATCHER":2,"LIMIT":3}');
 
 //用户类型
 define('USER_TYPE', '{ "VISIT_USER": 1,"NORMAL_USER": 2,"CHEAT_USER":3}');

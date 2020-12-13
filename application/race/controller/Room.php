@@ -12,6 +12,7 @@
 namespace app\race\controller;
 
 use app\race\service\RoomServer;
+use think\Log;
 
 class Room
 {
@@ -63,6 +64,7 @@ class Room
         if (isset($_GET["userId"]) && isset($_GET["roomId"])) {
             $userId = $_GET["userId"];
             $roomId = $_GET["roomId"];
+            Log::record('用户登录房间，用户：'.$userId.'房间：'.$roomId);
             $result_array = $this->RoomServer->login_in_room($userId, $roomId);
             echo arrayToJson($result_array);
         } else {
@@ -76,6 +78,7 @@ class Room
         header('Access-Control-Allow-Origin: *');
         if ($_GET["creatUserId"] && $_GET["playCount"] && $_GET["memberLimit"] && $_GET["roomPay"]
             && $_GET["costLimit"]) {
+            Log::record('创建房间');
             $content = [];
             $content['creatUserId'] = $_GET["creatUserId"]; //创建者ID
             $content['playCount'] = $_GET["playCount"];  //游戏场次
@@ -84,12 +87,14 @@ class Room
             $content['costLimit'] = $_GET["costLimit"];  //下注上限
             $is_val_all_right = $this->RoomServer->check_vals_create_room($content);
             if (!$is_val_all_right) {
+                Log::record('创建房间参数无效错误','error');
                 echo getJsonStringByParam(0, "param_val_error", "");
                 return;
             }
             $result_array = $this->RoomServer->create_room($content);
             echo arrayToJson($result_array);
         } else {
+            Log::record('创建房间参数错误','error');
             echo getJsonStringByParam(0, "param_error", "");
         }
     }
