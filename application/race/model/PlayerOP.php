@@ -109,7 +109,7 @@ class PlayerOP
     {
         $table = new Player();
         $ROOM_PLAY_MEMBER_TYPE = json_decode(ROOM_PLAY_MEMBER_TYPE, true);
-        $stringItem = 'roleType ==' . $ROOM_PLAY_MEMBER_TYPE['PLAYER'];
+        $stringItem = 'roleType =' . $ROOM_PLAY_MEMBER_TYPE['PLAYER'];
         return $table->where('roomId', $room_id)->where($stringItem)->select();
     }
 
