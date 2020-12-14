@@ -69,7 +69,7 @@ class Worker extends Server
             }
             switch ($data['type']) {
                 case SocketActionTag::$ENTER_ROOM_REQ: //进入房间
-                    Log::record('有用户进入房间，用户id:'.data['info']['userId'].'房间id:'.$data['info']['roomId']);
+                    Log::record('有用户进入房间，用户id:'.$data['info']['userId'].'房间id:'.$data['info']['roomId']);
                     $this->enterRoom($data['info']['roomId'], $connection, $data['info']['userId']);
                     break;
                 case SocketActionTag::$START_GAME_REQ: //开始游戏请求
