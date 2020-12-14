@@ -160,7 +160,7 @@ class RoomServer extends RoomBase
             return getInterFaceArray(1, "success", $room_race_info);
         }
 
-        Log::record('用户初次进入房间，并且房间没有关闭');
+        Log::record('用户在房间没有关闭的情况下，进入了房间');
         //根据房间的人数、房间的状态来决定当前用户的角色类型
         $valid_member = $this->PlayerOP->get_member_count_without_limit_member($room_id);
         Log::record('房间当前有效人数：'.$valid_member);
@@ -216,7 +216,7 @@ class RoomServer extends RoomBase
     {
         $room_info = $this->get_room_info_by_id($room_id)['data'];
         $race_info = $this->RaceServer->getRacesByRoomId($room_id)["data"];
-        $member_info = $this->PlayerOP->get_members_without_kickout($room_id);
+        $member_info = $this->PlayerOP->get_members_can_play($room_id);
         $bet_record_info = $this->BetRecordOP->getListByOneColumn('roomId', $room_id);
         return array('room' => $room_info, 'races' => $race_info, 'members' => $member_info, 'betRecords' => $bet_record_info);
     }

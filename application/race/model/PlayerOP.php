@@ -105,6 +105,15 @@ class PlayerOP
         return $table->where('roomId', $room_id)->where($stringItem)->select();
     }
 
+    public function get_members_can_play($room_id)
+    {
+        $table = new Player();
+        $ROOM_PLAY_MEMBER_TYPE = json_decode(ROOM_PLAY_MEMBER_TYPE, true);
+        $stringItem = 'roleType ==' . $ROOM_PLAY_MEMBER_TYPE['PLAYER'];
+        return $table->where('roomId', $room_id)->where($stringItem)->select();
+    }
+
+
     public function get_members_online($room_id)
     {
         $table = new Player();
