@@ -13,6 +13,7 @@ class WordDes
     public static $GAME_CLOSE_ERROR = "游戏异常关闭";
     public static $USER_FORBID = "已被禁止进入";
     public static $GAME_PLAYING = "游戏已开始";
+    public static $NO_THE_USER_IN_ROOM = "异常进入，房间没有相关用户信息";
     public static $PEOPLE_OVER_LIMIT = "人数超限";
     public static $ROOM_PLAYING = "游戏已开发";
     public static $USER_NOT_CONNECT = "用户不在线";

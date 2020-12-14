@@ -46,12 +46,12 @@ class Worker extends Server
     public function onMessage($connection, $data)
     {
         try {
-            Log::write('-----------------------------------------------------------------------', 'info');
-            Log::write($data, 'info');
+            Log::record('-----------------------------------------------------------------------');
+            Log::record($data);
             $data = json_decode($data, true);
             $isParamRight = SocketInParamCheck::isRight($data);
             if (!$isParamRight) {//
-                Log::write("参数错误", 'error');
+                Log::record("参数错误", 'error');
                 $backDataBase = new BackData($data['type']);
                 $backDataBase->setflag(0);
                 $backDataBase->setMessage("参数错误");
@@ -60,7 +60,7 @@ class Worker extends Server
             }
             $room = $this->socketData->get_room_by_id($data['info']['roomId']);
             if ($room == null && $data['type'] != SocketActionTag::$ENTER_ROOM_REQ) {
-                Log::write("房间不存在", 'error');
+                Log::record("房间不存在", 'error');
                 $backDataBase = new BackData($data['type']);
                 $backDataBase->setflag(0);
                 $backDataBase->setMessage("房间不存在");
@@ -69,9 +69,10 @@ class Worker extends Server
             }
             switch ($data['type']) {
                 case SocketActionTag::$ENTER_ROOM_REQ: //进入房间
+                    Log::record('有用户进入房间，用户id:'.data['info']['userId'].'房间id:'.$data['info']['roomId']);
                     $this->enterRoom($data['info']['roomId'], $connection, $data['info']['userId']);
                     break;
-                case SocketActionTag::$START_GAME_REQ:
+                case SocketActionTag::$START_GAME_REQ: //开始游戏请求
                     $startGameAction = new StartGameAction($this->socketServer, $this->socketData);
                     $startGameAction->startGame($data['info']['roomId']);
                     break;
@@ -102,7 +103,7 @@ class Worker extends Server
 
             }
         } catch (Exception $e) {
-            Log::write($e->getMessage(), 'error');
+            Log::record($e->getMessage(), 'error');
         }
     }
 
