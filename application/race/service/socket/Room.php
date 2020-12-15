@@ -215,6 +215,8 @@ class Room
             }
             $BE_LANDLORD_WAY = json_decode(BE_LANDLORD_WAY, true);
             $this->socketServer->change_on_race($this->roomId, $this->runningRaceNum);
+            $race_play_state = json_decode(RACE_PLAY_STATE, true);
+            $this->setRaceState($this->runningRaceNum, $race_play_state['CHOICE_LANDLORD']);
             if($this->playMode == $BE_LANDLORD_WAY['RAP']){
                 Log::record("抢庄模式");
                 $this->rapLandlordProcess();
@@ -260,8 +262,6 @@ class Room
         $the_landlord_id = $this->getRaceLandlordId($this->runningRaceNum);
         if ($the_landlord_id == null) {
             Log::record("当前场次没有庄家");
-            $race_play_state = json_decode(RACE_PLAY_STATE, true);
-            $this->setRaceState($this->runningRaceNum, $race_play_state['CHOICE_LANDLORD']);
             $message = BackData::getChoiceLandLordBack($this->runningRaceNum, $this->roomId);
             Log::record("广播所有效用户进行抢庄");
             $this->broadcastToAllMember($message); //如果是游客，是不能响应的，在前端去处理
