@@ -48,6 +48,11 @@ class SocketInParamCheck
                     && isset($data['info']['voiceName'])) {
                     return true;
                 }
+            case SocketActionTag::$SURE_BE_LANDLORD_IN_TURN:
+                if (isset($data['info']['roomId']) && isset($data['info']['userId'])
+                    && isset($data['info']['raceNum'])) {
+                    return true;
+                }
             default:
                 return false;
         }
