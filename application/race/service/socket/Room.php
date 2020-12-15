@@ -24,6 +24,7 @@ class Room
     private $createUserId = null; //房间创建者ID
     private $createTime; //房间创建的时间戳
     private $playMode; //抢庄模式
+    private $player_to_turn_user_id; //中间数据
 
     public function __construct($roomId , $createUserId, $race_count,SocketData $socketData, SocketServer $socketServer, $playMode)
     {
@@ -243,9 +244,10 @@ class Room
             Log::record('发出轮庄用户通知,并定时准备下一个通知');
             $message = BackData::getTurnLandlordBack($this->runningRaceNum, $this->roomId, $player_to_turn_user_id);
             $this->broadcastToAllMember($message);
-            $this->turnLandlordTimer = Timer::add(config('roomGameConfig.turnLandlordTime'), function ($player_to_turn_user_id) {
+            $this->player_to_turn_user_id = $player_to_turn_user_id;
+            $this->turnLandlordTimer = Timer::add(config('roomGameConfig.turnLandlordTime'), function ( ) {
                 Log::record('执行下一个用户轮庄流程');
-                $this->turnLandlordProcess($player_to_turn_user_id);
+                $this->turnLandlordProcess($this->player_to_turn_user_id);
             }, array(), false);
         } else {
             Timer::del($this->turnLandlordTimer);
