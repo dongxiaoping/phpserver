@@ -174,6 +174,7 @@ class Room
         $this->addScoreList($race_result);
         $the_landlord_id = $this->getRaceLandlordId($this->runningRaceNum);
         $message = BackData::getRaceShowDownBack($this->runningRaceNum, $this->roomId, $race_result, $this->scoreList, $the_landlord_id);
+        Log::record('比大小通知，将比赛结果信息通知给所有用户');
         $this->broadcastToAllMember($message);
     }
 

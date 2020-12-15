@@ -55,6 +55,10 @@ class LandlordSelectedAction
         if($room->getRaceLandlordId($raceNum) == null){
             Log::record('检查合理，用户可以轮流选择当庄');
             $room->setRaceLandlord($raceNum, $landlordId);
+            $landlordLastCount = config('roomGameConfig.landlordLastCount');
+            $this->socketServer->change_race_landlord($room->getRoomId(), $room->getRunningRaceNum(),
+                $landlordId, $landlordLastCount);
+            Log::record('将庄家信息存到数据库和虚拟房间中');
             $room->turnLandlordProcess($landlordId);
         }else{
             Log::record('该局已经有庄，用户的请求是异常行为');
