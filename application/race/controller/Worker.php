@@ -99,7 +99,6 @@ class Worker extends Server
                     $outRoomAction = new OutRoomAction($this->socketServer, $this->socketData);
                     $outRoomAction->kickOutRoom($data['info']['roomId'], $data['info']['kickUserId']);
                     break;
-                default:
                 case SocketActionTag::$SURE_BE_LANDLORD_IN_TURN: //用户同意轮庄当地主
                     Log::record('接到用户愿意轮庄当地主通知');
                     $landlordSelectedAction = new LandlordSelectedAction($this->socketServer, $this->socketData);
