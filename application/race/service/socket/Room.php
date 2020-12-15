@@ -85,9 +85,12 @@ class Room
     public function getOneLandlordId()
     {
         $selected_landlord_user_id = null;
+        Log::record('抢庄人数：'.count($this->rapLandlordUserList));
         if (count($this->rapLandlordUserList) <= 0) {//没有人抢庄
+            Log::record('没有人抢庄，随机选一个当庄');
             $selected_landlord_user_id = $this->socketServer->get_rand_landlord_user_id($this->roomId);
         } else {
+            Log::record('有人抢庄，从抢庄人群中随机选一个庄家');
             $indexSet = rand(0, count($this->rapLandlordUserList) - 1);
             $selected_landlord_user_id = $this->rapLandlordUserList[$indexSet];
         }
@@ -141,6 +144,7 @@ class Room
         $race_play_state = json_decode(RACE_PLAY_STATE, true);
         $this->setRaceState($this->runningRaceNum, $race_play_state['DEAL']);
         $the_landlord_id = $this->getRaceLandlordId($this->runningRaceNum);
+        Log::record('发牌通知，包含了场次，房间号，庄家信息：'.$this->runningRaceNum.':'.$this->roomId.':'.$the_landlord_id);
         $message = BackData::getRaceStateDealBack($this->runningRaceNum, $this->roomId, $the_landlord_id);
         $this->broadcastToAllMember($message);
     }
@@ -206,22 +210,27 @@ class Room
             $this->socketServer->change_on_race($this->roomId, $this->runningRaceNum);
             $the_landlord_id = $this->getRaceLandlordId($this->runningRaceNum);
             if ($the_landlord_id == null) {
+                Log::record("当前场次没有庄家");
                 $race_play_state = json_decode(RACE_PLAY_STATE, true);
                 $this->setRaceState($this->runningRaceNum, $race_play_state['CHOICE_LANDLORD']);
                 $message = BackData::getChoiceLandLordBack($this->runningRaceNum, $this->roomId);
-                $this->broadcastToAllMember($message); //广播选地主
+                Log::record("广播所有效用户进行抢庄");
+                $this->broadcastToAllMember($message); //如果是游客，是不能响应的，在前端去处理
                 $this->rapLandlordTimer = Timer::add(config('roomGameConfig.rapLandlordTime'), function () {
+                    Log::record("抢庄记时到，选一个当庄");
                     $selected_landlord_user_id = $this->getOneLandlordId();
                     if ($selected_landlord_user_id == null) {
                         $ROOM_STATE = json_decode(ROOM_STATE, true);
                         $this->socketServer->change_room_state($this->roomId, $ROOM_STATE['CLOSE']);
-                        //Log::write('workman/room:没有可当地主的成员，房间关闭,房间号:' . $this->roomId);
+                        Log::record('workman/room:没有可当地主的成员，房间关闭,房间号:' . $this->roomId);
                         $this->destroy();
                         return;
                     }
                     $this->setRaceLandlord($this->runningRaceNum, $selected_landlord_user_id);
                     $landlordLastCount = config('roomGameConfig.landlordLastCount');
-                    $this->socketServer->change_race_landlord($this->roomId, $this->runningRaceNum, $selected_landlord_user_id, $landlordLastCount); //数据库修改
+                    $this->socketServer->change_race_landlord($this->roomId, $this->runningRaceNum, $selected_landlord_user_id, $landlordLastCount);
+                    Log::record('将庄家信息存到数据库并开始接下来的游戏环节');
+                    Log::record('发牌通知中包含了当前局庄家的id');
                     $this->nextRaceNoLandlordSelect();
                 }, array(), false);
             } else {
