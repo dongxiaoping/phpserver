@@ -219,7 +219,7 @@ class Room
                 $this->rapLandlordProcess();
             }else{
                 Log::record("轮庄模式流程");
-                $this->turnLandlordProcess();
+                $this->turnLandlordProcess(null);
             }
         } catch (Exception $e) {
             //Log::write($e->getMessage(), 'error');
