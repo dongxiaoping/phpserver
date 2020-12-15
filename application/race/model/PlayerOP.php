@@ -128,7 +128,8 @@ class PlayerOP
         $ROOM_PLAY_MEMBER_TYPE = json_decode(ROOM_PLAY_MEMBER_TYPE, true);
         $ROOM_PLAY_MEMBER_STATE = json_decode(ROOM_PLAY_MEMBER_STATE, true);
         $stringItem = 'roleType =' . $ROOM_PLAY_MEMBER_TYPE['PLAYER'];
-        $list = $table->where('roomId', $room_id)->where($stringItem)->where('state', $ROOM_PLAY_MEMBER_STATE['ON_LINE'])->select();
+        $list = $table->where('roomId', $room_id)->where($stringItem)
+            ->where('state', $ROOM_PLAY_MEMBER_STATE['ON_LINE'])->order('creatTime desc')->select();
         return $list;
     }
 

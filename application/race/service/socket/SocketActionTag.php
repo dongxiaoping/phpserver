@@ -19,9 +19,12 @@ class SocketActionTag
     public static $MEMBER_OUT_ROOM_NOTICE = "memberOutRoom";//成员离开房间通知
     public static $MEMBER_IN_ROOM_NOTICE = "memberInSocketRoom";//有成员进入房间通知
     public static $RACE_DEAL_NOTICE = "raceStateDeal";//发牌环节通知
+    public static $TURN_LANDLORD_NOTICE = "turnLandlord";//轮庄通知
     public static $RACE_BET_NOTICE = "raceStateBet";//下注环节通知
     public static $RACEC_SHOW_DOWN_NOTICE = "raceStateShowDown";//比大小环节通知
     public static $ALL_RACE_FINISHED_NOTICE = "allRaceFinished";//所有场次比赛结束通知
     public static $RACE_CHOICE_LANDLORD_NOTICE = "raceStateChoiceLandlord";//选地主通知
     public static $CHECK_ROOM_MEMBER_NOTICE = "checkRoomMember";//房间成员核对
+    public static $SURE_BE_LANDLORD_IN_TURN = "sureBeLandlordInTurn";//成员同意轮庄当庄
+
 }

@@ -112,6 +112,7 @@ class RoomBase
     public function check_vals_create_room($content)
     {
         $ROOM_PAY = json_decode(ROOM_PAY, true);
+        $BE_LANDLORD_WAY = json_decode(BE_LANDLORD_WAY, true);
         if ($content['creatUserId'] === "") {
             return false;
         }
@@ -122,6 +123,9 @@ class RoomBase
             return false;
         }
         if ($content['roomPay'] != $ROOM_PAY["AA"] && $content['roomPay'] != $ROOM_PAY["CREATOR"]) {
+            return false;
+        }
+        if ($content['playMode'] != $BE_LANDLORD_WAY["TURN"] && $content['playMode'] != $BE_LANDLORD_WAY["RAP"]) {
             return false;
         }
         if ($content['costLimit'] <= 0) {

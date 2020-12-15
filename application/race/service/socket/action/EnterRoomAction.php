@@ -131,8 +131,9 @@ class EnterRoomAction
         }
         $room = $this->socket_data->get_room_by_id($this->room_id);
         if (!$room) {
+            Log::record('socket房间不存在，创建一个');
             $room = new Room($this->room_id, $this->room_info["creatUserId"], $this->room_info["playCount"],
-                $this->socket_data, $this->socket_server);
+                $this->socket_data, $this->socket_server, $this->room_info["playMode"]);
             $this->socket_data->add_room($room);
             Log::record('EnterRoomAction：socket房间创建成功，房间号：'.$this->room_id);
             Log::record('EnterRoomAction：当前socket房间总数：'.count($this->socket_data->get_room_list()));

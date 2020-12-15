@@ -77,6 +77,13 @@ class BackData
             'raceNum' => $raceNum, 'roomId' => $roomId, 'landlordId' => $landlordId));
     }
 
+    //获取轮庄通知数据
+    public static function getTurnLandlordBack($raceNum, $roomId, $userId)
+    {
+        return array('type' => SocketActionTag::$TURN_LANDLORD_NOTICE, 'info' => array(
+            'raceNum' => $raceNum, 'roomId' => $roomId, 'userId' => $userId));
+    }
+
     //获取下注通知数据
     public static function getRaceBetBack($raceNum, $roomId, $landlordId)
     {

@@ -97,6 +97,27 @@ class SocketServer
         }
     }
 
+    /* 轮流抢庄模式，选一个玩家抢庄，返回该玩家，如果没有返回null
+     * $before_user_id 先前通知的玩家，没有null
+     * */
+    public function get_turn_landlord_user_id($before_user_id, $room_id)
+    {
+        $member_list = $this->PlayerOP->get_member_can_landlord($room_id);
+        if ($member_list == null) {
+            return null;
+        }
+        if($before_user_id == null){
+            return $member_list[0]['userId'];
+        }
+        for ($i=0; $i<count($member_list); $i++)
+        {
+            if($member_list[$i]['userId'] == $before_user_id && isset($member_list[$i+1])){
+                return $member_list[$i+1]['userId'];
+            }
+        }
+        return $member_list[0]['userId'];
+    }
+
 
     //核对房间人员，以传入的为准
     public function check_room_member($room_id, $member_list)

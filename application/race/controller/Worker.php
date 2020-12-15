@@ -100,7 +100,12 @@ class Worker extends Server
                     $outRoomAction->kickOutRoom($data['info']['roomId'], $data['info']['kickUserId']);
                     break;
                 default:
-
+                case SocketActionTag::$SURE_BE_LANDLORD_IN_TURN: //用户同意轮庄当地主
+                    Log::record('接到用户愿意轮庄当地主通知');
+                    $landlordSelectedAction = new LandlordSelectedAction($this->socketServer, $this->socketData);
+                    $landlordSelectedAction->turnLandlordSelected($room, $data['info']['raceNum'], $data['info']['userId']);
+                    break;
+                default:
             }
         } catch (Exception $e) {
             Log::record($e->getMessage(), 'error');

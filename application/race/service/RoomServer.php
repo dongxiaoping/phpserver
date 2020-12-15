@@ -64,13 +64,11 @@ class RoomServer extends RoomBase
     public function create_room($info)
     {
         $ROOM_STATE = json_decode(ROOM_STATE, true);
-        $BE_LANDLORD_WAY = json_decode(BE_LANDLORD_WAY, true);
         $user_id = $info["creatUserId"];
         $info["creatTime"] = date("Y-m-d H:i:s");
         $info["modTime"] = date("Y-m-d H:i:s");
         $info["roomState"] = $ROOM_STATE['OPEN'];
         $info["oningRaceNum"] = 0;
-        $info["playMode"] = $BE_LANDLORD_WAY['RAP'];
         $item = $this->UserOP->get($user_id);
         if ($item === null) {
             return getInterFaceArray(0, "user_not_exist", "");
