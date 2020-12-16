@@ -68,6 +68,10 @@ class RoomServer extends RoomBase
         $info["creatTime"] = date("Y-m-d H:i:s");
         $info["modTime"] = date("Y-m-d H:i:s");
         $info["roomState"] = $ROOM_STATE['OPEN'];
+        // TODO 临时全部改为轮庄
+        $BE_LANDLORD_WAY = json_decode(BE_LANDLORD_WAY, true);
+        $info["playMode"] = $BE_LANDLORD_WAY["TURN"];
+        ///
         $info["oningRaceNum"] = 0;
         $item = $this->UserOP->get($user_id);
         if ($item === null) {
