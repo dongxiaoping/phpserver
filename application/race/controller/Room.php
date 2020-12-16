@@ -85,8 +85,9 @@ class Room
             $content['memberLimit'] = $_GET["memberLimit"];  //成员数量限制
             $content['roomPay'] = $_GET["roomPay"];  //房间费用支付模式
             $content['costLimit'] = $_GET["costLimit"];  //下注上限
-            $content['playMode'] = $_GET["playMode"]; //抢庄模式
-            $is_val_all_right = $this->RoomServer->check_vals_create_room($content);
+           // $content['playMode'] = $_GET["playMode"]; //抢庄模式 //测试TODO
+          //  $is_val_all_right = $this->RoomServer->check_vals_create_room($content);
+            $is_val_all_right = true;
             if (!$is_val_all_right) {
                 Log::record('创建房间参数无效错误','error');
                 echo getJsonStringByParam(0, "param_val_error", "");
