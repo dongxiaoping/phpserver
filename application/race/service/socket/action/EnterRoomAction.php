@@ -70,6 +70,7 @@ class EnterRoomAction
             $connectId = $connect_people->get_connection_id();
             $this->socket_data->remove_connect_people_by_connect_id($connectId);
             $connectOb = $connect_people->get_connection();
+            Log::record('有重复的用户登录，通知当前在房间的用户离开房间', 'error');
             $outRoomBack = new BackData(SocketActionTag::$MEMBER_OUT_ROOM_NOTICE);
             $outRoomBack->setFlag(1);
             $outRoomBack->setMessage(WordDes::$REPEAT_LOGIN_IN);

@@ -57,12 +57,13 @@ class OutRoomAction
         $this->outRoomBack->setMessage(WordDes::$USER_OUT_SUCCESS);
         $this->outRoomBack->setFlag(1);
         $this->outRoomBack->setData(array('outType'=>self::$OUT_KICK_OUT, "userId"=>$userId));
+        Log::record('该用户被踢出房间，通知所有玩家，用户：'.$userId);
         $room->broadcastToAllMember($this->outRoomBack->getBackData());
         $people->set_room_id(null);
         if(count($this->socketData->get_connect_people_list_by_room_id($roomId))<=0){
             $room->destroy();
             $this->socketData->remove_room_by_id($roomId);
-            //Log::write('socket房间无成员，房间销毁：'.$roomId, 'info');
+            Log::record('socket房间无成员，房间销毁：'.$roomId);
         }
         return true;
     }
@@ -73,11 +74,11 @@ class OutRoomAction
         $this->outRoomBack->setFlag(1);
         $people = $this->socketData->get_connect_people_by_connect_id($connectId);
         if ($people == null) {
-            //Log::write('socket断开，直接销毁', 'info');
+            Log::record('socket中无当前成员');
             return;
         }
-        //Log::write('退出前的成员信息数量', 'info');
-        //Log::write(count($this->socketData->get_people_list()), 'info');
+        Log::record('退出前的成员信息数量');
+        Log::record(count($this->socketData->get_people_list()));
         $roomId = $people->get_room_id();
         $userId = $people->get_user_id();
         if($roomId !=null && $userId!=null){
@@ -93,18 +94,16 @@ class OutRoomAction
                 }
                 $this->outRoomBack->setMessage(WordDes::$USER_OUT_SUCCESS);
                 $this->outRoomBack->setData(array('outType'=>self::$OUT_USER_EXIT, "userId"=>$userId));
+                Log::record('用户掉线离开房间，通知所有玩家，用户：'.$userId);
                 $room->broadcastToAllMember($this->outRoomBack->getBackData());
                 if(count($this->socketData->get_connect_people_list_by_room_id($roomId))<=0){
                     $room->destroy();
                     $this->socketData->remove_room_by_id($roomId);
-                   // Log::write('socket房间无成员，房间销毁：'.$roomId, 'info');
+                    Log::record('socket房间无成员，房间销毁：'.$roomId, 'info');
                 }
             }
         }
-        //Log::write('socket断开，成员离开', 'info');
         $this->socketData->remove_connect_people_by_connect_id($connectId);
-       // Log::write('退出后的成员信息数量', 'info');
-       // Log::write(count($this->socketData->get_people_list()), 'info');
     }
 
 }
