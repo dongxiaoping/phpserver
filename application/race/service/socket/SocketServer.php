@@ -164,4 +164,9 @@ class SocketServer
         return $this->PlayerOP->get_members_without_kickout($room_id);
     }
 
+    public function get_members_can_play($room_id)
+    {
+        return $this->PlayerOP->get_members_can_play($room_id);
+    }
+
 }

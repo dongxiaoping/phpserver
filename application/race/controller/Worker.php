@@ -73,6 +73,7 @@ class Worker extends Server
                     $this->enterRoom($data['info']['roomId'], $connection, $data['info']['userId']);
                     break;
                 case SocketActionTag::$START_GAME_REQ: //开始游戏请求
+                    Log::record('房主请求开始游戏');
                     $startGameAction = new StartGameAction($this->socketServer, $this->socketData);
                     $startGameAction->startGame($data['info']['roomId']);
                     break;
