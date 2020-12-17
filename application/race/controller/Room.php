@@ -24,6 +24,7 @@ class Room
     public function get_room_info_by_id()
     {
         header("Access-Control-Allow-Origin: *");
+        header('Access-Control-Allow-Headers', 'Origin, Content-Type, cache-control,postman-token,Cookie, Accept');
         if (isset($_GET["id"])) {
             $id = $_GET["id"];
             $result_array = $this->RoomServer->get_room_info_by_id($id);
@@ -36,6 +37,7 @@ class Room
     //根据创建者id获取当前还未开始的比赛房间信息
     public function get_not_begin_room_list_by_user_id(){
         header("Access-Control-Allow-Origin: *");
+        header('Access-Control-Allow-Headers', 'Origin, Content-Type, cache-control,postman-token,Cookie, Accept');
         if (isset($_GET["userId"])) {
             $user_id = $_GET["userId"];
             $result_array = $this->RoomServer->get_not_begin_room_list_by_user_id($user_id);
@@ -48,6 +50,7 @@ class Room
     //根据创建者id获取已创建，未结束的比赛房间信息
     public function get_on_room_list_by_user_id(){
         header("Access-Control-Allow-Origin: *");
+        header('Access-Control-Allow-Headers', 'Origin, Content-Type, cache-control,postman-token,Cookie, Accept');
         if (isset($_GET["userId"])) {
             $user_id = $_GET["userId"];
             $result_array = $this->RoomServer->get_on_room_list_by_user_id($user_id);
@@ -61,6 +64,7 @@ class Room
     public function login_in_room()
     {
         header("Access-Control-Allow-Origin: *");
+        header('Access-Control-Allow-Headers', 'Origin, Content-Type, cache-control,postman-token,Cookie, Accept');
         if (isset($_GET["userId"]) && isset($_GET["roomId"])) {
             $userId = $_GET["userId"];
             $roomId = $_GET["roomId"];
@@ -76,6 +80,7 @@ class Room
     public function create_room()
     {
         header('Access-Control-Allow-Origin: *');
+        header('Access-Control-Allow-Headers', 'Origin, Content-Type, cache-control,postman-token,Cookie, Accept');
         if ($_GET["creatUserId"] && $_GET["playCount"] && $_GET["memberLimit"] && $_GET["roomPay"]
             && $_GET["costLimit"]) {
             Log::record('创建房间');
@@ -104,6 +109,7 @@ class Room
     public function is_room_exist()
     {
         header("Access-Control-Allow-Origin: *");
+        header('Access-Control-Allow-Headers', 'Origin, Content-Type, cache-control,postman-token,Cookie, Accept');
         if (isset($_GET["roomId"])) {
             $result_array = $this->RoomServer->is_room_exist($_GET["roomId"]);
             echo arrayToJson($result_array);
@@ -115,6 +121,7 @@ class Room
     public function get_room_result()
     {
         header("Access-Control-Allow-Origin: *");
+        header('Access-Control-Allow-Headers', 'Origin, Content-Type, cache-control,postman-token,Cookie, Accept');
         if (isset($_GET["roomId"]) && isset($_GET["raceNum"])) {
             $result_array = $this->RoomServer->get_room_result($_GET["roomId"], $_GET["raceNum"]);
             echo arrayToJson($result_array);
@@ -127,6 +134,7 @@ class Room
     public function get_config()
     {
         header("Access-Control-Allow-Origin: *");
+        header('Access-Control-Allow-Headers', 'Origin, Content-Type, cache-control,postman-token,Cookie, Accept');
         $info = [];
         $info["roomGame"] = config('roomGameConfig');
         $info["createDiamond"] = config('createDiamondConfig');
@@ -137,6 +145,7 @@ class Room
     public function test()
     {
         header("Access-Control-Allow-Origin: *");
+        header('Access-Control-Allow-Headers', 'Origin, Content-Type, cache-control,postman-token,Cookie, Accept');
         $room_id = 217;
         $info = $this->RoomServer->get_room_result($room_id);
         var_dump($info);

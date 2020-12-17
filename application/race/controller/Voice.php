@@ -11,6 +11,7 @@ class Voice
     public function uploadVoice()
     {
         header("Access-Control-Allow-Origin: *");
+        header('Access-Control-Allow-Headers', 'Origin, Content-Type, cache-control,postman-token,Cookie, Accept');
         try{
             $info =  file_get_contents('php://input');
             $list = json_decode($info,true);

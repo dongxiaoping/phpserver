@@ -24,6 +24,7 @@ class Betrecord
     public function to_bet()
     {
         header('Access-Control-Allow-Origin: *');
+        header('Access-Control-Allow-Headers', 'Origin, Content-Type, cache-control,postman-token,Cookie, Accept');
         $content = file_get_contents("php://input");
         $content = (string)$content;
         $content = json_decode($content, true);
@@ -38,6 +39,7 @@ class Betrecord
     public function cancel_bet_by_location()
     {
         header('Access-Control-Allow-Origin: *');
+        header('Access-Control-Allow-Headers', 'Origin, Content-Type, cache-control,postman-token,Cookie, Accept');
         if ($_GET["roomId"] && $_GET["userId"] && $_GET["betLocation"]) { //$_GET["raceNum"] 注意为0的情况
             $roomId = $_GET["roomId"];
             $raceNum = $_GET["raceNum"];

@@ -25,6 +25,7 @@ class User
     public function get_user_info_by_id()
     {
         header("Access-Control-Allow-Origin: *");
+        header('Access-Control-Allow-Headers', 'Origin, Content-Type, cache-control,postman-token,Cookie, Accept');
         if (isset($_GET["id"])) {
             $id = $_GET["id"];
             $result_array = $this->UserServer->get_user_info_by_id($id);
@@ -37,6 +38,7 @@ class User
     public function login_in()
     {
         header("Access-Control-Allow-Origin: *");
+        header('Access-Control-Allow-Headers', 'Origin, Content-Type, cache-control,postman-token,Cookie, Accept');
         if (isset($_GET["phone"]) && isset($_GET["password"])) {
             $password = $_GET["password"];
             $phone = $_GET["phone"];
@@ -50,6 +52,7 @@ class User
     public function create_visit_account()
     {
         header("Access-Control-Allow-Origin: *");
+        header('Access-Control-Allow-Headers', 'Origin, Content-Type, cache-control,postman-token,Cookie, Accept');
         $result_array = $this->UserServer->create_visit_account();
         echo arrayToJson($result_array);
     }
@@ -58,6 +61,7 @@ class User
     public function create_account()
     {
         header("Access-Control-Allow-Origin: *");
+        header('Access-Control-Allow-Headers', 'Origin, Content-Type, cache-control,postman-token,Cookie, Accept');
         $baseData = trim($_POST['file']);
         $nick = trim($_POST['nick']);
         $phone = trim($_POST['phone']);
@@ -75,6 +79,7 @@ class User
     public function cost_diamond_in_room()
     {
         header('Access-Control-Allow-Origin: *');
+        header('Access-Control-Allow-Headers', 'Origin, Content-Type, cache-control,postman-token,Cookie, Accept');
         if ($_GET["userId"] && $_GET["roomId"]) {
             $userId = $_GET["userId"];
             $roomId = $_GET["roomId"];
@@ -88,6 +93,7 @@ class User
     public function get_user_diamond()
     {
         header('Access-Control-Allow-Origin: *');
+        header('Access-Control-Allow-Headers', 'Origin, Content-Type, cache-control,postman-token,Cookie, Accept');
         if ($_GET["userId"]) {
             $result_array = $this->UserServer->get_user_diamond($_GET["userId"]);
             echo arrayToJson($result_array);
@@ -101,6 +107,7 @@ class User
     public function recharge_diamond()
     {
         header('Access-Control-Allow-Origin: *');
+        header('Access-Control-Allow-Headers', 'Origin, Content-Type, cache-control,postman-token,Cookie, Accept');
         if ($_GET["userId"] && $_GET["diamondCount"]) {
             $result_array = $this->UserServer->recharge_diamond($_GET["userId"], $_GET["diamondCount"]);
             echo arrayToJson($result_array);

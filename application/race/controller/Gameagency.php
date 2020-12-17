@@ -20,6 +20,7 @@ class Gameagency
     public function get_config()
     {
         header("Access-Control-Allow-Origin: *");
+        header('Access-Control-Allow-Headers', 'Origin, Content-Type, cache-control,postman-token,Cookie, Accept');
         echo getJsonStringByParam(1, "success", config('gameAgencyConfig'));
     }
 }

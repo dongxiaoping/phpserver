@@ -22,6 +22,7 @@ class Player
 
     public function get_members_by_room_id(){
         header("Access-Control-Allow-Origin: *");
+        header('Access-Control-Allow-Headers', 'Origin, Content-Type, cache-control,postman-token,Cookie, Accept');
         if(isset($_GET["id"])){
             $id = $_GET["id"];
             $result_array = $this->PlayerServer->get_members_by_room_id($id);

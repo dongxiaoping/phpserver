@@ -24,6 +24,7 @@ class Race
     public function test()
     {
         header("Access-Control-Allow-Origin: *");
+        header('Access-Control-Allow-Headers', 'Origin, Content-Type, cache-control,postman-token,Cookie, Accept');
         $room_id = 1;
         $race_num = 2;
         $info = $this->RaceServer->get_race_result($room_id, $race_num);
