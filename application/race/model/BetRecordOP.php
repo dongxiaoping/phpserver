@@ -12,7 +12,7 @@
 namespace app\race\model;
 
 use app\race\model\table\BetRecord;
-use think\Db;
+use think\Log;
 
 class BetRecordOP
 {
@@ -38,19 +38,12 @@ class BetRecordOP
         return $table->where('id', $id)->update([$betLocation => $new_val]);
     }
 
-    /////////////////
-    /* $info ["category_name"=>$name,......] 除主键之外的表字段信息集合
- * */
     public function insert($info)
     {
         $table = new BetRecord();
-        $table->data($info);
-        $isOk = $table->save();
-        if ($isOk) {
-            return $table->id;
-        } else {
-            return false;
-        }
+        $result = $table->insertGetId($info);
+        Log::info('插入下注记录信息:'.$result);
+        return $result;
     }
 
     public function insertAll($list)

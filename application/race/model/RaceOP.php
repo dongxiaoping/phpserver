@@ -13,6 +13,7 @@ namespace app\race\model;
 
 use app\race\model\table\Race;
 use think\Db;
+use think\Log;
 
 class RaceOP
 {
@@ -98,19 +99,12 @@ class RaceOP
         return $list;
     }
 
-    /////////////////
-    /* $info ["category_name"=>$name,......] 除主键之外的表字段信息集合
- * */
     public function insert($info)
     {
         $table = new Race();
-        $table->data($info);
-        $isOk = $table->save();
-        if ($isOk) {
-            return $table->id;
-        } else {
-            return false;
-        }
+        $result = $table->insertGetId($info);
+        Log::info('插入比赛信息:'.$result);
+        return $result;
     }
 
     public function insertAll($list)

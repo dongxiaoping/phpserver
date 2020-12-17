@@ -152,19 +152,12 @@ class PlayerOP
         $table->where('userId', $user_id)->where('roomId', $room_id)->update(['state' => $state]);
     }
 
-    /////////////////
-    /* $info ["category_name"=>$name,......] 除主键之外的表字段信息集合
- * */
     public function insert($info)
     {
         $table = new Player();
-        $table->data($info);
-        $isOk = $table->save();
-        if ($isOk) {
-            return $table->id;
-        } else {
-            return false;
-        }
+        $result = $table->insertGetId($info);
+        Log::info('插入玩家成员结果:'.$result);
+        return $result;
     }
 
     public function insertAll($list)

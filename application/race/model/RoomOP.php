@@ -67,19 +67,12 @@ class RoomOP
         return $real_list;
     }
 
-    /////////////////
-    /* $info ["category_name"=>$name,......] 除主键之外的表字段信息集合
- * */
     public function insert($info)
     {
         $table = new Room();
-        $table->data($info);
-        $isOk = $table->save();
-        if ($isOk) {
-            return $table->id;
-        } else {
-            return false;
-        }
+        $result = $table->insertGetId($info);
+        Log::info('插入房间结果:'.$result);
+        return $result;
     }
 
     public function insertAll($list)

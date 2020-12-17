@@ -10,6 +10,8 @@
 // +----------------------------------------------------------------------
 namespace app\race\model;
 
+use think\Log;
+
 class BaseOP
 {
     private $tableOb;
@@ -19,18 +21,12 @@ class BaseOP
         $this->tableOb = $table;
     }
 
-    /* $info ["category_name"=>$name,......] 除主键之外的表字段信息集合
-     * */
     public function insert($info)
     {
         $table = new $this->tableOb();
-        $table->data($info);
-        $isOk = $table->save();
-        if ($isOk) {
-            return $table->id;
-        } else {
-            return false;
-        }
+        $result = $table->insertGetId($info);
+        Log::info('插入操作:'.$result);
+        return $result;
     }
 
     public function insertAll($list)
