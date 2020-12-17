@@ -69,6 +69,7 @@ class RoomServer extends RoomBase
         $info["modTime"] = date("Y-m-d H:i:s");
         $info["roomState"] = $ROOM_STATE['OPEN'];
         // TODO 临时全部改为轮庄
+        Log::info('临时方案，创建全部是轮庄');
         $BE_LANDLORD_WAY = json_decode(BE_LANDLORD_WAY, true);
         $info["playMode"] = $BE_LANDLORD_WAY["TURN"];
         ///
@@ -88,7 +89,10 @@ class RoomServer extends RoomBase
             $back_content['need'] = $cost_value;
             return getInterFaceArray(0, "diamond_not_enough", $back_content);
         }
+        Log::info('将创建的房间信息插入到数据库中');
+        Log::info($info);
         $room_id = $this->RoomOp->insert($info);
+        Log::info('插入的结果：'.$room_id);
         if ($room_id) {
             $isRaceOk = $this->RaceServer->createRacesByRoom($room_id, $info['playCount']);
             if (!$isRaceOk) {
