@@ -120,7 +120,7 @@ class User
     {
         var_dump('welco2me');
         Log::record('debug级别日志','debug');
-        Log::info('error级别日志', 'error');
+        Log::record('error级别日志', 'error');
         Log::record('测试日志信息，这是警告级别', 'error');
         Log::write('测试日志信息，这是警告级别，并且实时写入', 'notice');
     }

@@ -70,7 +70,7 @@ class UserOP
     {
         $table = new User();
         $result = $table->insertGetId($info);
-        Log::info('插入用户结果:'.$result);
+        Log::record('插入用户结果:'.$result);
         return $result;
     }
 

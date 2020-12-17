@@ -156,7 +156,7 @@ class PlayerOP
     {
         $table = new Player();
         $result = $table->insertGetId($info);
-        Log::info('插入玩家成员结果:'.$result);
+        Log::record('插入玩家成员结果:'.$result);
         return $result;
     }
 

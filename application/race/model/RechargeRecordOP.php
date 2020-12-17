@@ -13,7 +13,7 @@ class RechargeRecordOP
     {
         $table = new RechargeRecord();
         $result = $table->insertGetId($info);
-        Log::info('插入充值操作:'.$result);
+        Log::record('插入充值操作:'.$result);
         return $result;
     }
 }

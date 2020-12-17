@@ -103,7 +103,7 @@ class RaceOP
     {
         $table = new Race();
         $result = $table->insertGetId($info);
-        Log::info('插入比赛信息:'.$result);
+        Log::record('插入比赛信息:'.$result);
         return $result;
     }
 

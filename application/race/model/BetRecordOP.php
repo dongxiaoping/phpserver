@@ -42,7 +42,7 @@ class BetRecordOP
     {
         $table = new BetRecord();
         $result = $table->insertGetId($info);
-        Log::info('插入下注记录信息:'.$result);
+        Log::record('插入下注记录信息:'.$result);
         return $result;
     }
 

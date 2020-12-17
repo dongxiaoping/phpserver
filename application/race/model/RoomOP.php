@@ -71,7 +71,7 @@ class RoomOP
     {
         $table = new Room();
         $result = $table->insertGetId($info);
-        Log::info('插入房间结果:'.$result);
+        Log::record('插入房间结果:'.$result);
         return $result;
     }
 

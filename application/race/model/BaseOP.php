@@ -25,7 +25,7 @@ class BaseOP
     {
         $table = new $this->tableOb();
         $result = $table->insertGetId($info);
-        Log::info('插入操作:'.$result);
+        Log::record('插入操作:'.$result);
         return $result;
     }
 

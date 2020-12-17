@@ -13,7 +13,7 @@ class CostRecordOP
     {
         $table = new CostRecord();
         $result = $table->insertGetId($info);
-        Log::info('插入CostRecordOP操作:'.$result);
+        Log::record('插入CostRecordOP操作:'.$result);
         return $result;
     }
 }
