@@ -128,6 +128,7 @@ class Worker extends Server
     public function onClose($connection)
     {
         $outRoomAction = new OutRoomAction($this->socketServer, $this->socketData);
+        Log::record('断开socket连接，检查用户并退出房间');
         $outRoomAction->socketBreakOuRoom($connection->id);
     }
 

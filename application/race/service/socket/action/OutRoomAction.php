@@ -88,8 +88,10 @@ class OutRoomAction
                 $ROOM_STATE = json_decode(ROOM_STATE, true);
                 $ROOM_PLAY_MEMBER_STATE = json_decode(ROOM_PLAY_MEMBER_STATE, true);
                 if ($room->getState() == $ROOM_STATE["OPEN"]){
+                    Log::record('当前房间处于打开状态，从当前房间数据库中，删除该用户，用户:'.$userId.'房间：'.$roomId);
                     $this->socketServer->cancel_member_from_room($userId, $roomId);
                 }else{
+                    Log::record('将用户改为离线');
                     $this->socketServer->change_member_state_in_room($userId,$roomId, $ROOM_PLAY_MEMBER_STATE['OFF_LINE']);
                 }
                 $this->outRoomBack->setMessage(WordDes::$USER_OUT_SUCCESS);
