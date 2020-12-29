@@ -13,6 +13,7 @@ namespace app\race\service;
 
 use app\race\model\RoomOP;
 use app\race\model\UserOP;
+use Grafika\Grafika;
 
 class UserServer
 {
@@ -62,6 +63,12 @@ class UserServer
                     if (file_put_contents($path, base64_decode(str_replace($result[1], '', $baseData)))) {
                         $img_path = str_replace('../../..', '', $path);
                         //echo '图片上传成功</br>![](' .$img_path. ')';
+
+                        $editor = Grafika::createEditor();
+                        $editor->open( $image, $img_path );
+                        $editor->resizeExact( $image, 200, 200 );
+                        $editor->save( $image, $img_path, null, 90 );
+
                         return $picName;
                     } else {
                         //echo '图片上传失败</br>';
