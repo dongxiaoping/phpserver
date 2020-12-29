@@ -66,7 +66,7 @@ class UserServer
 
                         $editor = Grafika::createEditor();
                         $editor->open( $image, $img_path );
-                        $editor->resizeExact( $image, 200, 200 );
+                        $editor->resizeExact( $image, 300, 300 );
                         $editor->save( $image, $img_path, null, 90 );
 
                         return $picName;
