@@ -25,8 +25,10 @@ class Test
 //http://127.0.0.1/phpserver/public/index.php/race/test/test
     public function test()
     {
-        $SmsManage = new SmsManage();
-        $SmsManage->sendSmsNotice('13396080754');
+/*        $SmsManage = new SmsManage();
+        $SmsManage->sendSmsNotice('13396080754');*/
+        session('wer',30);
+        var_dump(session('wer'));
     }
 
     public function send()
