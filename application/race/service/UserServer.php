@@ -48,6 +48,17 @@ class UserServer
         return $info;
     }
 
+    public function get_user_info_by_session_in($phone)
+    {
+        $item = $this->UserOP->get_user_info_by_phone($phone);
+        if ($item == null) {
+            return getInterFaceArray(0, "手机号未注册！", "");
+        }
+        $item["gameUrl"] = config('gameAgencyConfig')['gameUrl'];
+        $info = getInterFaceArray(1, "登录成功！", $item);
+        return $info;
+    }
+
     public function loadUserIcon($baseData)
     {
         try {

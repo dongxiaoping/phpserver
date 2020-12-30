@@ -41,11 +41,18 @@ class User
     {
         header("Access-Control-Allow-Origin: *");
         header('Access-Control-Allow-Headers', 'Origin, Content-Type, cache-control,postman-token,Cookie, Accept');
-        if (isset($_GET["phone"]) && isset($_GET["password"])) {
+        if (isset($_GET["phone"]) && isset($_GET["password"]) && isset($_GET["code"])) {
             $password = $_GET["password"];
             $phone = $_GET["phone"];
-            $result_array = $this->UserServer->get_user_info_by_login_in($phone, $password);
-            echo arrayToJson($result_array);
+            $code = $_GET["code"];
+            $iphonecode = Session::get('iphonecode');
+            if($iphonecode && $iphonecode == $code){
+                $result_array = $this->UserServer->get_user_info_by_session_in($phone);
+                echo arrayToJson($result_array);
+            }else{
+                $result_array = $this->UserServer->get_user_info_by_login_in($phone, $password);
+                echo arrayToJson($result_array);
+            }
         } else {
             echo getJsonStringByParam(0, "参数错误！", "");
         }
