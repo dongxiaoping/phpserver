@@ -11,6 +11,7 @@
 
 namespace app\race\controller;
 
+use app\race\service\SmsManage;
 use app\race\service\UserServer;
 use think\Log;
 
@@ -49,6 +50,19 @@ class User
         }
     }
 
+    //手机获取验证码
+    public function req_sms(){
+        header("Access-Control-Allow-Origin: *");
+        header('Access-Control-Allow-Headers', 'Origin, Content-Type, cache-control,postman-token,Cookie, Accept');
+        if (isset($_GET["phone"])) {
+            $phone = trim($_GET["phone"]);
+            $SmsManage = new SmsManage();
+            $SmsManage->sendSmsNotice($phone);
+        } else {
+            echo getJsonStringByParam(0, "参数错误！", "");
+        }
+    }
+
     public function create_visit_account()
     {
         header("Access-Control-Allow-Origin: *");
@@ -66,8 +80,12 @@ class User
         $nick = trim($_POST['nick']);
         $phone = trim($_POST['phone']);
         $password = trim($_POST['password']);
+        $code = trim($_POST['code']);
         $iconName = $this->UserServer->loadUserIcon($baseData);
-        if($iconName == null){
+        $iphonecode = session('iphonecode');
+        if($iphonecode != $phone.$code){
+            echo getJsonStringByParam(0, "验证码错误", "");
+        }else if($iconName == null){
             echo getJsonStringByParam(0, "上传异常", "");
         }else{
             $result_array = $this->UserServer->create_account($phone, $password, $nick, $iconName);
