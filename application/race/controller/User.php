@@ -83,7 +83,9 @@ class User
         $code = trim($_POST['code']);
         $iconName = $this->UserServer->loadUserIcon($baseData);
         $iphonecode = session('iphonecode');
+        Log::record('session中的iphonecode:'.$iphonecode);
         if($iphonecode != $phone.$code){
+            Log::record('验证码错误，session中的验证码:'.$iphonecode.'传入的验证码：'.$code.',手机号：'.$phone,'error');
             echo getJsonStringByParam(0, "验证码错误", "");
         }else if($iconName == null){
             echo getJsonStringByParam(0, "上传异常", "");

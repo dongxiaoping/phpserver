@@ -7,6 +7,7 @@ namespace app\race\service;
 use AlibabaCloud\Client\AlibabaCloud;
 use AlibabaCloud\Client\Exception\ClientException;
 use AlibabaCloud\Client\Exception\ServerException;
+use think\Log;
 
 class SmsManage
 {
@@ -22,6 +23,7 @@ class SmsManage
         $code = rand(1000,9999);
         $this->setTemplateParam($code);
         session("iphonecode",$phoneNumber.$code);//session存储手机号+验证码
+        Log::record('sendSmsNotice,设置session中的iphonecode:'.$phoneNumber.$code);
         $this->send($phoneNumber);
     }
 
