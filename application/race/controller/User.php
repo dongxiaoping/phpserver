@@ -14,6 +14,7 @@ namespace app\race\controller;
 use app\race\service\SmsManage;
 use app\race\service\UserServer;
 use think\Log;
+use think\Session;
 
 class User
 {
@@ -82,7 +83,8 @@ class User
         $password = trim($_POST['password']);
         $code = trim($_POST['code']);
         $iconName = $this->UserServer->loadUserIcon($baseData);
-        $iphonecode = session('iphonecode');
+      //  $iphonecode = session('iphonecode');
+        $iphonecode = Session::get('iphonecode');
         Log::record('session中的iphonecode:'.$iphonecode);
         if($iphonecode != $phone.$code){
             Log::record('验证码错误，session中的验证码:'.$iphonecode.'传入的验证码：'.$code.',手机号：'.$phone,'error');

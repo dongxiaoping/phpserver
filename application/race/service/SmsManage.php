@@ -8,6 +8,7 @@ use AlibabaCloud\Client\AlibabaCloud;
 use AlibabaCloud\Client\Exception\ClientException;
 use AlibabaCloud\Client\Exception\ServerException;
 use think\Log;
+use think\Session;
 
 class SmsManage
 {
@@ -22,7 +23,8 @@ class SmsManage
     public function sendSmsNotice($phoneNumber){
         $code = rand(1000,9999);
         $this->setTemplateParam($code);
-        session("iphonecode",$phoneNumber.$code);//session存储手机号+验证码
+        Session::set('iphonecode', $phoneNumber.$code);
+      //  session("iphonecode",$phoneNumber.$code);//session存储手机号+验证码
         Log::record('sendSmsNotice,设置session中的iphonecode:'.$phoneNumber.$code);
         $this->send($phoneNumber);
     }
