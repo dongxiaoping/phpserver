@@ -45,11 +45,20 @@ class User
             $password = $_GET["password"];
             $phone = $_GET["phone"];
             $code = $_GET["code"];
-            $iphonecode = Session::get('iphonecode');
-            if($iphonecode && $iphonecode == $code){
-                $result_array = $this->UserServer->get_user_info_by_session_in($phone);
-                echo arrayToJson($result_array);
-            }else{
+            if ($code != "") {
+                Log::record('用户验证码登录,输入的验证码：' . $code);
+                $iphonecode = Session::get('iphonecode');
+                Log::record('用户的验证码session：' . $iphonecode);
+                if ($iphonecode && $iphonecode == $phone . $code) {
+                    Log::record('执行验证码登录流程：' . $iphonecode);
+                    $result_array = $this->UserServer->get_user_info_by_session_in($phone);
+                    echo arrayToJson($result_array);
+                } else {
+                    Log::record('验证码错误');
+                    echo getJsonStringByParam(0, "验证码错误！", "");
+                }
+            } else {
+                Log::record('用户密码登录：' . $phone . '密码：' . $password);
                 $result_array = $this->UserServer->get_user_info_by_login_in($phone, $password);
                 echo arrayToJson($result_array);
             }
