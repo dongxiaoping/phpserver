@@ -101,7 +101,7 @@ class OutRoomAction
                 if(count($this->socketData->get_connect_people_list_by_room_id($roomId))<=0){
                     $room->destroy();
                     $this->socketData->remove_room_by_id($roomId);
-                    Log::record('socket房间无成员，房间销毁：'.$roomId, 'info');
+                    Log::record('socket房间无成员，房间销毁：'.$roomId);
                 }
             }
         }

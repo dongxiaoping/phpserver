@@ -108,7 +108,7 @@ class BetRecordServer
         $id = $the_record['id'];
         $updateResult = $this->BetRecordOP->update_bet_val($id, $betLocation, 0);
         if($updateResult){
-            Log::record('del bet success', 'info');
+            Log::record('del bet success');
             return getInterFaceArray(1, "success", "");
         }else{
             Log::record('del bet fail', 'error');

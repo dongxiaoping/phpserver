@@ -134,7 +134,7 @@ class Room
             $item = array('state' => $RACE_PLAY_STATE['NOT_BEGIN'], 'landlord_id' => null);
             $this->raceList[$i] = $item;
         }
-        //Log::write('workman/room:场次信息初始化完毕', 'info');
+        Log::record('workman/room:场次信息初始化完毕');
     }
 
     public function broadcastToAllMember($message)
@@ -163,7 +163,6 @@ class Room
         $the_landlord_id = $this->getRaceLandlordId($this->runningRaceNum);
         $message = BackData::getRaceBetBack($this->runningRaceNum, $this->roomId, $the_landlord_id);
         $this->broadcastToAllMember($message);
-        //Log::write('workman/room:启动下注流程，房间号：' . $this->roomId . '场次号：' . $this->runningRaceNum, 'info');
     }
 
     private function changeShowDown()
