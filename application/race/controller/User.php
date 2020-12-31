@@ -55,7 +55,7 @@ class User
                     echo arrayToJson($result_array);
                 } else {
                     Log::record('验证码或手机号错误！');
-                    echo getJsonStringByParam(0, "验证码错误！", "");
+                    echo getJsonStringByParam(0, "验证码或手机号错误！", "");
                 }
             } else {
                 Log::record('用户密码登录：' . $phone . '密码：' . $password);
