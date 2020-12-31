@@ -54,7 +54,7 @@ class User
                     $result_array = $this->UserServer->get_user_info_by_session_in($phone);
                     echo arrayToJson($result_array);
                 } else {
-                    Log::record('验证码错误');
+                    Log::record('验证码或手机号错误！');
                     echo getJsonStringByParam(0, "验证码错误！", "");
                 }
             } else {
