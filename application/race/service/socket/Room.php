@@ -250,7 +250,7 @@ class Room
             $this->setPlayerToTurnUserId($playerToTurnUserId);
             $this->turnLandlordTimer = Timer::add(config('roomGameConfig.turnLandlordTime'), function ( ) {
                 Log::record('执行下一个用户轮庄流程');
-                $this->turnLandlordProcess($this->player_to_turn_user_id);
+                $this->turnLandlordProcess($this->getPlayerToTurnUserId());
             }, array(), false);
         } else {
             Log::record('庄家已确认，继续后续的流程');
