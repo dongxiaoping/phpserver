@@ -24,7 +24,7 @@ class Room
     private $createUserId = null; //房间创建者ID
     private $createTime; //房间创建的时间戳
     private $playMode; //抢庄模式
-    private $player_to_turn_user_id; //中间数据
+    public $playerToTurnUserId; //轮庄阶段当前正在轮询的潜在庄家ID
 
     public function __construct($roomId , $createUserId, $race_count,SocketData $socketData, SocketServer $socketServer, $playMode)
     {
@@ -115,7 +115,7 @@ class Room
                 }
             }
         } catch (Exception $e) {
-            //Log::write($e->getMessage(), 'error');
+            Log::record($e->getMessage(), 'error');
         }
     }
 
@@ -233,11 +233,12 @@ class Room
     //轮庄模式流程
     public function turnLandlordProcess($before_user_id){
         $the_landlord_id = $this->getRaceLandlordId($this->runningRaceNum);
+        Timer::del($this->turnLandlordTimer);
         if ($the_landlord_id == null) {
             Log::record("当前局没有庄家，开一个定时器，轮流通知抢庄");
-            $player_to_turn_user_id = $this->socketServer->get_turn_landlord_user_id($before_user_id, $this->roomId);
-            Log::record("通知当庄的用户：".$player_to_turn_user_id);
-            if($player_to_turn_user_id == null){
+            $playerToTurnUserId = $this->socketServer->get_turn_landlord_user_id($before_user_id, $this->roomId);
+            Log::record("通知当庄的用户：".$playerToTurnUserId);
+            if($playerToTurnUserId == null){
                 $ROOM_STATE = json_decode(ROOM_STATE, true);
                 $this->socketServer->change_room_state($this->roomId, $ROOM_STATE['CLOSE']);
                 Log::record('workman/room:没有可当地主的成员，房间关闭,房间号:' . $this->roomId);
@@ -245,15 +246,15 @@ class Room
                 return;
             }
             Log::record('发出轮庄用户通知,并定时准备下一个通知');
-            $message = BackData::getTurnLandlordBack($this->runningRaceNum, $this->roomId, $player_to_turn_user_id);
+            $message = BackData::getTurnLandlordBack($this->runningRaceNum, $this->roomId, $playerToTurnUserId);
             $this->broadcastToAllMember($message);
-            $this->player_to_turn_user_id = $player_to_turn_user_id;
+            $this->setPlayerToTurnUserId($playerToTurnUserId);
             $this->turnLandlordTimer = Timer::add(config('roomGameConfig.turnLandlordTime'), function ( ) {
                 Log::record('执行下一个用户轮庄流程');
                 $this->turnLandlordProcess($this->player_to_turn_user_id);
             }, array(), false);
         } else {
-            Timer::del($this->turnLandlordTimer);
+            Log::record('庄家已确认，继续后续的流程');
             $this->nextRaceNoLandlordSelect();
         }
     }
@@ -304,4 +305,22 @@ class Room
             }, array(), false);
         }, array(), false);
     }
+
+    /**
+     * @return mixed
+     */
+    public function getPlayerToTurnUserId()
+    {
+        return $this->playerToTurnUserId;
+    }
+
+    /**
+     * @param mixed $playerToTurnUserId
+     */
+    public function setPlayerToTurnUserId($playerToTurnUserId): void
+    {
+        $this->playerToTurnUserId = $playerToTurnUserId;
+    }
+
+
 }

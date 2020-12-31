@@ -100,10 +100,15 @@ class Worker extends Server
                     $outRoomAction = new OutRoomAction($this->socketServer, $this->socketData);
                     $outRoomAction->kickOutRoom($data['info']['roomId'], $data['info']['kickUserId']);
                     break;
-                case SocketActionTag::$SURE_BE_LANDLORD_IN_TURN: //用户同意轮庄当地主
+                case SocketActionTag::$SURE_BE_LANDLORD_IN_TURN: //用户同意轮庄当庄
                     Log::record('接到用户愿意轮庄当地主通知');
                     $landlordSelectedAction = new LandlordSelectedAction($this->socketServer, $this->socketData);
                     $landlordSelectedAction->turnLandlordSelected($room, $data['info']['raceNum'], $data['info']['userId']);
+                    break;
+                case SocketActionTag::$SURE_BE_LANDLORD_PASS: //用户放弃轮庄中当庄通知
+                    Log::record('接到用户轮庄中放弃当庄');
+                    $landlordSelectedAction = new LandlordSelectedAction($this->socketServer, $this->socketData);
+                    $landlordSelectedAction->turnLandlordPass($room, $data['info']['raceNum'], $data['info']['userId']);
                     break;
                 default:
             }

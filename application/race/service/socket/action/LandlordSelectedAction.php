@@ -20,17 +20,12 @@ class LandlordSelectedAction
         $this->socketServer = $socketServer;
     }
 
+    //抢庄选择当地主
     public function landlordSelected(Room $room, $raceNum, $landlordId)
     {
         Log::record('抢庄选择当庄');
-        if ($room->getRunningRaceNum() != $raceNum) {
-            Log::record('当前进行中场次号不对');
-            return false;
-        }
-        $RACE_PLAY_STATE = json_decode(RACE_PLAY_STATE, true);
-        $theRaceState = $room->getRaceState($raceNum);
-        if ($theRaceState != $RACE_PLAY_STATE['CHOICE_LANDLORD']) {
-            Log::record('当前不处于选庄阶段');
+        if(!$this->isRaceForLandlord($room, $raceNum)){
+            Log::record('抢庄选择当庄异常', 'error');
             return false;
         }
         $room->rapLandlordUserList[] = $landlordId;
@@ -42,14 +37,8 @@ class LandlordSelectedAction
     public function turnLandlordSelected(Room $room, $raceNum, $landlordId)
     {
         Log::record('轮庄选择当庄');
-        if ($room->getRunningRaceNum() != $raceNum) {
-            Log::record('当前进行中场次号不对','error');
-            return false;
-        }
-        $RACE_PLAY_STATE = json_decode(RACE_PLAY_STATE, true);
-        $theRaceState = $room->getRaceState($raceNum);
-        if ($theRaceState != $RACE_PLAY_STATE['CHOICE_LANDLORD']) {
-            Log::record('当前不处于选庄阶段', 'error');
+        if(!$this->isRaceForLandlord($room, $raceNum)){
+            Log::record('轮庄选择当庄异常', 'error');
             return false;
         }
         if($room->getRaceLandlordId($raceNum) == null){
@@ -64,5 +53,36 @@ class LandlordSelectedAction
             Log::record('该局已经有庄，用户的请求是异常行为');
             return false;
         }
+    }
+
+    //轮庄中放弃当庄
+    public function turnLandlordPass(Room $room, $raceNum, $userId)
+    {
+        Log::record('轮庄放弃当庄');
+        if(!$this->isRaceForLandlord($room, $raceNum)){
+            Log::record('轮庄放弃当庄异常', 'error');
+            return false;
+        }
+        if($room->getPlayerToTurnUserId() == $userId){
+            Log::record('玩家放弃当庄，立即开启下一个轮询，玩家：'.$userId);
+            $room->turnLandlordProcess($userId);
+        }else{
+            Log::record('当前轮询用户非该玩家：'.$userId.'轮询用户：'.$room->getPlayerToTurnUserId(), 'error');
+        }
+    }
+
+    //判断当前比赛场次是否处于选庄阶段
+    private function isRaceForLandlord(Room $room, $raceNum) : bool{
+        if ($room->getRunningRaceNum() != $raceNum) {
+            Log::record('当前进行中场次号不对','error');
+            return false;
+        }
+        $RACE_PLAY_STATE = json_decode(RACE_PLAY_STATE, true);
+        $theRaceState = $room->getRaceState($raceNum);
+        if ($theRaceState != $RACE_PLAY_STATE['CHOICE_LANDLORD']) {
+            Log::record('当前不处于选庄阶段', 'error');
+            return false;
+        }
+        return true;
     }
 }

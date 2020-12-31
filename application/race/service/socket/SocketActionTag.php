@@ -26,5 +26,5 @@ class SocketActionTag
     public static $RACE_CHOICE_LANDLORD_NOTICE = "raceStateChoiceLandlord";//选地主通知
     public static $CHECK_ROOM_MEMBER_NOTICE = "checkRoomMember";//房间成员核对
     public static $SURE_BE_LANDLORD_IN_TURN = "sureBeLandlordInTurn";//成员同意轮庄当庄
-
+    public static $SURE_BE_LANDLORD_PASS = "sureBeLandlordPass";//成员放弃轮庄中当庄
 }
