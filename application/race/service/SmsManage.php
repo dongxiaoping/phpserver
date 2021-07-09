@@ -15,7 +15,7 @@ class SmsManage
     public function __construct()
     {
         $this->setAccessKeyId("LTAI4G3aM1en9eTpGu4mmEB3");//AccessKeyId
-        $this->setAccessKeySecret("XA1IF3FYbb79y7GEfnVQ6I1kyo7TXV"); //AccessKeySecret
+        $this->setAccessKeySecret(""); //AccessKeySecret
         $this->setSignName("悦源动");//签名
         $this->setTemplateCode("SMS_207953490"); //短信模板号
     }
@@ -31,7 +31,7 @@ class SmsManage
 
     private function send($phoneNumber)
     {
-        AlibabaCloud::accessKeyClient($this->accessKeyId, 'XA1IF3FYbb79y7GEfnVQ6I1kyo7TXV')
+        AlibabaCloud::accessKeyClient($this->accessKeyId, '')
             ->regionId('cn-hangzhou')
             ->asDefaultClient();
 
