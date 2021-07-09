@@ -98,11 +98,12 @@ class RoomServer extends RoomBase
             if (!$isRaceOk) {
                 return getInterFaceArray(0, "race_error", "");
             }
-//            $isCashOk = $this->UserOP->mod_cash_by_user_id($user_id, $cost_value, 0);
-//            if (!$isCashOk) {
-//                return getInterFaceArray(0, "cash_error", "");
-//            }
-//            $this->CostServer->add_cost_record($user_id, $room_id, $cost_value);
+            //房主扣费
+            $isCashOk = $this->UserOP->mod_cash_by_user_id($user_id, $cost_value, 0);
+            if (!$isCashOk) {
+                return getInterFaceArray(0, "cash_error", "");
+            }
+            $this->CostServer->add_cost_record($user_id, $room_id, $cost_value);
             $room_info = $this->RoomOp->get($room_id);
             return getInterFaceArray(1, "success", $room_info);
         }

@@ -145,7 +145,7 @@ class UserServer
         }
         $item = [
             'score' => 0,
-            'diamond' => 0,
+            'diamond' => 300,
             'type' => $USER_TYPE['NORMAL_USER'],
             'nick' => $nick,
             'icon' => $iconName,
